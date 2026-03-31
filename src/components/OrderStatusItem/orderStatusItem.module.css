@@ -1,0 +1,34 @@
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #f2f2f7;
+}
+
+.name {
+  font-size: 15px;
+  color: #000;
+}
+
+.badge {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 8px;
+}
+
+.waiting {
+  background: #e8f4ff;
+  color: #1d7afc;
+}
+
+.cooking {
+  background: #fff3e0;
+  color: #f57c00;
+}
+
+.ready {
+  background: #e8f5e9;
+  color: #2e7d32;
+}

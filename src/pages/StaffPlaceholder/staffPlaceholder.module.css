@@ -1,0 +1,40 @@
+.page {
+  width: 100%;
+  min-height: 100vh;
+  background: #f2f2f7;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 40px 24px;
+  text-align: center;
+}
+
+.icon {
+  font-size: 64px;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.subtitle {
+  font-size: 15px;
+  color: #8e8e93;
+}
+
+.back {
+  margin-top: 16px;
+  background: none;
+  border: none;
+  font-size: 15px;
+  color: #1d7afc;
+  cursor: pointer;
+}

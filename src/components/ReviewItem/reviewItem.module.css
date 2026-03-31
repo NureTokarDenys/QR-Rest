@@ -1,0 +1,35 @@
+.wrapper {
+  background: #f2f2f7;
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.author {
+  font-size: 13px;
+  font-weight: 600;
+  color: #000;
+  flex: 1;
+}
+
+.stars {
+  font-size: 12px;
+}
+
+.ratingText {
+  font-size: 13px;
+  font-weight: 600;
+  color: #f5a623;
+}
+
+.text {
+  font-size: 14px;
+  color: #3c3c43;
+  line-height: 1.4;
+}

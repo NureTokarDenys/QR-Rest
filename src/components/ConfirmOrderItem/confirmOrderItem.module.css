@@ -1,0 +1,26 @@
+.row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 0;
+  border-bottom: 1px solid #f2f2f7;
+}
+
+.qty {
+  font-size: 15px;
+  font-weight: 600;
+  color: #000;
+  min-width: 24px;
+}
+
+.name {
+  flex: 1;
+  font-size: 15px;
+  color: #000;
+}
+
+.price {
+  font-size: 15px;
+  font-weight: 500;
+  color: #1d7afc;
+}

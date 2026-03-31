@@ -1,0 +1,156 @@
+.page {
+  width: 390px;
+  min-height: 844px;
+  background: #f2f2f7;
+  display: flex;
+  flex-direction: column;
+  max-width: 100vw;
+}
+
+.online { 
+  font-size: 12px;
+  font-weight: 600;
+  color: #2e7d32;
+  white-space: nowrap;
+  background-color: #c3fdc6;
+  border-radius: 15px;
+  padding: 5px 15px;
+}
+
+.content {
+  flex: 1;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.orderMeta {
+  text-align: center;
+  padding: 8px 0;
+}
+
+.orderLabel {
+  font-size: 13px;
+  color: #8e8e93;
+}
+
+.orderId {
+  font-size: 28px;
+  font-weight: 800;
+  color: #000;
+}
+
+.tableInfo {
+  font-size: 14px;
+  color: #8e8e93;
+  margin-top: 2px;
+}
+
+.stepsCard {
+  background: #fff;
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.steps {
+  display: flex;
+  align-items: flex-start;
+}
+
+.stepItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.stepCircle {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.done {
+  background: #2e7d32;
+  color: #fff;
+}
+
+.active {
+  background: #1d7afc;
+  color: #fff;
+}
+
+.idle {
+  background: #e5e5ea;
+  color: #8e8e93;
+}
+
+.stepLabel {
+  font-size: 10px;
+  color: #8e8e93;
+  text-align: center;
+  max-width: 50px;
+  line-height: 1.2;
+}
+
+.stepLabelActive {
+  color: #000;
+  font-weight: 500;
+}
+
+.line {
+  flex: 1;
+  height: 2px;
+  background: #e5e5ea;
+  margin-top: 15px;
+}
+
+.lineDone {
+  background: #2e7d32;
+}
+
+.statusBanner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff8e1;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 15px;
+}
+
+.bannerTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #f57c00;
+}
+
+.bannerSub {
+  font-size: 12px;
+  color: #8e8e93;
+}
+
+.dishesCard {
+  background: #fff;
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.dishesTitle {
+  font-size: 12px;
+  font-weight: 700;
+  color: #8e8e93;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}

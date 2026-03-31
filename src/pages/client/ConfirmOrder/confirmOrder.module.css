@@ -1,0 +1,122 @@
+.page {
+  width: 390px;
+  min-height: 844px;
+  background: #f2f2f7;
+  display: flex;
+  flex-direction: column;
+  max-width: 100vw;
+}
+
+.content {
+  flex: 1;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.tableSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 0;
+}
+
+.tableIcon {
+  font-size: 96px;
+}
+
+.tableLabel {
+  font-size: 13px;
+  color: #8e8e93;
+}
+
+.tableNumber {
+  font-size: 24px;
+  font-weight: 800;
+  color: #000;
+}
+
+.orderBox {
+  background: #fff;
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.boxTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #000;
+  margin-bottom: 8px;
+}
+
+.totalRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #f2f2f7;
+}
+
+.totalLabel {
+  font-size: 15px;
+  font-weight: 700;
+  color: #000;
+}
+
+.totalValue {
+  font-size: 17px;
+  font-weight: 800;
+  color: #1d7afc;
+}
+
+.commentBox {
+  background: #fff;
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.commentTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: #000;
+  margin-bottom: 4px;
+}
+
+.commentValue {
+  font-size: 14px;
+  color: #8e8e93;
+}
+
+.notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: #e8f5e9;
+  border: 1px solid #a5d6a7;
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.noticeIcon {
+  color: #2e7d32;
+  font-size: 14px;
+  margin-top: 1px;
+}
+
+.noticeText {
+  font-size: 13px;
+  color: #1b5e20;
+  line-height: 1.4;
+}
+
+.footer {
+  padding: 12px 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #f2f2f7;
+}

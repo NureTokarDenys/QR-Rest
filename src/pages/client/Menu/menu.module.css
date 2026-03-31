@@ -1,0 +1,105 @@
+.page {
+  width: 390px;
+  min-height: 844px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  max-width: 100vw;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.logoWait {
+  color: #1d7afc;
+}
+
+.logoLess {
+  color: #000;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.table {
+  background: #f2f2f7;
+  border-radius: 10px;
+  padding: 5px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #000;
+}
+
+.content {
+  flex: 1;
+  padding: 0 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow-y: auto;
+}
+
+.sectionTitle {
+  font-size: 17px;
+  font-weight: 700;
+  color: #000;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.searchResults {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.searchRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f2f2f7;
+  border-radius: 12px;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.searchThumb {
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.searchName {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.searchPrice {
+  font-size: 14px;
+  color: #1d7afc;
+  font-weight: 600;
+}
+
+.empty {
+  color: #8e8e93;
+  font-size: 15px;
+  text-align: center;
+  margin-top: 20px;
+}

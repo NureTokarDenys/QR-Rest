@@ -1,0 +1,19 @@
+.section {
+  margin-top: 24px;
+}
+
+.title {
+  font-size: 13px;
+  font-weight: 500;
+  color: #8e8e93;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 0 16px;
+  margin-bottom: 6px;
+}
+
+.rows {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+}
