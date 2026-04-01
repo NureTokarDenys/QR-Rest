@@ -6,6 +6,7 @@ import SettingsRow, { SettingsRowDropdown, ThemeSettingsRow } from '../../../com
 import Footer from '../../../components/Footer';
 import { useTheme } from '../../../context/ThemeContext';
 import styles from './profile.module.css';
+import { useTranslation } from 'react-i18next';
 
 import { MdPerson } from "react-icons/md";
 import { MdEmail } from "react-icons/md";
@@ -15,12 +16,14 @@ import { MdLock } from "react-icons/md";
 
 export default function Profile() {
   const { theme, setTheme } = useTheme();
+  const { i18n } = useTranslation();
+  const { t } = useTranslation('profile');
 
   const navigate = useNavigate();
 
   return (
     <div className={styles.page}>
-      <Header title="Профіль" />
+      <Header title={t('profile_header')} />
 
       <div className={styles.content}>
         <div className={styles.avatar}>
@@ -28,33 +31,35 @@ export default function Profile() {
           <p className={styles.email}>alina@email.com</p>
         </div>
 
-        <SettingsSection title="Замовлення">
-          <SettingsRow label="Мої замовлення" value="Дивитись" onClick={() => navigate('/order-history')} />
+        <SettingsSection title={t('orders')}>
+          <SettingsRow label={t('my_orders')} value={t('look')} onClick={() => navigate('/order-history')} />
         </SettingsSection>
 
-        <SettingsSection title="Загальне">
-          <SettingsRow icon={<MdPerson />} label="Ім'я" value="Аліна Коваленко" onClick={() => {}} />
-          <SettingsRow icon={<MdEmail />} label="Email" value="alina@email.com" onClick={() => {}} />
+        <SettingsSection title={t('overall')}>
+          <SettingsRow icon={<MdPerson />} label={t('name')} value="Аліна Коваленко" onClick={() => {}} />
+          <SettingsRow icon={<MdEmail />} label={t('enail')} value="alina@email.com" onClick={() => {}} />
         </SettingsSection>
 
-        <SettingsSection title="Налаштування">
+        <SettingsSection title={t('settings')}>
          <SettingsRowDropdown
             icon={<MdLanguage />}
-              label="Мова"
+              label={t('language')}
               options={[
-                { value: 'uk', label: 'Українська', icon: '🇺🇦' },
-                { value: 'en', label: 'English',    icon: '🇬🇧' },
+                { value: 'uk', label: t('ukrainian'), icon: 'UA' },
+                { value: 'en', label: t('english'),    icon: 'EN' },
               ]}
+              value={i18n.language}
+              onChange={(lng) => i18n.changeLanguage(lng)}
           />
          <ThemeSettingsRow icon={<MdPalette />} theme={theme} onThemeChange={setTheme} />
         </SettingsSection>
 
-        <SettingsSection title="Безпека">
-          <SettingsRow icon={<MdLock />} label="Змінити пароль" value="Змінити" onClick={() => {}} />
+        <SettingsSection title={t('security')}>
+          <SettingsRow icon={<MdLock />} label={t('change_password')} value={t('change')} onClick={() => {}} />
         </SettingsSection>
 
         <SettingsSection>
-          <SettingsRow label="Вийти з акаунту" onClick={() => navigate('/login')} danger />
+          <SettingsRow label={t('logout')} onClick={() => navigate('/login')} danger />
         </SettingsSection>
       </div>
 

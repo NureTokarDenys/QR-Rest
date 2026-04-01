@@ -1,0 +1,10 @@
+{
+    "cart_header": "Кошик",
+    "position_one": "позиція",
+    "position_few": "позиції",
+    "position_many": "позицій",
+    "empty": "Ваш кошик порожній",
+    "confirm_offer": "Оформити замовлення",
+    "order_comment": "Коментар до замовлення",
+    "order_comment_placeholder": "Додайте будь-які примітки для ресторану (алерргени, подача)"
+}

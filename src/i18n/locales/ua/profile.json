@@ -1,0 +1,20 @@
+{
+    "profile_header": "Профіль",
+    "orders": "Замовлення",
+    "my_orders": "Мої замовлення",
+    "look": "Дивитись",
+    "overall": "Загальне",
+    "name": "Ім'я",
+    "enail": "Електронна пошта",
+    "settings": "Налаштування",
+    "language": "Мова",
+    "english": "Англійська",
+    "ukrainian": "Українська",
+    "theme": "Тема",
+    "theme_light": "Світла",
+    "theme_dark": "Темна",
+    "security": "Безпека",
+    "change_password": "Змінити пароль",
+    "change": "Змінити",
+    "logout": "Вихід"
+}

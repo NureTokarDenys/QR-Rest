@@ -6,54 +6,88 @@ import OrderStatusItem from '../../../components/OrderStatusItem';
 import SecondaryButton from '../../../components/SecondaryButton';
 import Footer from '../../../components/Footer';
 import styles from './orderStatus.module.css';
+import { useLocalField } from '../../../i18n/useLang';
+import { useTranslation } from 'react-i18next';
 
 import { MdNotificationsActive } from "react-icons/md";
+import { MdInfoOutline } from "react-icons/md";
+import { MdLocalFireDepartment } from "react-icons/md";
+import { MdCheck } from "react-icons/md";
+import { MdCheckCircle } from "react-icons/md";
 
-const steps = ['В черзі', 'Готується', 'Готово', 'Подано'];
-
-const MOCK_ITEMS = [
-  { id: 1, name: 'Деруни з м\'ясом', status: 'waiting' },
-  { id: 2, name: 'Шніцель (×2)', status: 'cooking' },
-  { id: 3, name: 'Спагетті', status: 'ready' },
-];
+const STATUS_KEYS = ['waiting', 'cooking', 'ready', 'served'];
 
 export default function OrderStatus() {
+  const { t } = useTranslation('orderStatus');
+  const local = useLocalField(); 
   const navigate = useNavigate();
   const { currentOrder, tableNumber } = useApp();
-  const activeStep = 2;
 
   const items = currentOrder?.items?.map((item, i) => ({
     ...item,
-    status: MOCK_ITEMS[i % MOCK_ITEMS.length]?.status || 'waiting',
-    name: item.quantity > 1 ? `${item.name} (×${item.quantity})` : item.name,
-  })) || MOCK_ITEMS;
+    status: item.status || "waiting",
+    name: item.quantity > 1 ? `${local(item, 'name')} (×${item.quantity})` : local(item, 'name')
+  }));
+
+  const currentStatus = items && items.length > 0
+    ? STATUS_KEYS[Math.min(...items.map(item => STATUS_KEYS.indexOf(item.status)))]
+    : 'waiting';
+
+  const activeStep = STATUS_KEYS.indexOf(currentStatus) !== -1 ? STATUS_KEYS.indexOf(currentStatus) : 0;
+
+  const stepsLabels = STATUS_KEYS.map(key => t(`status_${key}`));
+
+  const bannerConfig = {
+    waiting: { 
+      icon: <MdInfoOutline />, 
+      title: t('snipet_waiting_title'), 
+      subtitle: t('snipet_waiting_subtitle') 
+    },
+    cooking: { 
+      icon: <MdLocalFireDepartment />, 
+      title: t('snipet_cooking_title'), 
+      subtitle: t('snipet_cooking_subtitle') 
+    },
+    ready: { 
+      icon: <MdCheck />, 
+      title: t('snipet_ready_title'), 
+      subtitle: t('snipet_ready_subtitle') 
+    },
+    served: { 
+      icon: <MdCheckCircle />, 
+      title: t('snipet_served_title'), 
+      subtitle: t('snipet_served_subtitle') 
+    }
+  };
+
+  const currentBanner = bannerConfig[currentStatus] || bannerConfig['waiting'];
 
   return (
     <div className={styles.page}>
       <Header
-        title="Статус замовлення"
+        title={t('header')}
         showBack
-        rightElement={<span className={styles.online}>● Онлайн</span>}
+        rightElement={<span className={styles.online}>● {t('online')}</span>}
       />
 
       <div className={styles.content}>
         <div className={styles.orderMeta}>
-          <p className={styles.orderLabel}>Замовлення</p>
+          <p className={styles.orderLabel}>{t('order')}</p>
           <p className={styles.orderId}>#{currentOrder?.id || 'WL-042'}</p>
-          <p className={styles.tableInfo}>Стіл №{tableNumber}</p>
+          <p className={styles.tableInfo}>{t('table_number')}{tableNumber}</p>
         </div>
 
         <div className={styles.stepsCard}>
           <div className={styles.steps}>
-            {steps.map((step, i) => (
-              <React.Fragment key={step}>
+            {stepsLabels.map((stepLabel, i) => (
+              <React.Fragment key={STATUS_KEYS[i]}>
                 <div className={styles.stepItem}>
                   <div className={`${styles.stepCircle} ${i < activeStep ? styles.done : i === activeStep ? styles.active : styles.idle}`}>
                     {i < activeStep ? '✓' : i + 1}
                   </div>
-                  <span className={`${styles.stepLabel} ${i <= activeStep ? styles.stepLabelActive : ''}`}>{step}</span>
+                  <span className={`${styles.stepLabel} ${i <= activeStep ? styles.stepLabelActive : ''}`}>{stepLabel}</span>
                 </div>
-                {i < steps.length - 1 && (
+                {i < stepsLabels.length - 1 && (
                   <div className={`${styles.line} ${i < activeStep ? styles.lineDone : ''}`} />
                 )}
               </React.Fragment>
@@ -61,23 +95,23 @@ export default function OrderStatus() {
           </div>
 
           <div className={styles.statusBanner}>
-            <span>🔍</span>
+            <span className={styles.statusIcon}>{currentBanner.icon}</span>
             <div>
-              <p className={styles.bannerTitle}>Ваше замовлення готується</p>
-              <p className={styles.bannerSub}>Приблизний час готовності: ~8 хв</p>
+              <p className={styles.bannerTitle}>{currentBanner.title}</p>
+              <p className={styles.bannerSub}>{currentBanner.subtitle}</p>
             </div>
           </div>
         </div>
 
         <div className={styles.dishesCard}>
-          <p className={styles.dishesTitle}>СТРАВИ</p>
-          {items.map((item, i) => (
-            <OrderStatusItem key={i} name={item.name} status={item.status} />
+          <p className={styles.dishesTitle}>{t('dishes')}</p>
+          {items?.map((item, i) => (
+            <OrderStatusItem key={i} name={local(item, "name")} status={item.status} />
           ))}
         </div>
 
-        <SecondaryButton label={<><MdNotificationsActive /> Викликати офіціанта</>} onClick={() => {}} />
-        <SecondaryButton label="+ Додати до замовлення" onClick={() => navigate('/menu')} />
+        <SecondaryButton label={<><MdNotificationsActive /> {t('waiter_call')}</>} onClick={() => {}} />
+        <SecondaryButton label={`+ ${t('add_more')}`} onClick={() => navigate('/menu')} />
       </div>
 
       <Footer />

@@ -7,39 +7,30 @@ import PrimaryButton from '../../../components/PrimaryButton';
 import SecondaryButton from '../../../components/SecondaryButton';
 import Footer from '../../../components/Footer';
 import styles from './cart.module.css';
+import { useTranslation } from 'react-i18next';
 
 import { MdShoppingCart } from "react-icons/md";
 
 export default function Cart() {
+  const { t } = useTranslation('cart');
   const navigate = useNavigate();
-  const { cart, cartTotal } = useApp();
-  const [comment, setComment] = useState('');
+  const { cart, cartTotal, orderComment, setOrderComment } = useApp();
 
   const totalItems = cart.reduce((s, i) => s + i.quantity, 0);
-
-  function formatItems(count) {
-    const mod10 = count % 10;
-    const mod100 = count % 100;
-
-    if (mod100 >= 11 && mod100 <= 14) return `${count} позицій`;
-    if (mod10 === 1)                   return `${count} позиція`;
-    if (mod10 >= 2 && mod10 <= 4)      return `${count} позиції`;
-    return `${count} позицій`;
-  }
 
   return (
     <div className={styles.page}>
       <Header
-        title="Кошик"
+        title={t('cart_header')}
         showBack
-        rightElement={<span className={styles.count}>{formatItems(totalItems)}</span>}
+        rightElement={<span className={styles.count}>{totalItems} {t('position', { count: totalItems })}</span>}
       />
 
       <div className={styles.content}>
         {cart.length === 0 ? (
           <div className={styles.empty}>
             <span className={styles.emptyIcon}><MdShoppingCart /></span>
-            <p>Кошик порожній</p>
+            <p>{t('empty')}</p>
           </div>
         ) : (
           <>
@@ -50,12 +41,12 @@ export default function Cart() {
             </div>
 
             <div className={styles.commentBox}>
-              <p className={styles.commentLabel}>Коментар до замовлення</p>
+              <p className={styles.commentLabel}>{t('order_comment')}</p>
               <textarea
                 className={styles.textarea}
-                placeholder="Побажання (алергени, подача...)"
-                value={comment}
-                onChange={e => setComment(e.target.value)}
+                placeholder={t('order_comment_placeholder')}
+                value={orderComment}
+                onChange={e => setOrderComment(e.target.value)}
               />
             </div>
           </>
@@ -63,13 +54,15 @@ export default function Cart() {
       </div>
 
       <div className={styles.footer}>
-        <PrimaryButton
-          label={`Оформити замовлення ${cartTotal}₴`}
-          onClick={() => navigate('/confirm')}
-          disabled={cart.length === 0}
-        />
+        {cart.length > 0 ? (
+          <PrimaryButton
+            label={`${t('confirm_offer')} ${cartTotal}₴`}
+            onClick={() => navigate('/confirm')}
+            disabled={cart.length === 0}
+          />
+        ) : null}
         <SecondaryButton
-          label="Продовжити покупки"
+          label="1"
           onClick={() => navigate('/menu')}
         />
       </div>

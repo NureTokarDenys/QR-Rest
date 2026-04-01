@@ -1,0 +1,12 @@
+{
+    "confirmation_header": "Order Confirmation",
+    "table_number": "Your table",
+    "order_number_info": "Table №",
+    "your_order": "Your order",
+    "total_label": "Total to pay",
+    "comment": "Comment to order",
+    "abcent": "(Absent)",
+    "snipet": "The order will be sent to the kitchen immediately after confirmation",
+    "confirm_and_sent": "Confirm and send",
+    "edit_order": "Edit order"
+}

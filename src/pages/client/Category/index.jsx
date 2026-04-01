@@ -6,8 +6,12 @@ import DishCard from '../../../components/DishCard';
 import Footer from '../../../components/Footer';
 import { getCategoryById, getDishesByCategory } from '../../../data/mockData';
 import styles from './category.module.css';
+import { useTranslation } from 'react-i18next';
+import { useLocalField } from '../../../i18n/useLang';
 
 export default function Category() {
+  const { t } = useTranslation('category');
+  const local = useLocalField(); 
   const { id } = useParams();
   const category = getCategoryById(id);
   const allDishes = getDishesByCategory(id);
@@ -19,11 +23,11 @@ export default function Category() {
 
   return (
     <div className={styles.page}>
-      <Header title={category?.name || 'Категорія'} showBack />
+      <Header title={local(category, 'name') || t('fallback_title')} showBack />
 
       <div className={styles.content}>
         <SearchBar
-          placeholder="Пошук у категорії..."
+          placeholder={t('search_placeholder')}
           value={query}
           onChange={e => setQuery(e.target.value)}
         />

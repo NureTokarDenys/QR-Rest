@@ -1,0 +1,9 @@
+{
+    "cart_header": "Cart",
+    "position_one": "position",
+    "position_other": "positions",
+    "empty": "Your cart is empty",
+    "confirm_offer": "Verify order",
+    "order_comment": "Order comment",
+    "order_comment_placeholder": "Add any notes for the restaurant (e.g., allergies, preferences)"
+}

@@ -148,4 +148,5 @@
 .optionIcon {
   font-size: 15px;
   flex-shrink: 0;
+  color: var(--icon-color);
 }

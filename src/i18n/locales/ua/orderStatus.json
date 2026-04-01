@@ -1,0 +1,23 @@
+{
+    "status_waiting": "В черзі",
+    "status_cooking": "Готується",
+    "status_ready": "Готово",
+    "status_served": "Подано",
+    "snipet_waiting_title": "Ваше замовлення обробляється",
+    "snipet_waiting_subtitle": "Приблизний час до готовності: 15-30 хвилин",
+    "snipet_cooking_title": "Ваше замовлення готується",
+    "snipet_cooking_subtitle": "Приблизний час до готовності: 5-15 хвилин",
+    "snipet_ready_title": "Ваше замовлення готово",
+    "snipet_ready_subtitle": "Будь ласка, подождите, пока мы подготовим ваше заказ к подаче",
+    "snipet_served_title": "Ваше замовлення подано",
+    "snipet_served_subtitle": "Смачного!",
+    "header": "Статус замовлення",
+    "online": "Онлайн", 
+    "order": "Замовлення",
+    "table_number": "Стіл №",
+    "snipet_title": "Ваше замовлення обробляється",
+    "snipet_subtitle": "Приблизний час очікування: 10-20 хвилин",
+    "dishes": "Страви",
+    "waiter_call": "Виклик офіціанта",
+    "add_more": "Додати ще страв"
+}

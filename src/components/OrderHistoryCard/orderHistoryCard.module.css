@@ -24,14 +24,28 @@
   font-weight: 600;
   padding: 3px 9px;
   border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px; /* Додано для відступу між іконкою та текстом статусу */
+}
+
+/* Нові статуси замовлення */
+.waiting {
+  background: var(--order-status-waiting-bg);
+  color: var(--order-status-waiting-text);
 }
 
 .cooking {
-  background: var(--badge-coocking-bg);
-  color: var(--badge-coocking-text);
+  background: var(--order-status-cooking-bg);
+  color: var(--order-status-cooking-text);
 }
 
-.done {
+.ready {
+  background: var(--order-status-ready-bg);
+  color: var(--order-status-ready-text);
+}
+
+.served {
   background: var(--badge-done-bg);
   color: var(--badge-done-text);
 }

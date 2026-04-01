@@ -1,0 +1,20 @@
+{
+    "profile_header": "Profile",
+    "orders": "Orders",
+    "my_orders": "My Orders",
+    "look": "Open",
+    "overall": "Overall",
+    "name": "Name",
+    "enail": "Email",
+    "settings": "Settings",
+    "language": "Language",
+    "english": "English",
+    "ukrainian": "Ukrainian",
+    "theme": "Theme",
+    "theme_light": "Light",
+    "theme_dark": "Dark",
+    "security": "Security",
+    "change_password": "Change Password",
+    "change": "Change",
+    "logout": "Logout"
+}

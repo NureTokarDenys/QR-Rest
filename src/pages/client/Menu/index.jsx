@@ -6,11 +6,15 @@ import CategoryCard from '../../../components/CategoryCard';
 import Footer from '../../../components/Footer';
 import { categories, dishes } from '../../../data/mockData';
 import styles from './menu.module.css';
+import { useTranslation } from 'react-i18next';
+import { useLocalField } from '../../../i18n/useLang';
 
 export default function Menu() {
+  const { t } = useTranslation('menu');
   const navigate = useNavigate();
   const { tableNumber, cartCount } = useApp();
   const [query, setQuery] = useState('');
+  const local = useLocalField();
 
   const allDishes = Object.values(dishes).flat();
   const filtered = query.trim()
@@ -25,13 +29,13 @@ export default function Menu() {
           <span className={styles.logoLess}>less</span>
         </span>
         <div className={styles.headerRight}>
-          <span className={styles.table}>Стіл №{tableNumber}</span>
+          <span className={styles.table}>{t('table', { number: tableNumber })}</span>
         </div>
       </div>
 
       <div className={styles.content}>
         <SearchBar
-          placeholder="Пошук страв..."
+          placeholder={t('search_placeholder')}
           value={query}
           onChange={e => setQuery(e.target.value)}
         />
@@ -39,7 +43,7 @@ export default function Menu() {
         {query.trim() ? (
           <div className={styles.searchResults}>
             {filtered.length === 0 ? (
-              <p className={styles.empty}>Нічого не знайдено</p>
+              <p className={styles.empty}>{t('empty')}</p>
             ) : (
               filtered.map(dish => (
                 <div
@@ -47,9 +51,9 @@ export default function Menu() {
                   className={styles.searchRow}
                   onClick={() => navigate(`/dish/${dish.id}`)}
                 >
-                  <img src={dish.image} alt={dish.name} className={styles.searchThumb} />
+                  <img src={dish.image} alt={local(dish, 'name')} className={styles.searchThumb} />
                   <div>
-                    <p className={styles.searchName}>{dish.name}</p>
+                    <p className={styles.searchName}>{local(dish, 'name')}</p>
                     <p className={styles.searchPrice}>{dish.price}₴</p>
                   </div>
                 </div>
@@ -58,10 +62,10 @@ export default function Menu() {
           </div>
         ) : (
           <>
-            <p className={styles.sectionTitle}>Категорії</p>
+            <p className={styles.sectionTitle}>{t('categories')}</p>
             <div className={styles.grid}>
               {categories.map(cat => (
-                <CategoryCard key={cat.id} {...cat} />
+                <CategoryCard key={cat.id} cat={cat} />
               ))}
             </div>
           </>

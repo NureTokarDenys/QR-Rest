@@ -8,6 +8,7 @@ export function AppProvider({ children }) {
   const [cart, setCart] = useState([]);
   const [tableNumber] = useState(5);
   const [currentOrder, setCurrentOrder] = useState(null);
+  const [orderComment, setOrderComment] = useState('');
 
   function addToCart(dish) {
     setCart(prev => {
@@ -60,6 +61,7 @@ export function AppProvider({ children }) {
       tableNumber,
       currentOrder, setCurrentOrder,
       orderHistory, addOrderToHistory,
+      orderComment, setOrderComment,
     }}>
       {children}
     </AppContext.Provider>

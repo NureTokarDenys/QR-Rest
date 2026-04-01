@@ -32,3 +32,8 @@
   background: var(--order-status-ready-bg);
   color: var(--order-status-ready-text);
 }
+
+.served {
+  background: var(--primary-btn-disabled);
+  color: var(--accent-color);
+}

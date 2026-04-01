@@ -1,0 +1,23 @@
+{
+    "status_waiting": "In queue",
+    "status_cooking": "Cooking",
+    "status_ready": "Ready",
+    "status_served": "Served",
+    "snipet_waiting_title": "Your order is being processed",
+    "snipet_waiting_subtitle": "Aproximate time until ready: 15-30 minutes",
+    "snipet_cooking_title": "Your order is cooking",
+    "snipet_cooking_subtitle": "Aproximate time until ready: 5-15 minutes",
+    "snipet_ready_title": "Your order is ready",
+    "snipet_ready_subtitle": "Please wait while we prepare your order for serving",
+    "snipet_served_title": "Your order has been served",
+    "snipet_served_subtitle": "Enjoy your meal!",
+    "header": "Order Status",
+    "online": "Online", 
+    "order": "Order",
+    "table_number": "Table №",
+    "snipet_title": "Your order is being processed",
+    "snipet_subtitle": "Aproximate time until ready: 10-20 minutes",
+    "dishes": "Dishes",
+    "waiter_call": "Call waiter",
+    "add_more": "Add more dishes"
+}
