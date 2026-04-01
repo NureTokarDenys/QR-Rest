@@ -1,9 +1,9 @@
 .button {
   width: 100%;
   height: 52px;
-  background: #fff;
-  color: #1d7afc;
-  border: 1.5px solid #1d7afc;
+  background: var(--secondary-btn-active);
+  color: var(--secondary-btn-text);
+  border: 1.5px solid var(--secondary-btn-text);
   border-radius: 14px;
   font-size: 17px;
   font-weight: 600;

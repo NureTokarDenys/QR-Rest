@@ -1,5 +1,5 @@
 .wrapper {
-  background: #f2f2f7;
+  background: var(--bg-color);
   border-radius: 12px;
   padding: 12px;
 }
@@ -14,7 +14,7 @@
 .author {
   font-size: 13px;
   font-weight: 600;
-  color: #000;
+  color: var(--primary-text);
   flex: 1;
 }
 
@@ -25,11 +25,11 @@
 .ratingText {
   font-size: 13px;
   font-weight: 600;
-  color: #f5a623;
+  color: var(--rating-text);
 }
 
 .text {
   font-size: 14px;
-  color: #3c3c43;
+  color: var(--primary-text);
   line-height: 1.4;
 }

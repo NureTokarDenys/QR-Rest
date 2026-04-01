@@ -1,7 +1,7 @@
 .page {
   width: 390px;
   min-height: 844px;
-  background: #f2f2f7;
+  background: var(--bg-color);
   display: flex;
   flex-direction: column;
   max-width: 100vw;
@@ -10,9 +10,9 @@
 .online { 
   font-size: 12px;
   font-weight: 600;
-  color: #2e7d32;
+  color: var(--success-text);
   white-space: nowrap;
-  background-color: #c3fdc6;
+  background-color: var(--success-bg);
   border-radius: 15px;
   padding: 5px 15px;
 }
@@ -33,23 +33,23 @@
 
 .orderLabel {
   font-size: 13px;
-  color: #8e8e93;
+  color: var(--secondary-text);
 }
 
 .orderId {
   font-size: 28px;
   font-weight: 800;
-  color: #000;
+  color: var(--primary-text);
 }
 
 .tableInfo {
   font-size: 14px;
-  color: #8e8e93;
+  color: var(--secondary-text);
   margin-top: 2px;
 }
 
 .stepsCard {
-  background: #fff;
+  background: var(--surface-color);
   border-radius: 14px;
   padding: 16px;
   display: flex;
@@ -82,49 +82,49 @@
 }
 
 .done {
-  background: #2e7d32;
-  color: #fff;
+  background: var(--order-state-completed);
+  color: var(--surface-color);
 }
 
 .active {
-  background: #1d7afc;
-  color: #fff;
+  background: var(--accent-color);
+  color: var(--surface-color);
 }
 
 .idle {
-  background: #e5e5ea;
-  color: #8e8e93;
+  background: var(--order-status-waiting-bg);
+  color: var(--order-status-waiting-text);
 }
 
 .stepLabel {
   font-size: 10px;
-  color: #8e8e93;
+  color: var(--secondary-text);
   text-align: center;
   max-width: 50px;
   line-height: 1.2;
 }
 
 .stepLabelActive {
-  color: #000;
+  color: var(--primary-text);
   font-weight: 500;
 }
 
 .line {
   flex: 1;
   height: 2px;
-  background: #e5e5ea;
+  background: var(--order-status-waiting-bg);
   margin-top: 15px;
 }
 
 .lineDone {
-  background: #2e7d32;
+  background: var(--badge-done-text);
 }
 
 .statusBanner {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #fff8e1;
+  background: var(--bg-color);
   border-radius: 10px;
   padding: 10px 12px;
   font-size: 15px;
@@ -133,16 +133,16 @@
 .bannerTitle {
   font-size: 14px;
   font-weight: 600;
-  color: #f57c00;
+  color: var(--badge-coocking-text);
 }
 
 .bannerSub {
   font-size: 12px;
-  color: #8e8e93;
+  color: var(--secondary-text);
 }
 
 .dishesCard {
-  background: #fff;
+  background: var(--surface-color);
   border-radius: 14px;
   padding: 14px;
 }
@@ -150,7 +150,7 @@
 .dishesTitle {
   font-size: 12px;
   font-weight: 700;
-  color: #8e8e93;
+  color: var(--secondary-text);
   letter-spacing: 0.5px;
   margin-bottom: 4px;
 }

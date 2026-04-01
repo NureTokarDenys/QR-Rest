@@ -2,8 +2,9 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../../components/Header';
 import SettingsSection from '../../../components/SettingsSection';
-import SettingsRow from '../../../components/SettingsRow';
+import SettingsRow, { SettingsRowDropdown, ThemeSettingsRow } from '../../../components/SettingsRow';
 import Footer from '../../../components/Footer';
+import { useTheme } from '../../../context/ThemeContext';
 import styles from './profile.module.css';
 
 import { MdPerson } from "react-icons/md";
@@ -13,6 +14,8 @@ import { MdPalette } from "react-icons/md";
 import { MdLock } from "react-icons/md";
 
 export default function Profile() {
+  const { theme, setTheme } = useTheme();
+
   const navigate = useNavigate();
 
   return (
@@ -21,7 +24,7 @@ export default function Profile() {
 
       <div className={styles.content}>
         <div className={styles.avatar}>
-          <div className={styles.avatarCircle}><MdPerson /></div>
+          <div className={styles.avatarCircle}><MdPerson className={styles.avatarIcon} /></div>
           <p className={styles.email}>alina@email.com</p>
         </div>
 
@@ -35,8 +38,15 @@ export default function Profile() {
         </SettingsSection>
 
         <SettingsSection title="Налаштування">
-          <SettingsRow icon={<MdLanguage />} label="Мова" value="Українська" onClick={() => {}} />
-          <SettingsRow icon={<MdPalette />} label="Тема" value="Світла" onClick={() => {}} />
+         <SettingsRowDropdown
+            icon={<MdLanguage />}
+              label="Мова"
+              options={[
+                { value: 'uk', label: 'Українська', icon: '🇺🇦' },
+                { value: 'en', label: 'English',    icon: '🇬🇧' },
+              ]}
+          />
+         <ThemeSettingsRow icon={<MdPalette />} theme={theme} onThemeChange={setTheme} />
         </SettingsSection>
 
         <SettingsSection title="Безпека">

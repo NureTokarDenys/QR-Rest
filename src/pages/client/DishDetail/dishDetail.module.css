@@ -1,7 +1,7 @@
 .page {
   width: 390px;
   min-height: 844px;
-  background: #fff;
+  background: var(--surface-color);
   display: flex;
   flex-direction: column;
   max-width: 100vw;
@@ -32,7 +32,7 @@
   border-radius: 10px;
   font-size: 20px;
   cursor: pointer;
-  color: #1d7afc;
+  color: var(--primary-btn-active);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -50,7 +50,7 @@
 .name {
   font-size: 24px;
   font-weight: 700;
-  color: #000;
+  color: var(--primary-text);
 }
 
 .ratingRow {
@@ -60,43 +60,43 @@
 }
 
 .starFilled {
-  color: #f5a623;
+  color: var(--rating-text);
   font-size: 16px;
 }
 
 .starEmpty {
-  color: #d1d1d6;
+  color: var(--border);
   font-size: 16px;
 }
 
 .ratingVal {
   font-size: 14px;
   font-weight: 600;
-  color: #000;
+  color: var(--primary-text);
   margin-left: 4px;
 }
 
 .reviewCount {
   font-size: 14px;
-  color: #8e8e93;
+  color: var(--secondary-text);
 }
 
 .description {
   font-size: 14px;
-  color: #3c3c43;
+  color: var(--secondary-text);
   line-height: 1.5;
 }
 
 .sectionTitle {
   font-size: 17px;
   font-weight: 700;
-  color: #000;
+  color: var(--primary-text);
   margin-top: 4px;
 }
 
 .ingredients {
   font-size: 14px;
-  color: #3c3c43;
+  color: var(--secondary-text);
   line-height: 1.5;
 }
 
@@ -111,9 +111,9 @@
   bottom: 0;
   width: 390px;
   max-width: 100vw;
-  background: #fff;
+  background: var(--surface-color);
   padding: 12px 16px 24px;
-  border-top: 1px solid #f2f2f7;
+  border-top: 1px solid var(--border);
   display: flex;
   align-items: center;
   gap: 12px;
@@ -129,12 +129,12 @@
 .qtyBtn {
   width: 32px;
   height: 32px;
-  border: 1.5px solid #1d7afc;
+  border: 1.5px solid var(--primary-btn-active);
   background: none;
   border-radius: 8px;
   font-size: 18px;
   font-weight: 700;
-  color: #1d7afc;
+  color: var(--primary-btn-active);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -146,6 +146,7 @@
   font-weight: 600;
   min-width: 20px;
   text-align: center;
+  color: var(--primary-text);
 }
 
 .addBtn {
@@ -155,6 +156,6 @@
 .notFound {
   padding: 40px;
   font-size: 16px;
-  color: #8e8e93;
+  color: var(--secondary-text);
   text-align: center;
 }

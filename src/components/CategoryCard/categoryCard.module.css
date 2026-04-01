@@ -22,17 +22,19 @@
   position: absolute;
   bottom: 10px;
   left: 12px;
-  color: #fff;
+  color: var(--surface-color);
 }
 
 .name {
   display: block;
   font-size: 18px;
   font-weight: 700;
+  color: var(--menu-primary-text);
 }
 
 .count {
   display: block;
   font-size: 13px;
   opacity: 0.9;
+  color: var(--menu-secondary-text);
 }

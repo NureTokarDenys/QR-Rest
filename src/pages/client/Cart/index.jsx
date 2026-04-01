@@ -17,12 +17,22 @@ export default function Cart() {
 
   const totalItems = cart.reduce((s, i) => s + i.quantity, 0);
 
+  function formatItems(count) {
+    const mod10 = count % 10;
+    const mod100 = count % 100;
+
+    if (mod100 >= 11 && mod100 <= 14) return `${count} позицій`;
+    if (mod10 === 1)                   return `${count} позиція`;
+    if (mod10 >= 2 && mod10 <= 4)      return `${count} позиції`;
+    return `${count} позицій`;
+  }
+
   return (
     <div className={styles.page}>
       <Header
         title="Кошик"
         showBack
-        rightElement={<span className={styles.count}>{totalItems} позиції</span>}
+        rightElement={<span className={styles.count}>{formatItems(totalItems)}</span>}
       />
 
       <div className={styles.content}>

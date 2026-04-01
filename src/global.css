@@ -1,0 +1,129 @@
+:root {
+  --bg-color: #f2f2f7;
+  --surface-color: #ffffff;
+  --logo-color: #000000;
+
+  --border: #d1d1d6;
+
+  --primary-text: #111111;
+  --secondary-text: #555555;
+  --primary-text-inverted: #ffffff;
+  --secondary-text-inverted: #999999;
+
+  --menu-primary-text: #ffffff;
+  --menu-secondary-text: #999999;
+
+  --separator-color: #e5e5ea;
+  --icon-color: #3c3c43;
+
+  --value-text: #8e8e93;
+  --chevron-color: #c7c7cc;
+
+  --danger-color: #ff3b30;
+
+  --accent-color: #007aff;
+
+  --primary-btn-active: #1d7afc;
+  --primary-btn-hover: #2563eb;
+  --primary-btn-disabled: #87b6fa;
+
+  --secondary-btn-active: #ffffff;
+  --secondary-btn-text: #1d7afc;
+  --secondary-btn-disabled: #87b6fa;
+
+  --client-toast-bg: #000000;
+  --client-toast-text: #ffffff;
+  --client-toast-progress-bar: #4caf50;
+
+  --badge-coocking-bg: #fff3e0;
+  --badge-coocking-text: #f57c00;
+  --badge-done-bg: #e8f5e9;
+  --badge-done-text: #2e7d32;
+
+  --order-status-waiting-bg: #e8f4ff;
+  --order-status-waiting-text: #1d7afc;
+  --order-status-cooking-bg: #fff3e0;
+  --order-status-cooking-text: #f57c00;
+  --order-status-ready-bg: #e8f5e9;
+  --order-status-ready-text: #2e7d32;
+
+  --order-state-completed: #308d37;
+
+  --success-bg: #e8f5e9;
+  --success-text: #1b5e20;
+
+  --dropdown-bg: #ffffff;
+  --dropdown-border: #e5e5ea;
+  --dropdown-shadow: rgba(0, 0, 0, 0.08);
+  --dropdown-option-hover: #f2f2f7;
+  --dropdown-option-selected-text: #1d7afc;
+  --trigger-border: #e5e5ea;
+  --trigger-focus-shadow: rgba(29, 122, 252, 0.15);
+
+  --rating-text:#f5a623;
+}
+
+[data-theme="dark"] {
+  --bg-color: #1c1c1e;
+  --surface-color: #2c2c2e;
+  --logo-color: #ffffff;
+
+  --border: #808081;
+
+  --primary-text: #ffffff;
+  --secondary-text: #ebebf5cc;
+  --primary-text-inverted: #111111;
+  --secondary-text-inverted: #555555;
+
+  --menu-primary-text: #ffffff;
+  --menu-secondary-text: #999999;
+
+  --separator-color: #38383a;
+  --icon-color: #ebebf599;
+
+  --value-text: #8e8e93;
+  --chevron-color: #48484a;
+
+  --danger-color: #ff453a;
+
+  --accent-color: #007aff;
+
+  --primary-btn-active: #0a84ff;
+  --primary-btn-hover: #409cff;
+  --primary-btn-disabled: #0a84ff66;
+
+  --secondary-btn-active: #000000;
+  --secondary-btn-text: #0a84ff;
+  --secondary-btn-disabled: #0a84ff66;
+
+  --client-toast-bg: #ffffff;
+  --client-toast-text: #000000;
+  --client-toast-progress-bar: #4caf50;
+
+  --badge-coocking-bg: #fff3e0;
+  --badge-coocking-text: #f57c00;
+  --badge-done-bg: #e8f5e9;
+  --badge-done-text: #2e7d32;
+
+  --order-status-waiting-bg: #e8f4ff;
+  --order-status-waiting-text: #1d7afc;
+  --order-status-cooking-bg: #fff3e0;
+  --order-status-cooking-text: #f57c00;
+  --order-status-ready-bg: #e8f5e9;
+  --order-status-ready-text: #2e7d32;
+
+  --order-state-completed: #308d37;
+
+  --success-bg: #1a3a1a;
+  --success-text: #4caf50;
+
+  --dropdown-bg: #2c2c2e;
+  --dropdown-border: #38383a;
+  --dropdown-shadow: rgba(0, 0, 0, 0.35);
+  --dropdown-option-hover: #3a3a3c;
+  --dropdown-option-selected-text: #0a84ff;
+  --trigger-border: #38383a;
+  --trigger-focus-shadow: rgba(10, 132, 255, 0.2);
+
+  --rating-text:#f5a623;
+}

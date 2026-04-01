@@ -17,9 +17,9 @@
 }
 
 .wait {
-  color: #1d7afc;
+  color: var(--accent-color);
 }
 
 .less {
-  color: #000;
+  color: var(--logo-color);
 }

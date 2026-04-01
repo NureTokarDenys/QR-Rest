@@ -1,5 +1,5 @@
 .card {
-  background: #fff;
+  background: var(--surface-color);
   border-radius: 14px;
   padding: 14px;
   display: flex;
@@ -16,7 +16,7 @@
 .id {
   font-size: 15px;
   font-weight: 700;
-  color: #000;
+  color: var(--primary-text);
 }
 
 .badge {
@@ -27,18 +27,18 @@
 }
 
 .cooking {
-  background: #fff3e0;
-  color: #f57c00;
+  background: var(--badge-coocking-bg);
+  color: var(--badge-coocking-text);
 }
 
 .done {
-  background: #e8f5e9;
-  color: #2e7d32;
+  background: var(--badge-done-bg);
+  color: var(--badge-done-text);
 }
 
 .date {
   font-size: 13px;
-  color: #8e8e93;
+  color: var(--value-text);
 }
 
 .bottom {
@@ -50,14 +50,14 @@
 
 .total {
   font-size: 14px;
-  color: #000;
+  color: var(--primary-text);
 }
 
 .link {
   background: none;
   border: none;
   font-size: 14px;
-  color: #1d7afc;
+  color: var(--accent-color);
   cursor: pointer;
   padding: 0;
 }

@@ -1,7 +1,7 @@
 .footer {
   display: flex;
-  border-top: 1px solid #e5e5ea;
-  background: #fff;
+  border-top: 1px solid var(--separator-color);
+  background: var(--surface-color);
   padding: 8px 0 16px;
   position: fixed;
   top: 784px;
@@ -19,11 +19,11 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: #8e8e93;
+  color: var(--secondary-text);
 }
 
 .active {
-  color: #1d7afc;
+  color: var(--primary-btn-active);
 }
 
 .icon {

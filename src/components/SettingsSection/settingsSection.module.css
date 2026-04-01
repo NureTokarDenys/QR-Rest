@@ -5,7 +5,7 @@
 .title {
   font-size: 13px;
   font-weight: 500;
-  color: #8e8e93;
+  color: var(--secondary-text);
   text-transform: uppercase;
   letter-spacing: 0.4px;
   padding: 0 16px;
@@ -13,7 +13,7 @@
 }
 
 .rows {
-  background: #fff;
+  background: var(--surface-color);
   border-radius: 12px;
   overflow: hidden;
 }

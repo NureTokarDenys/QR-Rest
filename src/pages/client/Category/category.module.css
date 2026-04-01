@@ -1,7 +1,7 @@
 .page {
   width: 390px;
   height: 784px;
-  background: #f2f2f7;
+  background: var(--surface-color);
   display: flex;
   flex-direction: column;
   max-width: 100vw;

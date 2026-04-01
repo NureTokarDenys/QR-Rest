@@ -1,0 +1,189 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  user-select: none;
+}
+
+.container {
+  position: relative;
+  width: 100%;
+}
+
+.trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  background: var(--color-background-primary);
+  border: 1px solid var(--color-border-secondary);
+  border-radius: 8px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  box-sizing: border-box;
+}
+
+.trigger:hover {
+  border-color: var(--color-border-primary);
+}
+
+.trigger:focus-visible {
+  border-color: var(--color-border-info);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.open .trigger {
+  border-color: var(--color-border-info);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.disabled .trigger {
+  background: var(--color-background-secondary);
+  border-color: var(--color-border-tertiary);
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.hasError .trigger {
+  border-color: var(--color-border-danger);
+}
+
+.hasError .trigger:focus-visible,
+.hasError.open .trigger {
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+}
+
+.selectedText {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--color-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.placeholder {
+  font-size: 14px;
+  color: var(--color-text-tertiary);
+}
+
+.chevron {
+  flex-shrink: 0;
+  color: var(--color-text-secondary);
+  transition: transform 0.2s ease;
+}
+
+.chevronUp {
+  transform: rotate(180deg);
+}
+
+.list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 100;
+  max-height: 240px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  background: var(--color-background-primary);
+  border: 1px solid var(--color-border-secondary);
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  animation: dropdownFadeIn 0.12s ease;
+  box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-secondary) transparent;
+}
+
+.list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.list::-webkit-scrollbar-thumb {
+  background: var(--color-border-secondary);
+  border-radius: 4px;
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 14px;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.1s ease;
+}
+
+.option:hover,
+.optionFocused {
+  background: var(--color-background-secondary);
+}
+
+.optionSelected {
+  color: var(--color-text-info);
+  font-weight: 500;
+}
+
+.optionSelected .check {
+  color: var(--color-text-info);
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.optionDisabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+.empty {
+  padding: 10px 12px;
+  font-size: 14px;
+  color: var(--color-text-tertiary);
+  text-align: center;
+}
+
+.error {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-danger);
+}

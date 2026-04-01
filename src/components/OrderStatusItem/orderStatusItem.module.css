@@ -3,12 +3,12 @@
   align-items: center;
   justify-content: space-between;
   padding: 10px 0;
-  border-bottom: 1px solid #f2f2f7;
+  border-bottom: 1px solid var(--border);
 }
 
 .name {
   font-size: 15px;
-  color: #000;
+  color: var(--primary-text);
 }
 
 .badge {
@@ -19,16 +19,16 @@
 }
 
 .waiting {
-  background: #e8f4ff;
-  color: #1d7afc;
+  background: var(--order-status-waiting-bg);
+  color: var(--order-status-waiting-text);
 }
 
 .cooking {
-  background: #fff3e0;
-  color: #f57c00;
+  background: var(--order-status-cooking-bg);
+  color: var(--order-status-cooking-text);
 }
 
 .ready {
-  background: #e8f5e9;
-  color: #2e7d32;
+  background: var(--order-status-ready-bg);
+  color: var(--order-status-ready-text);
 }

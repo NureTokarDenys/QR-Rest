@@ -1,7 +1,7 @@
 .page {
   width: 390px;
   min-height: 844px;
-  background: #f2f2f7;
+  background: var(--bg-color);
   display: flex;
   flex-direction: column;
   max-width: 100vw;
