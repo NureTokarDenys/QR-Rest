@@ -371,7 +371,7 @@ export const dishes = {
 
 export const orderHistory = [
   { 
-    id: 'WL-042', 
+    id: 'WL-041', 
     date: '2026-03-30T18:03:00.000Z', 
     total: 710, 
     status: 'waiting', 
@@ -382,7 +382,7 @@ export const orderHistory = [
     ]
   },
   { 
-    id: 'WL-041', 
+    id: 'WL-040', 
     date: '2026-03-30T16:35:00.000Z', 
     total: 540, 
     status: 'served', 
@@ -392,7 +392,7 @@ export const orderHistory = [
     ]
   },
   { 
-    id: 'WL-036', 
+    id: 'WL-039', 
     date: '2026-03-29T12:08:00.000Z', 
     total: 290, 
     status: 'served', 
@@ -405,7 +405,7 @@ export const orderHistory = [
 
 export const TABLES = [
   { id: 1, seats: 4, status: 'free',    orderId: null,      dishes: [] },
-  { id: 2, seats: 4, status: 'waiter',  orderId: 'WL-042',  timeAtTable: '00:47:12',
+  { id: 2, seats: 4, status: 'waiter',  orderId: 'WL-041',  timeAtTable: '00:47:12',
     dishes: [
       { name: 'Деруни з м\'ясом', name_en: 'Potato pancakes', qty: 1, price: 190, status: 'waiting' },
       { name: 'Котлета по-київськи', name_en: 'Chicken Kyiv', qty: 1, price: 150, status: 'waiting' },
@@ -413,7 +413,7 @@ export const TABLES = [
     ]
   },
   { id: 3, seats: 6, status: 'free',    orderId: null,      dishes: [] },
-  { id: 4, seats: 2, status: 'busy',    orderId: 'WL-041',  timeAtTable: '00:22:05',
+  { id: 4, seats: 2, status: 'busy',    orderId: 'WL-040',  timeAtTable: '00:22:05',
     dishes: [
       { name: 'Картопляне пюре', name_en: 'Mashed potatoes', qty: 1, price: 140, status: 'served' },
       { name: 'Шніцель', name_en: 'Schnitzel', qty: 2, price: 400, status: 'served' },
@@ -424,15 +424,15 @@ export const TABLES = [
 ];
 
 export const KANBAN_ITEMS = [
-  { id: 'k1', dishName: 'Деруни з м\'ясом',     dishName_en: 'Potato pancakes', tableId: 1, orderId: 'WL-042', dishCount: 3, time: '14:20', status: 'waiting' },
-  { id: 'k2', dishName: 'Котлета по-київськи',  dishName_en: 'Chicken Kyiv',    tableId: 1, orderId: 'WL-042', dishCount: 3, time: '14:22', status: 'waiting' },
-  { id: 'k3', dishName: 'Спагетті',             dishName_en: 'Spaghetti',       tableId: 1, orderId: 'WL-042', dishCount: 3, time: '14:22', status: 'waiting' },
-  { id: 'k4', dishName: 'Деруни з м\'ясом',     dishName_en: 'Potato pancakes', tableId: 2, orderId: 'WL-042', dishCount: 3, time: '14:22', status: 'waiting' },
-  { id: 'k5', dishName: 'Шніцель (×2)',         dishName_en: 'Schnitzel (×2)',  tableId: 3, orderId: 'WL-042', dishCount: 3, time: '14:23', status: 'cooking' },
-  { id: 'k6', dishName: 'Спагетті',             dishName_en: 'Spaghetti',       tableId: 3, orderId: 'WL-042', dishCount: 3, time: '14:23', status: 'ready' },
-  { id: 'k7', dishName: 'Картопляне пюре',      dishName_en: 'Mashed potatoes', tableId: 3, orderId: 'WL-045', dishCount: 3, time: '14:10', status: 'served' },
-  { id: 'k8', dishName: 'Шніцель (×2)',         dishName_en: 'Schnitzel (×2)',  tableId: 3, orderId: 'WL-045', dishCount: 3, time: '14:15', status: 'served' },
-  { id: 'k9', dishName: 'Борщ',                 dishName_en: 'Borscht',         tableId: 3, orderId: 'WL-045', dishCount: 3, time: '14:18', status: 'served' },
+  { id: 'k1', dishName: 'Деруни з м\'ясом',     dishName_en: 'Potato pancakes', tableId: 1, orderId: 'WL-041', dishCount: 3, time: '14:20', status: 'waiting' },
+  { id: 'k2', dishName: 'Котлета по-київськи',  dishName_en: 'Chicken Kyiv',    tableId: 1, orderId: 'WL-041', dishCount: 3, time: '14:22', status: 'waiting' },
+  { id: 'k3', dishName: 'Спагетті',             dishName_en: 'Spaghetti',       tableId: 1, orderId: 'WL-041', dishCount: 3, time: '14:22', status: 'waiting' },
+  { id: 'k4', dishName: 'Деруни з м\'ясом',     dishName_en: 'Potato pancakes', tableId: 2, orderId: 'WL-040', dishCount: 3, time: '14:22', status: 'waiting' },
+  { id: 'k5', dishName: 'Шніцель (×2)',         dishName_en: 'Schnitzel (×2)',  tableId: 3, orderId: 'WL-040', dishCount: 3, time: '14:23', status: 'cooking' },
+  { id: 'k6', dishName: 'Спагетті',             dishName_en: 'Spaghetti',       tableId: 3, orderId: 'WL-040', dishCount: 3, time: '14:23', status: 'ready' },
+  { id: 'k7', dishName: 'Картопляне пюре',      dishName_en: 'Mashed potatoes', tableId: 3, orderId: 'WL-039', dishCount: 3, time: '14:10', status: 'served' },
+  { id: 'k8', dishName: 'Шніцель (×2)',         dishName_en: 'Schnitzel (×2)',  tableId: 3, orderId: 'WL-039', dishCount: 3, time: '14:15', status: 'served' },
+  { id: 'k9', dishName: 'Борщ',                 dishName_en: 'Borscht',         tableId: 3, orderId: 'WL-039', dishCount: 3, time: '14:18', status: 'served' },
 ];
 
 export const ORDER_DETAIL = {

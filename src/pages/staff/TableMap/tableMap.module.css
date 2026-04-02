@@ -25,6 +25,7 @@
 
 .free   { background: #4ade80; }
 .busy   { background: #f87171; }
+.bill { background: #a39e90; }
 .waiter { background: #fbbf24; }
 
 .legendLabel { color: var(--primary-text); }

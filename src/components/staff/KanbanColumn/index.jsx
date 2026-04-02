@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import KanbanCard from '../KanbanCard';
 import styles from './kanbanColumn.module.css';
@@ -13,9 +13,45 @@ const COLUMN_COLORS = {
 export default function KanbanColumn({ status, items, onStatusChange }) {
   const { t } = useTranslation('components');
   const cfg = COLUMN_COLORS[status] || COLUMN_COLORS.waiting;
+  
+  const [isOver, setIsOver] = useState(false);
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    setIsOver(true);
+  };
+
+  const handleDragLeave = (e) => {
+    if (e.currentTarget.contains(e.relatedTarget)) return;
+    setIsOver(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsOver(false);
+
+    const itemId = e.dataTransfer.getData('text/plain');
+    if (!itemId) return;
+
+    if (onStatusChange) {
+      onStatusChange(itemId, status);
+    }
+  };
 
   return (
-    <div className={styles.column}>
+    <div 
+      className={styles.column}
+      onDragOver={handleDragOver}
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+      style={isOver ? { opacity: 0.8, filter: 'brightness(0.95)' } : {}}
+    >
       <div className={styles.header} style={{ color: cfg.text }}>
         <span className={styles.colLabel}>{t(`kanban_col_${status}`)}</span>
         <span className={styles.count}>{items.length}</span>

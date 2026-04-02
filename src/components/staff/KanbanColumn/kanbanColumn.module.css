@@ -1,35 +1,39 @@
 .column {
   flex: 1;
-  min-width: 0;
+  min-width: 280px;
+  background: var(--bg-color);
+  border-radius: 12px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
+  transition: opacity 0.2s, filter 0.2s;
 }
 
 .header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  padding: 6px 4px;
-  font-size: 12px;
+  align-items: center;
   font-weight: 700;
-  letter-spacing: 0.5px;
+  font-size: 14px;
 }
 
 .count {
-  background: var(--surface-color);
-  border-radius: 10px;
-  padding: 1px 7px;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 2px 8px;
+  border-radius: 12px;
   font-size: 12px;
-  font-weight: 700;
-  color: var(--secondary-text);
-  border: 1px solid var(--separator-color);
 }
 
 .cards {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  overflow-y: auto;
   flex: 1;
+  overflow-y: auto;
+  pointer-events: none;
+}
+
+.cards > * {
+  pointer-events: auto;
 }

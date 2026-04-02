@@ -14,9 +14,31 @@ export default function KanbanCard({ item, status, onStatusChange }) {
   
   const next = NEXT_STATUS[status];
 
+  const handleDragStart = (e) => {
+    e.dataTransfer.setData('text/plain', item.id);
+    e.dataTransfer.effectAllowed = 'move';
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const offsetX = e.clientX - rect.left;
+    const offsetY = e.clientY - rect.top;
+    e.dataTransfer.setDragImage(e.currentTarget, offsetX, offsetY);
+
+    setTimeout(() => {
+      e.target.style.opacity = '0.5';
+    }, 0);
+  };
+
+  const handleDragEnd = (e) => {
+    e.target.style.opacity = '1';
+  };
+
   return (
     <div
+      draggable="true"
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
       className={styles.card}
+      style={item.orderColor ? { borderRightColor: item.orderColor } : {}}
       onClick={() => navigate(`/staff/order/${item.orderId}`)}
     >
       <div className={styles.top}>
