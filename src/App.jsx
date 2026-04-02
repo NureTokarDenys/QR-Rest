@@ -30,6 +30,7 @@ export default function App() {
               <Route path="/cart" element={<Cart />} />
               <Route path="/confirm" element={<ConfirmOrder />} />
               <Route path="/order-status" element={<OrderStatus />} />
+              <Route path="/order-status/:orderId" element={<OrderStatus />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/order-history" element={<OrderHistory />} />
             </Routes>

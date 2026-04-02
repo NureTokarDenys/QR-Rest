@@ -19,5 +19,6 @@
     "snipet_subtitle": "Aproximate time until ready: 10-20 minutes",
     "dishes": "Dishes",
     "waiter_call": "Call waiter",
-    "add_more": "Add more dishes"
+    "add_more": "Add more dishes",
+    "order_not_found": "Order not found"
 }

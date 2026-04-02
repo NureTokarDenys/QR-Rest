@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useApp } from '../../../context/AppContext';
 import Header from '../../../components/Header';
 import OrderStatusItem from '../../../components/OrderStatusItem';
@@ -20,10 +20,27 @@ const STATUS_KEYS = ['waiting', 'cooking', 'ready', 'served'];
 export default function OrderStatus() {
   const { t } = useTranslation('orderStatus');
   const local = useLocalField(); 
+  const { orderId } = useParams(); 
   const navigate = useNavigate();
-  const { currentOrder, tableNumber } = useApp();
+  const { currentOrder, tableNumber, orderHistory } = useApp();
 
-  const items = currentOrder?.items?.map((item, i) => ({
+  const activeOrder = orderId 
+    ? orderHistory?.find(order => order.id === orderId) 
+    : currentOrder;
+
+  if (!activeOrder) {
+    return (
+      <div className={styles.page}>
+        <Header title={t('header')} showBack />
+        <div className={styles.content}>
+          <p className={styles.not_found}>{t('order_not_found')}</p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  const items = activeOrder?.items?.map((item, i) => ({
     ...item,
     status: item.status || "waiting",
     name: item.quantity > 1 ? `${local(item, 'name')} (×${item.quantity})` : local(item, 'name')
@@ -73,7 +90,7 @@ export default function OrderStatus() {
       <div className={styles.content}>
         <div className={styles.orderMeta}>
           <p className={styles.orderLabel}>{t('order')}</p>
-          <p className={styles.orderId}>#{currentOrder?.id || 'WL-042'}</p>
+          <p className={styles.orderId}>#{activeOrder.id}</p>
           <p className={styles.tableInfo}>{t('table_number')}{tableNumber}</p>
         </div>
 

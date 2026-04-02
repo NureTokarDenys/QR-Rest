@@ -159,3 +159,10 @@
   letter-spacing: 0.5px;
   margin-bottom: 4px;
 }
+
+.not_found {
+  text-align: center;
+  margin-top: 50px;
+  font-size: 24px;
+  color: var(--primary-text);
+}
