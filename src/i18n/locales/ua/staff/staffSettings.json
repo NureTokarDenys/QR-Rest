@@ -2,20 +2,31 @@
   "title": "Налаштування",
   "saveChanges": "Зберегти зміни",
   "logout": "Вийти",
-  "personalData": "ОСОБИСТІ ДАНІ",
+  
+  "online": "В мережі",
+  "role_admin": "Адміністратор",
+  "role_waiter": "Офіціант",
+  
+  "personalData": "Особисті дані",
   "name": "Ім'я",
   "email": "Email",
-  "role": "Роль",
-  "settingsSection": "НАЛАШТУВАННЯ",
+  "role": "Посада",
+  
+  "settingsSection": "Налаштування системи",
   "interfaceLang": "Мова інтерфейсу",
+  "lang_ua": "Українська",
+  "lang_en": "English",
   "theme": "Тема оформлення",
+  "theme_light": "Світла",
+  "theme_dark": "Темна",
   "soundNotifications": "Звукові сповіщення",
-  "changePassword": "ЗМІНА ПАРОЛЯ",
+  
+  "changePassword": "Зміна пароля",
   "currentPassword": "Поточний пароль",
   "newPassword": "Новий пароль",
-  "confirmPassword": "Підтвердження",
+  "confirmPassword": "Підтвердіть пароль",
   "changePasswordBtn": "Змінити пароль",
-  "online": "Онлайн",
-  "waiter": "Офіціант",
-  "admin": "Адміністратор"
+  
+  "notificationsPanel": "Сповіщення",
+  "shiftPanel": "Поточна зміна"
 }

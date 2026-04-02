@@ -1,21 +1,32 @@
 {
   "title": "Settings",
   "saveChanges": "Save changes",
-  "logout": "Logout",
-  "personalData": "PERSONAL DATA",
+  "logout": "Log out",
+  
+  "online": "Online",
+  "role_admin": "Administrator",
+  "role_waiter": "Waiter",
+  
+  "personalData": "Personal Data",
   "name": "Name",
   "email": "Email",
   "role": "Role",
-  "settingsSection": "SETTINGS",
-  "interfaceLang": "Interface language",
+  
+  "settingsSection": "System Settings",
+  "interfaceLang": "Interface Language",
+  "lang_ua": "Українська",
+  "lang_en": "English",
   "theme": "Theme",
+  "theme_light": "Light",
+  "theme_dark": "Dark",
   "soundNotifications": "Sound notifications",
-  "changePassword": "CHANGE PASSWORD",
+  
+  "changePassword": "Change Password",
   "currentPassword": "Current password",
   "newPassword": "New password",
   "confirmPassword": "Confirm password",
   "changePasswordBtn": "Change password",
-  "online": "Online",
-  "waiter": "Waiter",
-  "admin": "Administrator"
+  
+  "notificationsPanel": "Notifications",
+  "shiftPanel": "Current Shift"
 }

@@ -111,6 +111,9 @@
 }
 
 .toggleLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   font-size: 14px;
   color: var(--primary-text);
 }
@@ -159,4 +162,31 @@
   font-size: 13px;
   font-weight: 700;
   color: var(--primary-text);
+}
+
+.saveBtn {
+  background: var(--accent-color);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 14px;
+  width: fit-content;
+}
+
+.logoutBtn {
+  background: var(--danger-color);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 14px;
+  width: fit-content;
+}
+
+.notificationIcon {
+  font-size: 16px;
+  margin: 0px;
+  padding: 0px;
+  color: #ce9a3a;
 }

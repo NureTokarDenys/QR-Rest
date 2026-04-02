@@ -8,7 +8,7 @@
 .label {
   font-size: 14px;
   font-weight: 500;
-  color: var(--color-text-primary);
+  color: var(--primary-text);
   user-select: none;
 }
 
@@ -25,8 +25,8 @@
   width: 100%;
   height: 40px;
   padding: 0 12px;
-  background: var(--color-background-primary);
-  border: 1px solid var(--color-border-secondary);
+  background: var(--surface-color);
+  border: 1px solid var(--trigger-border);
   border-radius: 8px;
   cursor: pointer;
   outline: none;
@@ -35,33 +35,33 @@
 }
 
 .trigger:hover {
-  border-color: var(--color-border-primary);
+  border-color: var(--border);
 }
 
 .trigger:focus-visible {
-  border-color: var(--color-border-info);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px var(--trigger-focus-shadow);
 }
 
 .open .trigger {
-  border-color: var(--color-border-info);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px var(--trigger-focus-shadow);
 }
 
 .disabled .trigger {
-  background: var(--color-background-secondary);
-  border-color: var(--color-border-tertiary);
+  background: var(--bg-color);
+  border-color: var(--separator-color);
   cursor: not-allowed;
   opacity: 0.55;
 }
 
 .hasError .trigger {
-  border-color: var(--color-border-danger);
+  border-color: var(--danger-color);
 }
 
 .hasError .trigger:focus-visible,
 .hasError.open .trigger {
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+  box-shadow: 0 0 0 3px rgba(255, 59, 48, 0.15);
 }
 
 .selectedText {
@@ -69,7 +69,7 @@
   align-items: center;
   gap: 8px;
   font-size: 14px;
-  color: var(--color-text-primary);
+  color: var(--primary-text);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -77,12 +77,12 @@
 
 .placeholder {
   font-size: 14px;
-  color: var(--color-text-tertiary);
+  color: var(--value-text);
 }
 
 .chevron {
   flex-shrink: 0;
-  color: var(--color-text-secondary);
+  color: var(--chevron-color);
   transition: transform 0.2s ease;
 }
 
@@ -101,14 +101,14 @@
   margin: 0;
   padding: 4px;
   list-style: none;
-  background: var(--color-background-primary);
-  border: 1px solid var(--color-border-secondary);
+  background: var(--dropdown-bg);
+  border: 1px solid var(--dropdown-border);
   border-radius: 10px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 20px var(--dropdown-shadow);
   animation: dropdownFadeIn 0.12s ease;
   box-sizing: border-box;
   scrollbar-width: thin;
-  scrollbar-color: var(--color-border-secondary) transparent;
+  scrollbar-color: var(--dropdown-border) transparent;
 }
 
 .list::-webkit-scrollbar {
@@ -116,7 +116,7 @@
 }
 
 .list::-webkit-scrollbar-thumb {
-  background: var(--color-border-secondary);
+  background: var(--dropdown-border);
   border-radius: 4px;
 }
 
@@ -138,7 +138,7 @@
   padding: 8px 10px;
   border-radius: 6px;
   font-size: 14px;
-  color: var(--color-text-primary);
+  color: var(--primary-text);
   cursor: pointer;
   user-select: none;
   transition: background 0.1s ease;
@@ -146,16 +146,16 @@
 
 .option:hover,
 .optionFocused {
-  background: var(--color-background-secondary);
+  background: var(--dropdown-option-hover);
 }
 
 .optionSelected {
-  color: var(--color-text-info);
+  color: var(--dropdown-option-selected-text);
   font-weight: 500;
 }
 
 .optionSelected .check {
-  color: var(--color-text-info);
+  color: var(--dropdown-option-selected-text);
   margin-left: auto;
   flex-shrink: 0;
 }
@@ -178,12 +178,12 @@
 .empty {
   padding: 10px 12px;
   font-size: 14px;
-  color: var(--color-text-tertiary);
+  color: var(--value-text);
   text-align: center;
 }
 
 .error {
   margin: 0;
   font-size: 12px;
-  color: var(--color-text-danger);
+  color: var(--danger-color);
 }
