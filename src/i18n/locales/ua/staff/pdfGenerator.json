@@ -16,7 +16,12 @@
   "showReviews": "Показувати відгуки",
   "demoMenu": "Дасмове меню",
   "categories": "Категорії",
-  "generate": "Генерувати PDF",
+  "generate": "Завантажити PDF",
   "preview": "ПОПЕРЕДНІЙ ПЕРЕГЛЯД",
-  "menuYear": "Меню · 2026"
+  "menuYear": "Меню · 2026",
+  "allCategories": "Всі категорії",
+  "languageOptions": {
+    "en": "Англійська",
+    "ua": "Українська"
+  }
 }

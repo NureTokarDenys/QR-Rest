@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Dropdown } from '../../Dropdown';
 import styles from './activeOrderRow.module.css';
 
-import { STATUS_STYLES, STATUS_KEYS } from '../../../constants/orderStatuses'; 
+import { STATUS_STYLES, STATUS_KEYS } from '../../../constants/mainConstants'; 
 
 export default function ActiveOrderRow({ item, onStatusChange }) {
   const { t } = useTranslation('components');

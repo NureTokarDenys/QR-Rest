@@ -16,7 +16,12 @@
   "showReviews": "Show reviews",
   "demoMenu": "Demo menu",
   "categories": "Categories",
-  "generate": "Generate PDF",
+  "generate": "Download PDF",
   "preview": "PREVIEW",
-  "menuYear": "Menu · 2026"
+  "menuYear": "Menu · 2026",
+  "allCategories": "All categories",
+  "languageOptions": {
+    "en": "English",
+    "ua": "Ukrainian"
+  }
 }

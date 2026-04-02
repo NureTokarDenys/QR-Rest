@@ -7,28 +7,43 @@ import PdfMenuDish from '../../../components/staff/PdfMenuDish';
 import { Dropdown } from '../../../components/Dropdown';
 import PrimaryButton from '../../../components/PrimaryButton';
 import SecondaryButton from '../../../components/SecondaryButton';
-import { categories } from '../../../data/mockData';
-import { MENU_DISHES_FLAT } from '../../../data/mockData';
+import { categories, dishes as dishesData } from '../../../data/mockData';
+import { PDF_GENERATOR_TEMPLATES } from '../../../constants/mainConstants';
 import styles from './pdfGenerator.module.css';
+import { MdPictureAsPdf } from "react-icons/md";
 
-const TEMPLATES = [
-  { id: 'classic', label_ua: 'Класичний', label_en: 'Classic', color: '#1d7afc' },
-  { id: 'dark',    label_ua: 'Темний',    label_en: 'Dark',    color: '#1a1a2e' },
-  { id: 'minimal', label_ua: 'Мінімал',   label_en: 'Minimal', color: '#374151' },
-  { id: 'light',   label_ua: 'Світлий',   label_en: 'Light',   color: '#f2f2f7' },
-];
+const allDishes = Object.entries(dishesData).flatMap(([categoryId, items]) =>
+  items.map(dish => ({ ...dish, category: categoryId }))
+);
+
+const Toggle = ({ value, onChange }) => (
+  <button
+    className={`${styles.toggle} ${value ? styles.toggleOn : ''}`}
+    onClick={() => onChange(!value)}
+  >
+    <span className={styles.toggleThumb} />
+  </button>
+);
 
 export default function PdfGenerator() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation('pdfGenerator');
-  const lang = i18n.language === 'en' ? 'en' : 'ua';
+  const local = (obj, field) => i18n.language === 'en' ? obj[`${field}_en`] : obj[field];
 
-  const [template, setTemplate] = useState('classic');
+  const [templateId, setTemplateId] = useState('classic');
   const [format, setFormat] = useState('A4');
-  const [pdfLang, setPdfLang] = useState('ua');
+  const [pdfLang, setPdfLang] = useState(i18n.language === 'en' ? 'en' : 'ua');
   const [showMainPhoto, setShowMainPhoto] = useState(true);
   const [showIngredients, setShowIngredients] = useState(false);
-  const [selectedCats, setSelectedCats] = useState([]);
+  const [selectedCats, setSelectedCats] = useState(categories.map(c => c.id));
+
+  const tpl = PDF_GENERATOR_TEMPLATES.find(t => t.id === templateId) || PDF_GENERATOR_TEMPLATES[0];
+
+  const allSelected = selectedCats.length === categories.length;
+
+  function toggleAll() {
+    setSelectedCats(allSelected ? [] : categories.map(c => c.id));
+  }
 
   function toggleCat(id) {
     setSelectedCats(prev =>
@@ -36,41 +51,48 @@ export default function PdfGenerator() {
     );
   }
 
-  const Toggle = ({ value, onChange }) => (
-    <button
-      className={`${styles.toggle} ${value ? styles.toggleOn : ''}`}
-      onClick={() => onChange(!value)}
-    >
-      <span className={styles.toggleThumb} />
-    </button>
-  );
+  const activeCats = categories.filter(c => selectedCats.includes(c.id));
 
-  const previewDishes = MENU_DISHES_FLAT.slice(0, 3);
+  const docStyle = {
+    background: tpl.docBg,
+    fontFamily: tpl.fontFamily,
+  };
+
+  const docHeaderStyle = {
+    borderBottomColor: tpl.headerColor,
+  };
+
+  const docTitleStyle = {
+    color: tpl.titleColor,
+  };
+
+  const docSubStyle = {
+    color: tpl.descColor,
+  };
+
+  const docSectionStyle = {
+    color: tpl.sectionColor,
+    borderBottomColor: tpl.sectionBorder,
+  };
 
   return (
     <StaffShell
-      title={`← ${t('title')}`}
+      title={`${t('title')}`}
       backTo="/staff/menu"
-      rightActions={
-        <div className={styles.headerActions}>
-          <SecondaryButton label={t('cancel')} onClick={() => navigate('/staff/menu')} className={styles.cancelBtn} />
-          <PrimaryButton label={t('save')} onClick={() => {}} className={styles.saveBtn} />
-        </div>
-      }
     >
       <div className={styles.layout}>
         <div className={styles.settingsCol}>
           <div className={styles.section}>
             <p className={styles.sectionTitle}>{t('template')}</p>
             <div className={styles.templates}>
-              {TEMPLATES.map(tpl => (
+              {PDF_GENERATOR_TEMPLATES.map(item => (
                 <div
-                  key={tpl.id}
-                  className={`${styles.tplCard} ${template === tpl.id ? styles.tplActive : ''}`}
-                  onClick={() => setTemplate(tpl.id)}
+                  key={item.id}
+                  className={`${styles.tplCard} ${templateId === item.id ? styles.tplActive : ''}`}
+                  onClick={() => setTemplateId(item.id)}
                 >
-                  <div className={styles.tplColor} style={{ background: tpl.color }} />
-                  <span className={styles.tplLabel}>{lang === 'en' ? tpl.label_en : tpl.label_ua}</span>
+                  <div className={styles.tplColor} style={{ background: item.preview }} />
+                  <span className={styles.tplLabel}>{local(item, 'label')}</span>
                 </div>
               ))}
             </div>
@@ -87,7 +109,10 @@ export default function PdfGenerator() {
             </PdfSettingItem>
             <PdfSettingItem label={t('language')}>
               <Dropdown
-                options={[{ value: 'ua', label: 'Українська' }, { value: 'en', label: 'English' }]}
+                options={[
+                  { value: 'ua', label: t('languageOptions.ua') },
+                  { value: 'en', label: t('languageOptions.en') },
+                ]}
                 value={pdfLang}
                 onChange={setPdfLang}
               />
@@ -102,6 +127,16 @@ export default function PdfGenerator() {
 
           <div className={styles.section}>
             <p className={styles.sectionTitle}>{t('categories')}</p>
+            <label className={styles.catCheck}>
+              <input
+                type="checkbox"
+                checked={allSelected}
+                onChange={toggleAll}
+                className={styles.checkbox}
+              />
+              <span className={`${styles.catName} ${styles.catAll}`}>{t('allCategories')}</span>
+            </label>
+            <div className={styles.catDivider} />
             {categories.map(cat => (
               <label key={cat.id} className={styles.catCheck}>
                 <input
@@ -110,30 +145,39 @@ export default function PdfGenerator() {
                   onChange={() => toggleCat(cat.id)}
                   className={styles.checkbox}
                 />
-                <span className={styles.catName}>{cat.name}</span>
+                <span className={styles.catName}>{local(cat, 'name')}</span>
               </label>
             ))}
           </div>
 
-          <PrimaryButton label={`📄 ${t('generate')}`} onClick={() => {}} />
+          <PrimaryButton label={<><MdPictureAsPdf /> {t('generate')}</>} onClick={() => {}} />
         </div>
 
         <div className={styles.previewCol}>
           <p className={styles.previewTitle}>{t('preview')}</p>
-          <div className={styles.previewDoc}>
-            <div className={styles.docHeader}>
-              <h2 className={styles.docTitle}>Waitless Restaurant</h2>
-              <p className={styles.docSub}>{t('menuYear')}</p>
+          <div className={styles.previewDoc} style={docStyle}>
+            <div className={styles.docHeader} style={docHeaderStyle}>
+              <h2 className={styles.docTitle} style={docTitleStyle}>Waitless Restaurant</h2>
+              <p className={styles.docSub} style={docSubStyle}>{t('menuYear')}</p>
             </div>
-            <h3 className={styles.docSection}>Основні страви</h3>
-            {previewDishes.map(dish => (
-              <PdfMenuDish
-                key={dish.id}
-                dish={dish}
-                showPhoto={showMainPhoto}
-                showIngredients={showIngredients}
-              />
-            ))}
+            {activeCats.map(cat => {
+              const catDishes = allDishes.filter(d => d.category === cat.id);
+              if (!catDishes.length) return null;
+              return (
+                <div key={cat.id}>
+                  <h3 className={styles.docSection} style={docSectionStyle}>{local(cat, 'name')}</h3>
+                  {catDishes.slice(0, 2).map(dish => (
+                    <PdfMenuDish
+                      key={dish.id}
+                      dish={dish}
+                      showPhoto={showMainPhoto}
+                      showIngredients={showIngredients}
+                      tpl={tpl}
+                    />
+                  ))}
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

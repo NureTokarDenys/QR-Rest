@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocalField } from '../../../i18n/useLang';
 import styles from './tableDishList.module.css';
 
-import { STATUS_STYLES } from '../../../constants/orderStatuses'; 
+import { STATUS_STYLES } from '../../../constants/mainConstants'; 
 
 export default function TableDishList({ dishes }) {
   const { t } = useTranslation('components');
