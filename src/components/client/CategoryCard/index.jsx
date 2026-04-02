@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './categoryCard.module.css';
-import { useLocalField } from '../../i18n/useLang';
+import { useLocalField } from '../../../i18n/useLang';
 import { useTranslation } from 'react-i18next';
 
 export default function CategoryCard({ cat }) {

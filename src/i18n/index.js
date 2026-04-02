@@ -1,31 +1,31 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
-import uaMenu from './locales/ua/menu.json';
-import uaCategory from './locales/ua/category.json';
-import uaFooter from './locales/ua/footer.json';
-import uaClientToast from './locales/ua/clientToast.json'; 
-import uaLogin from './locales/ua/login.json';
-import uaNotFound from './locales/ua/notFound.json';
-import uaDishDetails from './locales/ua/dishDetails.json';
-import uaCart from './locales/ua/cart.json';
-import uaProfile from './locales/ua/profile.json';
-import uaOrderConfirmation from './locales/ua/orderConfirmation.json';
-import uaOrderStatus from './locales/ua/orderStatus.json';
-import uaMyOrders from './locales/ua/myOrders.json';
+import uaMenu from './locales/ua/client/menu.json';
+import uaCategory from './locales/ua/client/category.json';
+import uaFooter from './locales/ua/client/footer.json';
+import uaClientToast from './locales/ua/client/clientToast.json'; 
+import uaLogin from './locales/ua/client/login.json';
+import uaNotFound from './locales/ua/client/notFound.json';
+import uaDishDetails from './locales/ua/client/dishDetails.json';
+import uaCart from './locales/ua/client/cart.json';
+import uaProfile from './locales/ua/client/profile.json';
+import uaOrderConfirmation from './locales/ua/client/orderConfirmation.json';
+import uaOrderStatus from './locales/ua/client/orderStatus.json';
+import uaMyOrders from './locales/ua/client/myOrders.json';
 
-import enMenu from './locales/en/menu.json';
-import enCategory from './locales/en/category.json';
-import enFooter from './locales/en/footer.json';
-import enClientToast from './locales/en/clientToast.json';
-import enLogin from './locales/en/login.json';
-import enNotFound from './locales/en/notFound.json';
-import enDishDetails from './locales/en/dishDetails.json';
-import enCart from './locales/en/cart.json';
-import enProfile from './locales/en/profile.json';
-import enOrderConfirmation from './locales/en/orderConfirmation.json';
-import enOrderStatus from './locales/en/orderStatus.json';
-import enMyOrders from './locales/en/myOrders.json';
+import enMenu from './locales/en/client/menu.json';
+import enCategory from './locales/en/client/category.json';
+import enFooter from './locales/en/client/footer.json';
+import enClientToast from './locales/en/client/clientToast.json';
+import enLogin from './locales/en/client/login.json';
+import enNotFound from './locales/en/client/notFound.json';
+import enDishDetails from './locales/en/client/dishDetails.json';
+import enCart from './locales/en/client/cart.json';
+import enProfile from './locales/en/client/profile.json';
+import enOrderConfirmation from './locales/en/client/orderConfirmation.json';
+import enOrderStatus from './locales/en/client/orderStatus.json';
+import enMyOrders from './locales/en/client/myOrders.json';
 
 i18n.use(initReactI18next).init({
   resources: {

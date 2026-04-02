@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import Header from '../../../components/Header';
+import Header from '../../../components/client/Header';
 import SearchBar from '../../../components/SearchBar';
-import DishCard from '../../../components/DishCard';
-import Footer from '../../../components/Footer';
+import DishCard from '../../../components/client/DishCard';
+import Footer from '../../../components/client/Footer';
 import { getCategoryById, getDishesByCategory } from '../../../data/mockData';
 import styles from './category.module.css';
 import { useTranslation } from 'react-i18next';

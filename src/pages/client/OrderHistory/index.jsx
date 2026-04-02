@@ -1,6 +1,6 @@
 import React, { use } from 'react';
-import Header from '../../../components/Header';
-import OrderHistoryCard from '../../../components/OrderHistoryCard';
+import Header from '../../../components/client/Header';
+import OrderHistoryCard from '../../../components/client/OrderHistoryCard';
 import { useApp } from '../../../context/AppContext';
 import styles from './orderHistory.module.css';
 import { useTranslation } from 'react-i18next';

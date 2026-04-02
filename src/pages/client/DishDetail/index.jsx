@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../../../context/AppContext';
-import ReviewItem from '../../../components/ReviewItem';
+import ReviewItem from '../../../components/client/ReviewItem';
 import PrimaryButton from '../../../components/PrimaryButton';
 import { getDishById } from '../../../data/mockData';
 import styles from './dishDetail.module.css';

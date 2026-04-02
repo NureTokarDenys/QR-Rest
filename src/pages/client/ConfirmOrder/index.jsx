@@ -1,8 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../../context/AppContext';
-import Header from '../../../components/Header';
-import ConfirmOrderItem from '../../../components/ConfirmOrderItem';
+import Header from '../../../components/client/Header';
+import ConfirmOrderItem from '../../../components/client/ConfirmOrderItem';
 import PrimaryButton from '../../../components/PrimaryButton';
 import SecondaryButton from '../../../components/SecondaryButton';
 import styles from './confirmOrder.module.css';

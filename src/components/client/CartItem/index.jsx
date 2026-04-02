@@ -1,7 +1,7 @@
 import React from 'react';
-import { useApp } from '../../context/AppContext';
+import { useApp } from '../../../context/AppContext';
 import styles from './cartItem.module.css';
-import { useLocalField } from '../../i18n/useLang';
+import { useLocalField } from '../../../i18n/useLang';
 
 import { MdDelete } from "react-icons/md";
 

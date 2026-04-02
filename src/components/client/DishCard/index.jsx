@@ -1,10 +1,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useApp } from '../../context/AppContext';
+import { useApp } from '../../../context/AppContext';
 import styles from './dishCard.module.css';
-import { useToast } from "../../context/ClientToastContext";
+import { useToast } from "../../../context/ClientToastContext";
 import { useTranslation } from 'react-i18next';
-import { useLocalField } from '../../i18n/useLang';
+import { useLocalField } from '../../../i18n/useLang';
 
 export default function DishCard({ dish }) {
   const { t } = useTranslation('clientToast');

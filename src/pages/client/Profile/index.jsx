@@ -1,9 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from '../../../components/Header';
-import SettingsSection from '../../../components/SettingsSection';
-import SettingsRow, { SettingsRowDropdown, ThemeSettingsRow } from '../../../components/SettingsRow';
-import Footer from '../../../components/Footer';
+import Header from '../../../components/client/Header';
+import SettingsSection from '../../../components/client/SettingsSection';
+import SettingsRow, { SettingsRowDropdown, ThemeSettingsRow } from '../../../components/client/SettingsRow';
+import Footer from '../../../components/client/Footer';
 import { useTheme } from '../../../context/ThemeContext';
 import styles from './profile.module.css';
 import { useTranslation } from 'react-i18next';

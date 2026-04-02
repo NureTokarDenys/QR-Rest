@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../../context/AppContext';
-import Header from '../../../components/Header';
-import CartItem from '../../../components/CartItem';
+import Header from '../../../components/client/Header';
+import CartItem from '../../../components/client/CartItem';
 import PrimaryButton from '../../../components/PrimaryButton';
 import SecondaryButton from '../../../components/SecondaryButton';
-import Footer from '../../../components/Footer';
+import Footer from '../../../components/client/Footer';
 import styles from './cart.module.css';
 import { useTranslation } from 'react-i18next';
 

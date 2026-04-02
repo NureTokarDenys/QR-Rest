@@ -1,10 +1,10 @@
 import React from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useApp } from '../../../context/AppContext';
-import Header from '../../../components/Header';
-import OrderStatusItem from '../../../components/OrderStatusItem';
+import Header from '../../../components/client/Header';
+import OrderStatusItem from '../../../components/client/OrderStatusItem';
 import SecondaryButton from '../../../components/SecondaryButton';
-import Footer from '../../../components/Footer';
+import Footer from '../../../components/client/Footer';
 import styles from './orderStatus.module.css';
 import { useLocalField } from '../../../i18n/useLang';
 import { useTranslation } from 'react-i18next';

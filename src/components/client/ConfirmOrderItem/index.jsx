@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './confirmOrderItem.module.css';
-import { useLocalField } from '../../i18n/useLang';
+import { useLocalField } from '../../../i18n/useLang';
 
 export default function ConfirmOrderItem({ item }) {
   const local = useLocalField(); 
