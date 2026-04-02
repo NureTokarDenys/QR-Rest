@@ -1,0 +1,85 @@
+.sidebar {
+  width: 180px;
+  flex-shrink: 0;
+  background: #1a1f36;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.logoWrap {
+  padding: 20px 16px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.nav {
+  flex: 1;
+  padding: 12px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--menu-secondary-text);
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  width: 100%;
+  border-left: 3px solid transparent;
+}
+
+.navItem:hover {
+  background: rgba(255,255,255,0.05);
+  color: var(--menu-primary-text);
+}
+
+.active {
+  background: rgba(29,122,252,0.15);
+  color: var(--menu-primary-text);
+  border-left-color: #1d7afc;
+}
+
+.navIcon {
+  font-size: 18px;
+  width: 22px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.navLabel {
+  font-size: 14px;
+}
+
+.user {
+  padding: 14px 16px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #1d7afc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.roleName {
+  font-size: 13px;
+  color: var(--menu-secondary-text);
+}

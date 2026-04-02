@@ -1,0 +1,22 @@
+{
+  "title": "Table details №",
+  "waiterCall": "Waiter call",
+  "acceptCall": "Accept call",
+  "status": "Status",
+  "timeAtTable": "Time at table",
+  "currentOrder": "Current order",
+  "activeOrder": "Active order",
+  "editOrder": "Edit order",
+  "dish": "DISH",
+  "qty": "QTY",
+  "sum": "SUM",
+  "statusCol": "STATUS",
+  "total": "Total",
+  "qrCode": "Table QR code",
+  "downloadPng": "Download PNG",
+  "print": "Print",
+  "history": "History (today)",
+  "hall": "Hall A",
+  "seats": "seats",
+  "noOrder": "No active orders"
+}

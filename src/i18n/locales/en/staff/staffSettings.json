@@ -1,0 +1,21 @@
+{
+  "title": "Settings",
+  "saveChanges": "Save changes",
+  "logout": "Logout",
+  "personalData": "PERSONAL DATA",
+  "name": "Name",
+  "email": "Email",
+  "role": "Role",
+  "settingsSection": "SETTINGS",
+  "interfaceLang": "Interface language",
+  "theme": "Theme",
+  "soundNotifications": "Sound notifications",
+  "changePassword": "CHANGE PASSWORD",
+  "currentPassword": "Current password",
+  "newPassword": "New password",
+  "confirmPassword": "Confirm password",
+  "changePasswordBtn": "Change password",
+  "online": "Online",
+  "waiter": "Waiter",
+  "admin": "Administrator"
+}

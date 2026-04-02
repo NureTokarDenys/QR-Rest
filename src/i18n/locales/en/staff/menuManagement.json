@@ -1,0 +1,17 @@
+{
+  "title": "Menu Management",
+  "generatePdf": "Create PDF menu",
+  "addDish": "+ Add dish",
+  "categories": "CATEGORIES",
+  "all": "All",
+  "newCategory": "+ New category",
+  "searchPlaceholder": "Search dishes...",
+  "dish": "DISH",
+  "category": "CATEGORY",
+  "price": "PRICE",
+  "available": "AVAILABLE",
+  "actions": "ACTIONS",
+  "edit": "Edit",
+  "delete": "Delete",
+  "confirmDelete": "Delete dish?"
+}

@@ -1,0 +1,22 @@
+{
+  "titleAdd": "Додати страву",
+  "titleEdit": "Редагування страви",
+  "cancel": "Скасувати",
+  "save": "Зберегти",
+  "mainInfo": "ОСНОВНА ІНФОРМАЦІЯ",
+  "nameUa": "Назва (UA)",
+  "nameEn": "Назва (EN)",
+  "descUa": "Опис (UA)",
+  "descEn": "Опис (EN)",
+  "ingredientsUa": "Склад (UA)",
+  "ingredientsEn": "Склад (EN)",
+  "price": "Ціна (₴)",
+  "category": "Категорія",
+  "photos": "ФОТО",
+  "uploadHint": "Перетягніть або натисніть",
+  "uploadFormats": "JPEG, PNG, WebP · max 5MB",
+  "preview": "Попередній перегляд",
+  "available": "Доступна",
+  "pricePlaceholder": "0",
+  "selectCategory": "Оберіть категорію"
+}

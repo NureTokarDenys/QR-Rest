@@ -1,0 +1,17 @@
+{
+  "title": "Управління меню",
+  "generatePdf": "Створити PDF меню",
+  "addDish": "+ Додати страву",
+  "categories": "КАТЕГОРІЇ",
+  "all": "Все",
+  "newCategory": "+ Нова категорія",
+  "searchPlaceholder": "Пошук страв...",
+  "dish": "СТРАВА",
+  "category": "КАТЕГОРІЯ",
+  "price": "ЦІНА",
+  "available": "ДОСТУПНА",
+  "actions": "ДІЇ",
+  "edit": "Редагувати",
+  "delete": "Видалити",
+  "confirmDelete": "Видалити страву?"
+}

@@ -1,0 +1,22 @@
+{
+  "title": "PDF Menu Generator",
+  "cancel": "Cancel",
+  "save": "Save",
+  "template": "Template",
+  "classic": "Classic",
+  "dark": "Dark",
+  "minimal": "Minimal",
+  "light": "Light",
+  "settings": "Settings",
+  "format": "Format",
+  "language": "Language",
+  "showMainPhoto": "Preview photo",
+  "showAllPhotos": "Show all photos",
+  "showIngredients": "Show ingredients",
+  "showReviews": "Show reviews",
+  "demoMenu": "Demo menu",
+  "categories": "Categories",
+  "generate": "Generate PDF",
+  "preview": "PREVIEW",
+  "menuYear": "Menu · 2026"
+}

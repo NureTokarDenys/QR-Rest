@@ -5,9 +5,19 @@
   gap: 8px;
 }
 
+.compact {
+  flex-direction: row;
+  gap: 8px;
+}
+
 .icon {
   width: 72px;
   height: 72px;
+}
+
+.compact .icon {
+  width: 28px;
+  height: 28px;
 }
 
 .wordmark {
@@ -16,10 +26,20 @@
   line-height: 1;
 }
 
+.wordmarkInline {
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1;
+}
+
 .wait {
-  color: var(--accent-color);
+  color: #1d7afc;
 }
 
 .less {
   color: var(--logo-color);
+}
+
+.lessWhite {
+  color: #ffffff;
 }

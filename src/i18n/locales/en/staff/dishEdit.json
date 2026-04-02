@@ -1,0 +1,22 @@
+{
+  "titleAdd": "Add dish",
+  "titleEdit": "Edit dish",
+  "cancel": "Cancel",
+  "save": "Save",
+  "mainInfo": "MAIN INFORMATION",
+  "nameUa": "Name (UA)",
+  "nameEn": "Name (EN)",
+  "descUa": "Description (UA)",
+  "descEn": "Description (EN)",
+  "ingredientsUa": "Ingredients (UA)",
+  "ingredientsEn": "Ingredients (EN)",
+  "price": "Price (₴)",
+  "category": "Category",
+  "photos": "PHOTOS",
+  "uploadHint": "Drag & drop or click",
+  "uploadFormats": "JPEG, PNG, WebP · max 5MB",
+  "preview": "Preview",
+  "available": "Available",
+  "pricePlaceholder": "0",
+  "selectCategory": "Select category"
+}

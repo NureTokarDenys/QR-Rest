@@ -1,0 +1,130 @@
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.periods {
+  display: flex;
+  background: var(--bg-color);
+  border-radius: 8px;
+  padding: 2px;
+  gap: 2px;
+}
+
+.periodBtn {
+  background: none;
+  border: none;
+  padding: 5px 12px;
+  font-size: 13px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--secondary-text);
+  font-weight: 500;
+}
+
+.periodActive {
+  background: var(--surface-color);
+  color: var(--primary-text);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.exportBtn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--accent-color);
+  font-weight: 600;
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.kpiRow {
+  display: flex;
+  gap: 12px;
+}
+
+.chartsRow {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 12px;
+}
+
+.chartBox, .catBox {
+  background: var(--surface-color);
+  border: 1px solid var(--separator-color);
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.chartTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--primary-text);
+  margin-bottom: 16px;
+}
+
+.bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 100px;
+}
+
+.barWrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.bar {
+  width: 100%;
+  background: #bfdbfe;
+  border-radius: 3px 3px 0 0;
+  min-height: 4px;
+}
+
+.barHighlight {
+  background: #1d7afc;
+}
+
+.barLabel {
+  font-size: 10px;
+  color: var(--secondary-text);
+}
+
+.tableBox {
+  background: var(--surface-color);
+  border: 1px solid var(--separator-color);
+  border-radius: 14px;
+  overflow: hidden;
+  padding: 18px 18px 0;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.thead th {
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--secondary-text);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  border-bottom: 1px solid var(--separator-color);
+}

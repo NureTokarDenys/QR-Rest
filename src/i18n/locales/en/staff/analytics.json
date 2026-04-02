@@ -1,0 +1,19 @@
+{
+  "title": "Analytics & Reports",
+  "today": "Today",
+  "week": "Week",
+  "month": "Month",
+  "exportCsv": "+ Export CSV",
+  "revenue": "Revenue",
+  "orders": "Orders",
+  "avgCheck": "Avg. check",
+  "vsYesterday": "yesterday",
+  "chartTitle": "Revenue today (hourly)",
+  "topCategories": "Top categories",
+  "topDishes": "Top dishes today",
+  "num": "#",
+  "dish": "DISH",
+  "ordered": "ORDERED",
+  "dishRevenue": "REVENUE",
+  "rating": "RATING"
+}

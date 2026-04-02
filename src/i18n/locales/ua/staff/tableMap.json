@@ -1,0 +1,20 @@
+{
+  "title": "Карта залу",
+  "hallTitle": "ЗАЛ А — ОСНОВНИЙ",
+  "activeOrders": "активних замовлення",
+  "free": "Вільний",
+  "busy": "Зайнятий",
+  "taken": "Зайнятий",
+  "waiterCall": "Рахунок",
+  "seats": "місця",
+  "kitchen": "Кухня",
+  "notifications": "Сповіщення",
+  "shiftStats": "Поточна зміна",
+  "orders": "Замовлення",
+  "completed": "Виконано",
+  "revenue": "Виручка",
+  "avgCheck": "Середній чек",
+  "accept": "Прийняти",
+  "waiterCalled": "виклик офіціанта",
+  "newOrder": "Нове замовлення"
+}

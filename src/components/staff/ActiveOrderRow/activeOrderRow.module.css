@@ -1,0 +1,32 @@
+.row {
+  border-bottom: 1px solid var(--separator-color);
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.name {
+  padding: 12px 14px;
+  font-size: 14px;
+  color: var(--primary-text);
+}
+
+.cell {
+  padding: 12px 14px;
+  font-size: 14px;
+  color: var(--primary-text);
+}
+
+.price {
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.badge {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}

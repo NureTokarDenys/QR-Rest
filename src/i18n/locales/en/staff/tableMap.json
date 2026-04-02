@@ -1,0 +1,20 @@
+{
+  "title": "Table Map",
+  "hallTitle": "HALL A — MAIN",
+  "activeOrders": "active orders",
+  "free": "Free",
+  "busy": "Busy",
+  "taken": "Taken",
+  "waiterCall": "Bill",
+  "seats": "seats",
+  "kitchen": "Kitchen",
+  "notifications": "Notifications",
+  "shiftStats": "Current Shift",
+  "orders": "Orders",
+  "completed": "Completed",
+  "revenue": "Revenue",
+  "avgCheck": "Avg. check",
+  "accept": "Accept",
+  "waiterCalled": "waiter called",
+  "newOrder": "New order"
+}

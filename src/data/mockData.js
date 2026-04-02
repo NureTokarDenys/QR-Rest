@@ -403,6 +403,109 @@ export const orderHistory = [
   },
 ];
 
+export const TABLES = [
+  { id: 1, seats: 4, status: 'free',    orderId: null,      dishes: [] },
+  { id: 2, seats: 4, status: 'waiter',  orderId: 'WL-042',  timeAtTable: '00:47:12',
+    dishes: [
+      { name: 'Деруни з м\'ясом', name_en: 'Potato pancakes', qty: 1, price: 190, status: 'waiting' },
+      { name: 'Котлета по-київськи', name_en: 'Chicken Kyiv', qty: 1, price: 150, status: 'waiting' },
+      { name: 'Спагетті', name_en: 'Spaghetti', qty: 1, price: 120, status: 'waiting' },
+    ]
+  },
+  { id: 3, seats: 6, status: 'free',    orderId: null,      dishes: [] },
+  { id: 4, seats: 2, status: 'busy',    orderId: 'WL-041',  timeAtTable: '00:22:05',
+    dishes: [
+      { name: 'Картопляне пюре', name_en: 'Mashed potatoes', qty: 1, price: 140, status: 'served' },
+      { name: 'Шніцель', name_en: 'Schnitzel', qty: 2, price: 400, status: 'served' },
+      { name: 'Борщ', name_en: 'Borscht', qty: 1, price: 89, status: 'served' },
+    ]
+  },
+  { id: 5, seats: 6, status: 'free',    orderId: null,      dishes: [] },
+];
+
+export const KANBAN_ITEMS = [
+  { id: 'k1', dishName: 'Деруни з м\'ясом',     dishName_en: 'Potato pancakes', tableId: 1, orderId: 'WL-042', dishCount: 3, time: '14:20', status: 'new' },
+  { id: 'k2', dishName: 'Котлета по-київськи',  dishName_en: 'Chicken Kyiv',    tableId: 1, orderId: 'WL-042', dishCount: 3, time: '14:22', status: 'new' },
+  { id: 'k3', dishName: 'Спагетті',             dishName_en: 'Spaghetti',       tableId: 1, orderId: 'WL-042', dishCount: 3, time: '14:22', status: 'new' },
+  { id: 'k4', dishName: 'Деруни з м\'ясом',     dishName_en: 'Potato pancakes', tableId: 2, orderId: 'WL-042', dishCount: 3, time: '14:22', status: 'new' },
+  { id: 'k5', dishName: 'Шніцель (×2)',         dishName_en: 'Schnitzel (×2)',  tableId: 3, orderId: 'WL-042', dishCount: 3, time: '14:23', status: 'cooking' },
+  { id: 'k6', dishName: 'Спагетті',             dishName_en: 'Spaghetti',       tableId: 3, orderId: 'WL-042', dishCount: 3, time: '14:23', status: 'ready' },
+  { id: 'k7', dishName: 'Картопляне пюре',      dishName_en: 'Mashed potatoes', tableId: 3, orderId: 'WL-045', dishCount: 3, time: '14:10', status: 'served' },
+  { id: 'k8', dishName: 'Шніцель (×2)',         dishName_en: 'Schnitzel (×2)',  tableId: 3, orderId: 'WL-045', dishCount: 3, time: '14:15', status: 'served' },
+  { id: 'k9', dishName: 'Борщ',                 dishName_en: 'Borscht',         tableId: 3, orderId: 'WL-045', dishCount: 3, time: '14:18', status: 'served' },
+];
+
+export const ORDER_DETAIL = {
+  id: 'WL-042',
+  tableId: 2,
+  time: '14:31',
+  status: 'waiter',
+  items: [
+    { id: 1, name: 'Деруни з м\'ясом', name_en: 'Potato pancakes', qty: 1, price: 190, status: 'waiting' },
+    { id: 2, name: 'Шніцель',          name_en: 'Schnitzel',        qty: 2, price: 400, status: 'cooking' },
+    { id: 3, name: 'Спагетті',         name_en: 'Spaghetti',        qty: 1, price: 110, status: 'ready' },
+  ],
+  comment: null,
+  total: 710,
+};
+
+export const NOTIFICATIONS = [
+  { id: 'n1', type: 'waiter', tableId: 2, time: '14:30' },
+  { id: 'n2', type: 'newOrder', tableId: 1, time: '14:28' },
+];
+
+export const SHIFT_STATS = {
+  orders: 18,
+  completed: 15,
+  revenue: 7840,
+  avgCheck: 436,
+};
+
+export const MENU_DISHES_FLAT = [
+  { id: 1,  name: 'Борщ з пампушками',    name_en: 'Borscht with buns',  category: 'soups',    categoryName: 'Супи',    categoryName_en: 'Soups',    price: 189, available: true,  image: null },
+  { id: 2,  name: 'Котлета по-київськи',  name_en: 'Chicken Kyiv',       category: 'mains',    categoryName: 'Основні', categoryName_en: 'Mains',    price: 245, available: true,  image: null },
+  { id: 3,  name: 'Суші з лососем',       name_en: 'Salmon sushi',       category: 'soups',    categoryName: 'Суші',    categoryName_en: 'Sushi',    price: 320, available: false, image: null },
+  { id: 4,  name: 'Чай з лимоном',        name_en: 'Lemon tea',          category: 'drinks',   categoryName: 'Напої',   categoryName_en: 'Drinks',   price: 55,  available: true,  image: null },
+  { id: 5,  name: 'Яблучний штрудель',    name_en: 'Apple strudel',      category: 'desserts', categoryName: 'Десерти', categoryName_en: 'Desserts', price: 145, available: true,  image: null },
+];
+
+export const ANALYTICS_DATA = {
+  revenue: 14820,
+  revenueChange: 18,
+  orders: 38,
+  ordersChange: 12,
+  avgCheck: 390,
+  avgCheckChange: -5,
+  hourlyBars: [2, 3, 5, 8, 12, 15, 18, 14, 20, 16, 10, 8],
+  hours: ['09','10','11','12','13','14','15','16','17','18','19','20'],
+  topCategories: [
+    { name: 'Основні', name_en: 'Mains',    pct: 38, color: '#1d7afc' },
+    { name: 'Напої',   name_en: 'Drinks',   pct: 24, color: '#10b981' },
+    { name: 'Закуски', name_en: 'Starters', pct: 18, color: '#f59e0b' },
+    { name: 'Супи',    name_en: 'Soups',    pct: 12, color: '#ef4444' },
+    { name: 'Інше',    name_en: 'Other',    pct: 8,  color: '#8e8e93' },
+  ],
+  topDishes: [
+    { num: 1, name: 'Котлета по-київськи', name_en: 'Chicken Kyiv',    ordered: 24, revenue: 5808, rating: 4.9 },
+    { num: 2, name: 'Борщ з пампушками',  name_en: 'Borscht with buns', ordered: 19, revenue: 3591, rating: 4.8 },
+    { num: 3, name: 'Вареники',           name_en: 'Dumplings',        ordered: 15, revenue: 2325, rating: 4.7 },
+  ],
+};
+
+export const STAFF_USER = {
+  name: 'Микола Сидоренко',
+  name_en: 'Mykola Sydorenko',
+  email: 'mykola@waitless.app',
+  role: 'waiter',
+  initials: 'МС',
+};
+
+export const TABLE_HISTORY = [
+  { id: 'WL-033', total: 799 },
+  { id: 'WL-023', total: 512 },
+  { id: 'WL-011', total: 345 },
+];
+
 export function getDishById(id) {
   const numId = parseInt(id);
   for (const cat of Object.values(dishes)) {

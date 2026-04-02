@@ -1,0 +1,36 @@
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.name {
+  font-size: 13px;
+  color: var(--primary-text);
+  width: 70px;
+  flex-shrink: 0;
+}
+
+.barWrap {
+  flex: 1;
+  height: 6px;
+  background: var(--bg-color);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.bar {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+.pct {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--primary-text);
+  width: 32px;
+  text-align: right;
+  flex-shrink: 0;
+}

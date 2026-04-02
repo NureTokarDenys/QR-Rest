@@ -1,0 +1,72 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.legendRow {
+  display: flex;
+  gap: 20px;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--secondary-text);
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.free   { background: #4ade80; }
+.busy   { background: #f87171; }
+.waiter { background: #fbbf24; }
+
+.legendLabel { color: var(--primary-text); }
+
+.hall {
+  background: var(--surface-color);
+  border: 1px solid var(--separator-color);
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.hallTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--primary-text);
+}
+
+.tablesGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 32px 20px;
+  align-items: start;
+}
+
+.tableSlot {
+  display: flex;
+  justify-content: center;
+}
+
+.kitchenBtn {
+  background: #10b981;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.kitchenLabel {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+}

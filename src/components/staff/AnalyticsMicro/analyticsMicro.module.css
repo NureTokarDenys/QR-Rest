@@ -1,0 +1,30 @@
+.card {
+  background: var(--surface-color);
+  border: 1px solid var(--separator-color);
+  border-radius: 12px;
+  padding: 16px 18px;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.label {
+  font-size: 13px;
+  color: var(--secondary-text);
+}
+
+.value {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--primary-text);
+}
+
+.change {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.up   { color: #16a34a; }
+.down { color: #dc2626; }

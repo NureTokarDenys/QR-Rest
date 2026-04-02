@@ -1,0 +1,45 @@
+.box {
+  background: var(--surface-color);
+  border: 1px solid var(--separator-color);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--primary-text);
+}
+
+.qrPlaceholder {
+  width: 120px;
+  height: 120px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  margin: 0 auto;
+}
+
+.qrGrid {
+  width: 90px;
+  height: 90px;
+  background: repeating-linear-gradient(
+    0deg, #111 0 4px, transparent 4px 8px
+  ),
+  repeating-linear-gradient(
+    90deg, #111 0 4px, transparent 4px 8px
+  );
+  border-radius: 2px;
+}
+
+.url {
+  font-size: 12px;
+  color: var(--secondary-text);
+  text-align: center;
+}

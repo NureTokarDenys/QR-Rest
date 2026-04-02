@@ -1,0 +1,16 @@
+{
+  "title": "Active dish preparation",
+  "dishes": "dishes",
+  "list": "List",
+  "filter": "Filter",
+  "new": "NEW",
+  "cooking": "COOKING",
+  "ready": "READY",
+  "served": "SERVED",
+  "accept": "Accept",
+  "done": "Done",
+  "serve": "Serve",
+  "table": "Table",
+  "order": "Ord.",
+  "noItems": "No dishes"
+}

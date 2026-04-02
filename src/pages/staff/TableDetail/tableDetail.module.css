@@ -1,0 +1,140 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.tableTitle {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--primary-text);
+}
+
+.tableSub {
+  font-size: 14px;
+  color: var(--secondary-text);
+  margin-top: 2px;
+}
+
+.statsRow {
+  display: flex;
+  gap: 12px;
+}
+
+.orderBox {
+  background: var(--surface-color);
+  border: 1px solid var(--separator-color);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.orderHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--separator-color);
+}
+
+.orderTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--primary-text);
+}
+
+.editBtn {
+  background: #eff6ff;
+  color: #1d7afc;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tableHead th {
+  padding: 10px 16px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--secondary-text);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  background: var(--bg-color);
+  border-bottom: 1px solid var(--separator-color);
+}
+
+.tableRow:hover td {
+  background: var(--bg-color);
+}
+
+.td {
+  padding: 12px 16px;
+  font-size: 14px;
+  color: var(--primary-text);
+  border-bottom: 1px solid var(--separator-color);
+}
+
+.priceCell {
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.badge {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.waiting { background: #e8f4ff; color: #1d7afc; }
+.cooking { background: #fff3e0; color: #f57c00; }
+.ready   { background: #e8f5e9; color: #2e7d32; }
+.served  { background: #e8f5e9; color: #2e7d32; }
+
+.total {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--primary-text);
+}
+
+.totalVal {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--accent-color);
+}
+
+.noOrder {
+  background: var(--surface-color);
+  border: 1px solid var(--separator-color);
+  border-radius: 14px;
+  padding: 24px;
+  text-align: center;
+  color: var(--secondary-text);
+  font-size: 15px;
+}
+
+.bottomRow {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 16px;
+  align-items: start;
+}

@@ -1,0 +1,31 @@
+.headerExtra {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.count {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-color);
+  background: #eff6ff;
+  border-radius: 8px;
+  padding: 4px 10px;
+}
+
+.filterBtn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--primary-text);
+}
+
+.board {
+  display: flex;
+  gap: 12px;
+  height: calc(100vh - 140px);
+  overflow-x: auto;
+}

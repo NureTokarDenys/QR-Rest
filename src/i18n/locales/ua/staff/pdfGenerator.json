@@ -1,0 +1,22 @@
+{
+  "title": "Генератор PDF-меню",
+  "cancel": "Скасувати",
+  "save": "Зберегти",
+  "template": "Шаблон оформлення",
+  "classic": "Класичний",
+  "dark": "Темний",
+  "minimal": "Мінімал",
+  "light": "Світлий",
+  "settings": "Налаштування",
+  "format": "Формат",
+  "language": "Мова",
+  "showMainPhoto": "Фото прев'ю",
+  "showAllPhotos": "Показувати всі фото",
+  "showIngredients": "Показувати склад",
+  "showReviews": "Показувати відгуки",
+  "demoMenu": "Дасмове меню",
+  "categories": "Категорії",
+  "generate": "Генерувати PDF",
+  "preview": "ПОПЕРЕДНІЙ ПЕРЕГЛЯД",
+  "menuYear": "Меню · 2026"
+}

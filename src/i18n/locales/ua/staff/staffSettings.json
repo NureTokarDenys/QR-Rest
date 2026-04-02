@@ -1,0 +1,21 @@
+{
+  "title": "Налаштування",
+  "saveChanges": "Зберегти зміни",
+  "logout": "Вийти",
+  "personalData": "ОСОБИСТІ ДАНІ",
+  "name": "Ім'я",
+  "email": "Email",
+  "role": "Роль",
+  "settingsSection": "НАЛАШТУВАННЯ",
+  "interfaceLang": "Мова інтерфейсу",
+  "theme": "Тема оформлення",
+  "soundNotifications": "Звукові сповіщення",
+  "changePassword": "ЗМІНА ПАРОЛЯ",
+  "currentPassword": "Поточний пароль",
+  "newPassword": "Новий пароль",
+  "confirmPassword": "Підтвердження",
+  "changePasswordBtn": "Змінити пароль",
+  "online": "Онлайн",
+  "waiter": "Офіціант",
+  "admin": "Адміністратор"
+}

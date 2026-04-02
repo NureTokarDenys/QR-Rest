@@ -1,0 +1,104 @@
+.row {
+  border-bottom: 1px solid var(--separator-color);
+}
+
+.row:hover td {
+  background: var(--bg-color);
+}
+
+.dishCell {
+  padding: 12px 14px;
+}
+
+.dishInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.thumb {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #fff3e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--primary-text);
+}
+
+.cell {
+  padding: 12px 14px;
+  font-size: 14px;
+  color: var(--primary-text);
+  vertical-align: middle;
+}
+
+.price {
+  font-weight: 600;
+  color: var(--accent-color);
+}
+
+.catBadge {
+  font-size: 12px;
+  background: #eff6ff;
+  color: #1d7afc;
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-weight: 500;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.editBtn, .deleteBtn {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+}
+
+.editBtn:hover { background: #eff6ff; }
+.deleteBtn:hover { background: #fef2f2; }
+
+.toggle {
+  width: 36px;
+  height: 20px;
+  border-radius: 10px;
+  background: #d1d1d6;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.2s;
+}
+
+.toggleOn {
+  background: #1d7afc;
+}
+
+.toggleThumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  transition: left 0.2s;
+}
+
+.toggleOn .toggleThumb {
+  left: 18px;
+}
