@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { use, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import StaffShell from '../../../components/staff/StaffShell';
@@ -9,39 +9,63 @@ import DishPreview from '../../../components/staff/DishPreview';
 import { Dropdown } from '../../../components/Dropdown';
 import PrimaryButton from '../../../components/PrimaryButton';
 import SecondaryButton from '../../../components/SecondaryButton';
-import { categories } from '../../../data/mockData';
+import { categories, dishes as dishesData } from '../../../data/mockData';
 import styles from './dishEdit.module.css';
+import { useLocalField } from '../../../i18n/useLang';
+
+const allDishes = Object.entries(dishesData).flatMap(([categoryId, items]) =>
+  items.map(dish => ({ ...dish, category: categoryId }))
+);
+
+const EMPTY_FORM = {
+  name: '', name_en: '',
+  description: '', description_en: '',
+  ingredients: '', ingredients_en: '',
+  price: '',
+  category: '',
+  images: [],
+  available: true,
+};
 
 export default function DishEdit() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const local = useLocalField(); 
   const { t } = useTranslation('dishEdit');
   const isNew = !id || id === 'new';
 
-  const [form, setForm] = useState({
-    name: '', name_en: '',
-    description: '', description_en: '',
-    ingredients: '', ingredients_en: '',
-    price: '',
-    category: '',
-    images: [],
-    available: true,
+  const [form, setForm] = useState(() => {
+    if (isNew) return EMPTY_FORM;
+    const existing = allDishes.find(d => String(d.id) === String(id));
+    if (!existing) return EMPTY_FORM;
+    return {
+      name:            existing.name          ?? '',
+      name_en:         existing.name_en       ?? '',
+      description:     existing.description   ?? '',
+      description_en:  existing.description_en ?? '',
+      ingredients:     existing.ingredients   ?? '',
+      ingredients_en:  existing.ingredients_en ?? '',
+      price:           existing.price         ?? '',
+      category:        existing.category      ?? '',
+      images:          existing.image ? [existing.image] : [],
+      available:       existing.available     ?? true,
+    };
   });
 
   function set(field, val) {
     setForm(prev => ({ ...prev, [field]: val }));
   }
 
-  const catOptions = categories.map(c => ({ value: c.id, label: c.name }));
+  const catOptions = categories.map(c => ({ value: c.id, label: local(c, 'name') }));
 
   return (
     <StaffShell
-      title={`← ${isNew ? t('titleAdd') : t('titleEdit')}`}
+      title={`${isNew ? t('titleAdd') : t('titleEdit')}`}
       backTo="/staff/menu"
       rightActions={
         <div className={styles.headerActions}>
-          <SecondaryButton label={t('cancel')} onClick={() => navigate('/staff/menu')} />
-          <PrimaryButton label={t('save')} onClick={() => navigate('/staff/menu')} />
+          <SecondaryButton label={t('cancel')} onClick={() => navigate('/staff/menu')} className={styles.cancelBtn} />
+          <PrimaryButton label={t('save')} onClick={() => navigate('/staff/menu')} className={styles.saveBtn} />
         </div>
       }
     >

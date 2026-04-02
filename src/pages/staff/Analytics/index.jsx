@@ -6,6 +6,7 @@ import TopCategoryItem from '../../../components/staff/TopCategoryItem';
 import TopDishRow from '../../../components/staff/TopDishRow';
 import { ANALYTICS_DATA } from '../../../data/mockData';
 import styles from './analytics.module.css';
+import { MdBarChart } from "react-icons/md";
 
 const PERIODS = ['today', 'week', 'month'];
 
@@ -17,7 +18,7 @@ export default function Analytics() {
 
   return (
     <StaffShell
-      title={`📊 ${t('title')}`}
+      title={<><MdBarChart className={styles.headerIcon} /> {t('title')}</>}
       rightActions={
         <div className={styles.headerActions}>
           <div className={styles.periods}>
@@ -31,7 +32,7 @@ export default function Analytics() {
               </button>
             ))}
           </div>
-          <button className={styles.exportBtn}>+ {t('exportCsv')}</button>
+          <button className={styles.exportBtn}>{t('exportCsv')}</button>
         </div>
       }
     >

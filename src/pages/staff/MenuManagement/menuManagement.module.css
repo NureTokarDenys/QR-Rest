@@ -46,3 +46,25 @@
   position: sticky;
   top: 0;
 }
+
+.headerIcon {
+  font-size: 20px;
+  color: var(--primary-text);
+}
+
+.exportBtn {
+  color: #1d7afc;
+  border: 1px solid #1d7afc;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 16px;
+}
+
+.addDishBtn {
+  color: #fff;
+  background: #1d7afc;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 16px;
+}

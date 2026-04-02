@@ -53,8 +53,8 @@ export default function PdfGenerator() {
       backTo="/staff/menu"
       rightActions={
         <div className={styles.headerActions}>
-          <SecondaryButton label={t('cancel')} onClick={() => navigate('/staff/menu')} />
-          <PrimaryButton label={t('save')} onClick={() => {}} />
+          <SecondaryButton label={t('cancel')} onClick={() => navigate('/staff/menu')} className={styles.cancelBtn} />
+          <PrimaryButton label={t('save')} onClick={() => {}} className={styles.saveBtn} />
         </div>
       }
     >

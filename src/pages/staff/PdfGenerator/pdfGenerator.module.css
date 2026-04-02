@@ -172,3 +172,21 @@
   padding-bottom: 6px;
   border-bottom: 1px solid #e5e5ea;
 }
+
+.cancelBtn {
+  color: var(--primary-text);
+  border: 1px solid var(--separator-color);
+  background-color: var(--danger-color);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 14px;
+}
+
+.saveBtn {
+  color: var(--primary-text);
+  border: 1px solid var(--separator-color);
+  background-color: var(--accent-color);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 14px;
+}

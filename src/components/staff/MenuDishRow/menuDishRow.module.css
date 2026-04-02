@@ -16,7 +16,7 @@
   gap: 10px;
 }
 
-.thumb {
+.image {
   width: 36px;
   height: 36px;
   border-radius: 8px;
@@ -43,13 +43,14 @@
 
 .price {
   font-weight: 600;
+  font-size: 16px;
   color: var(--accent-color);
 }
 
 .catBadge {
-  font-size: 12px;
-  background: #eff6ff;
-  color: #1d7afc;
+  font-size: 16px;
+  background: var(--accent-color);
+  color: var(--primary-text);
   border-radius: 6px;
   padding: 3px 8px;
   font-weight: 500;
@@ -101,4 +102,14 @@
 
 .toggleOn .toggleThumb {
   left: 18px;
+}
+
+.editIcon{
+  color: var(--accent-color);
+  font-size: 24px;
+}
+
+.deleteIcon{
+  color: var(--danger-color);
+  font-size: 24px;
 }

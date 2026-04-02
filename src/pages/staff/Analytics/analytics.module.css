@@ -128,3 +128,8 @@
   letter-spacing: 0.4px;
   border-bottom: 1px solid var(--separator-color);
 }
+
+.headerIcon {
+  font-size: 20px;
+  color: var(--primary-text);
+}

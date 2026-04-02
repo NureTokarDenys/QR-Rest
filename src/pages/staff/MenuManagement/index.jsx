@@ -7,20 +7,29 @@ import MenuDishRow from '../../../components/staff/MenuDishRow';
 import SearchBar from '../../../components/SearchBar';
 import PrimaryButton from '../../../components/PrimaryButton';
 import SecondaryButton from '../../../components/SecondaryButton';
-import { MENU_DISHES_FLAT } from '../../../data/mockData';
-import { categories } from '../../../data/mockData';
+import { dishes as dishesData, categories as initialCategories } from '../../../data/mockData';
 import styles from './menuManagement.module.css';
+import { MdOutlineRestaurant } from "react-icons/md";
+
+const flattenDishes = (dishesObj) =>
+  Object.entries(dishesObj).flatMap(([categoryId, items]) =>
+    items.map(dish => ({ ...dish, category: categoryId, available: true }))
+  );
 
 export default function MenuManagement() {
   const navigate = useNavigate();
   const { t } = useTranslation('menuManagement');
+  const { i18n } = useTranslation();
   const [selectedCat, setSelectedCat] = useState('all');
   const [query, setQuery] = useState('');
-  const [dishes, setDishes] = useState(MENU_DISHES_FLAT);
+  const [dishes, setDishes] = useState(() => flattenDishes(dishesData));
+  const [cats, setCats] = useState(initialCategories);
 
   const filtered = dishes.filter(d => {
     const matchCat = selectedCat === 'all' || d.category === selectedCat;
-    const matchQ = !query.trim() || d.name.toLowerCase().includes(query.toLowerCase());
+    const matchQ = !query.trim() ||
+      d.name.toLowerCase().includes(query.toLowerCase()) ||
+      d.name_en.toLowerCase().includes(query.toLowerCase());
     return matchCat && matchQ;
   });
 
@@ -34,22 +43,28 @@ export default function MenuManagement() {
     }
   }
 
+  function handleRename(id, newName) {
+    const field = i18n.language === 'en' ? 'name_en' : 'name';
+    setCats(prev => prev.map(c => c.id === id ? { ...c, [field]: newName } : c));
+  }
+
   return (
     <StaffShell
-      title={`🍽 ${t('title')}`}
+      title={<><MdOutlineRestaurant className={styles.headerIcon} /> {t('title')}</>}
       rightActions={
         <div className={styles.headerActions}>
-          <SecondaryButton label={t('generatePdf')} onClick={() => navigate('/staff/menu/pdf')} />
-          <PrimaryButton label={t('addDish')} onClick={() => navigate('/staff/menu/dish/new')} />
+          <SecondaryButton label={t('generatePdf')} onClick={() => navigate('/staff/menu/pdf')} className={styles.exportBtn} />
+          <PrimaryButton label={t('addDish')} onClick={() => navigate('/staff/menu/dish/new')} className={styles.addDishBtn} />
         </div>
       }
     >
       <div className={styles.layout}>
         <MenuCategoryList
-          categories={categories}
+          categories={cats}
           selected={selectedCat}
           onSelect={setSelectedCat}
           onAdd={() => {}}
+          onRename={handleRename}
         />
 
         <div className={styles.right}>
@@ -74,6 +89,7 @@ export default function MenuManagement() {
                   <MenuDishRow
                     key={dish.id}
                     dish={dish}
+                    dish_category={cats.find(c => c.id === dish.category)}
                     onToggle={handleToggle}
                     onDelete={handleDelete}
                   />

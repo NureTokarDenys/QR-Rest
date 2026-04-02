@@ -43,6 +43,7 @@
 .catRow {
   display: flex;
   align-items: center;
+  gap: 2px;
 }
 
 .catRow .item {
@@ -56,6 +57,15 @@
   cursor: pointer;
   padding: 4px;
   color: var(--secondary-text);
+  border-radius: 6px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon:hover {
+  background-color: var(--bg-color);
 }
 
 .addBtn {
@@ -67,4 +77,35 @@
   color: var(--accent-color);
   cursor: pointer;
   margin-top: 8px;
+}
+
+.editIcon {
+  color: var(--accent-color);
+  font-size: 16px;
+}
+
+.editInput {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid #1d7afc;
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 14px;
+  color: var(--primary-text);
+  background: var(--separator-color);
+  outline: none;
+}
+
+.editInput:focus {
+  box-shadow: 0 0 0 2px #bfdbfe;
+}
+
+.confirmIcon {
+  color: #16a34a;
+  font-size: 16px;
+}
+
+.cancelIcon {
+  color: #dc2626;
+  font-size: 16px;
 }
