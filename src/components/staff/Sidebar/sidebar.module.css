@@ -37,12 +37,12 @@
 
 .navItem:hover {
   background: rgba(255,255,255,0.05);
-  color: var(--menu-primary-text);
+  color: var(--accent-color);
 }
 
 .active {
   background: rgba(29,122,252,0.15);
-  color: var(--menu-primary-text);
+  color: var(--accent-color);
   border-left-color: #1d7afc;
 }
 

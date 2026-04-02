@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import styles from './menuCategoryList.module.css';
 
 export default function MenuCategoryList({ categories, selected, onSelect, onAdd }) {
-  const { t } = useTranslation('menuManagement');
+  const { t } = useTranslation('components');
 
   return (
     <div className={styles.wrapper}>
@@ -22,7 +22,7 @@ export default function MenuCategoryList({ categories, selected, onSelect, onAdd
           >
             {cat.name}
           </button>
-          <button className={styles.icon}>✏️</button>
+          <button className={styles.icon} aria-label={t('edit')}>✏️</button>
         </div>
       ))}
       <button className={styles.addBtn} onClick={onAdd}>{t('newCategory')}</button>

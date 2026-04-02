@@ -6,7 +6,7 @@ import styles from './menuDishRow.module.css';
 
 export default function MenuDishRow({ dish, onToggle, onDelete }) {
   const navigate = useNavigate();
-  const { t } = useTranslation('menuManagement');
+  const { t } = useTranslation('components');
   const local = useLocalField();
 
   return (
@@ -20,7 +20,9 @@ export default function MenuDishRow({ dish, onToggle, onDelete }) {
       <td className={styles.cell}>
         <span className={styles.catBadge}>{local(dish, 'categoryName')}</span>
       </td>
-      <td className={`${styles.cell} ${styles.price}`}>{dish.price}₴</td>
+      <td className={`${styles.cell} ${styles.price}`}>
+        {dish.price} {t('currency_symbol', '₴')}
+      </td>
       <td className={styles.cell}>
         <button
           className={`${styles.toggle} ${dish.available ? styles.toggleOn : ''}`}
@@ -34,12 +36,14 @@ export default function MenuDishRow({ dish, onToggle, onDelete }) {
           <button
             className={styles.editBtn}
             onClick={() => navigate(`/staff/menu/dish/${dish.id}`)}
+            aria-label={t('edit')}
           >
             ✏️
           </button>
           <button
             className={styles.deleteBtn}
             onClick={() => onDelete && onDelete(dish.id)}
+            aria-label={t('delete')}
           >
             🗑
           </button>

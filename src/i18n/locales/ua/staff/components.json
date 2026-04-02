@@ -1,0 +1,48 @@
+{
+  "change": "Змінити",
+  "yesterday": "вчора",
+  "preview": "Попередній перегляд",
+  "available": "Доступно",
+  "currency_symbol": "₴",
+  "table_number": "Стіл #",
+
+  "dishes": "Страви",
+  
+  "dish_one": "страва",
+  "dish_few": "страви",
+  "dish_many": "страв",
+
+  "status_waiting": "Очікує",
+  "status_cooking": "Готується",
+  "status_ready": "Готово",
+  "status_served": "Подано",
+
+  "kanban_btn_waiting": "Прийняти",
+  "kanban_btn_cooking": "Готово",
+  "kanban_btn_ready": "Подати",
+
+  "kanban_col_waiting": "НОВІ",
+  "kanban_col_cooking": "ГОТУЮТЬСЯ",
+  "kanban_col_ready": "ГОТОВІ",
+  "kanban_col_served": "ПОДАНІ",
+
+  "categories": "Категорії",
+  "all": "Всі",
+  "newCategory": "Нова категорія",
+  "edit": "Редагувати",
+  "delete": "Видалити",
+  "waiterCalled": "кличе офіціанта",
+  "newOrder": "Нове замовлення",
+  "accept": "Прийняти",
+  "uploadHint": "Перетягніть фото сюди або натисніть",
+  "uploadFormats": "Підтримуються JPG, PNG, WEBP (до 5МБ)",
+  
+  "nav_tableMap": "Карта залу",
+  "nav_cooking": "Приготування",
+  "nav_menu": "Меню",
+  "nav_analytics": "Аналітика",
+  "nav_settings": "Налаштування",
+  
+  "role_admin": "Адміністратор",
+  "role_waiter": "Офіціант"
+}

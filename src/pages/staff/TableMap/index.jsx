@@ -20,7 +20,7 @@ export default function TableMap() {
   const lang = i18n.language === 'en' ? 'en' : 'ua';
 
   return (
-    <StaffShell title={`${<MdMap/>} ${t('title')}`}>
+    <StaffShell title={<> <MdMap /> {t('title')}</>}>
       <div className={styles.page}>
         <div className={styles.legendRow}>
           {LEGEND.map(l => (

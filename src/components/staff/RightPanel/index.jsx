@@ -6,6 +6,9 @@ import ShiftStats from '../ShiftStats';
 import { NOTIFICATIONS, SHIFT_STATS } from '../../../data/mockData';
 import styles from './rightPanel.module.css';
 
+import { MdNotifications } from "react-icons/md";
+import { MdShowChart } from "react-icons/md";
+
 export default function RightPanel() {
   const { panelOpen } = useStaffLayout();
   const { t } = useTranslation('tableMap');
@@ -14,7 +17,8 @@ export default function RightPanel() {
     <div className={`${styles.panel} ${panelOpen ? styles.open : ''}`}>
       <div className={styles.section}>
         <p className={styles.sectionTitle}>
-          🔔 {t('notifications')}
+          <MdNotifications className={styles.notificationIcon} />
+          {t('notifications')}
           {NOTIFICATIONS.length > 0 && (
             <span className={styles.count}>{NOTIFICATIONS.length}</span>
           )}
@@ -25,7 +29,7 @@ export default function RightPanel() {
       </div>
 
       <div className={styles.section}>
-        <p className={styles.sectionTitle}>📈 {t('shiftStats')}</p>
+        <p className={styles.sectionTitle}> <MdShowChart className={styles.chartIcon} /> {t('shiftStats')}</p>
         <ShiftStats stats={SHIFT_STATS} />
       </div>
     </div>

@@ -26,6 +26,9 @@
 }
 
 .title {
+  display: flex;
+  align-items: center;
+  gap: 5px;
   font-size: 16px;
   font-weight: 700;
   color: var(--primary-text);
@@ -70,4 +73,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.timeIcon {
+  font-size: 14px;
+  margin: 0 4px 0 0;
+  padding: 0;
+  color: var(--primary-text);
+}
+
+.bellIcon {
+  font-size: 20px;
+  color: #CE9A3A;
 }

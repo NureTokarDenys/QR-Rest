@@ -44,3 +44,13 @@
   border-radius: 10px;
   padding: 1px 6px;
 }
+
+.notificationIcon {
+  font-size: 20px;
+  color: #CE9A3A;
+}
+
+.chartIcon {
+  font-size: 20px;
+  color: var(--accent-color);
+}

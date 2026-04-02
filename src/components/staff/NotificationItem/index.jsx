@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import styles from './notificationItem.module.css';
 
 export default function NotificationItem({ notification }) {
-  const { t } = useTranslation('tableMap');
+  const { t } = useTranslation('components');
   const isWaiter = notification.type === 'waiter';
 
   return (
@@ -11,12 +11,14 @@ export default function NotificationItem({ notification }) {
       <div className={styles.top}>
         <span className={styles.text}>
           {isWaiter
-            ? `${t('tableMap:title').split(' ')[1] || 'Стіл'} #${notification.tableId} ${t('waiterCalled')}`
-            : `${t('newOrder')} — Стіл #${notification.tableId}`}
+            ? `${t('table_number')} ${notification.tableId} ${t('waiterCalled')}`
+            : `${t('newOrder')} — ${t('table_number')} ${notification.tableId}`}
         </span>
         <span className={styles.time}>{notification.time}</span>
       </div>
-      <button className={styles.accept}>{t('accept')}</button>
+      <button className={`${styles.accept} ${isWaiter ? styles.waiter_btn : styles.order_btn}`}>
+        {t('accept')}
+      </button>
     </div>
   );
 }

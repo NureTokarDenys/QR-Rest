@@ -5,33 +5,24 @@ import Logo from '../../Logo';
 import { STAFF_USER } from '../../../data/mockData';
 import styles from './sidebar.module.css';
 
-const NAV = [
-  { path: '/staff/map',       icon: '🗺',  labelKey: 'tableMap' },
-  { path: '/staff/cooking',   icon: '🍳',  labelKey: 'cooking' },
-  { path: '/staff/menu',      icon: '🍽',  labelKey: 'menu' },
-  { path: '/staff/analytics', icon: '📊',  labelKey: 'analytics' },
-  { path: '/staff/settings',  icon: '⚙️', labelKey: 'settings' },
-];
+import { MdMap, MdLocalFireDepartment, MdRestaurant, MdBarChart, MdSettings } from "react-icons/md";
 
-const LABEL_MAP = {
-  tableMap:  { ua: 'Карта залу',  en: 'Table Map' },
-  cooking:   { ua: 'Приготування', en: 'Cooking' },
-  menu:      { ua: 'Меню',        en: 'Menu' },
-  analytics: { ua: 'Аналітика',   en: 'Analytics' },
-  settings:  { ua: 'Налаштування', en: 'Settings' },
-};
+const NAV = [
+  { path: '/staff/map',       icon: <MdMap />,               labelKey: 'nav_tableMap' },
+  { path: '/staff/cooking',   icon: <MdLocalFireDepartment />, labelKey: 'nav_cooking' },
+  { path: '/staff/menu',      icon: <MdRestaurant />,        labelKey: 'nav_menu' },
+  { path: '/staff/analytics', icon: <MdBarChart />,          labelKey: 'nav_analytics' },
+  { path: '/staff/settings',  icon: <MdSettings />,          labelKey: 'nav_settings' },
+];
 
 export default function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { i18n } = useTranslation();
-  const lang = i18n.language === 'en' ? 'en' : 'ua';
+  const { t } = useTranslation('components');
 
   const isAdmin = STAFF_USER.role === 'admin';
   const initials = STAFF_USER.initials;
-  const roleName = isAdmin
-    ? (lang === 'en' ? 'Administrator' : 'Адміністратор')
-    : (lang === 'en' ? 'Waiter' : 'Офіціант');
+  const roleName = isAdmin ? t('role_admin') : t('role_waiter');
 
   return (
     <aside className={styles.sidebar}>
@@ -49,7 +40,7 @@ export default function Sidebar() {
               onClick={() => navigate(item.path)}
             >
               <span className={styles.navIcon}>{item.icon}</span>
-              <span className={styles.navLabel}>{LABEL_MAP[item.labelKey][lang]}</span>
+              <span className={styles.navLabel}>{t(item.labelKey)}</span>
             </button>
           );
         })}

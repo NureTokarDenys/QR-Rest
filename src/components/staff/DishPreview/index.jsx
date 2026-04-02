@@ -3,9 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { useLocalField } from '../../../i18n/useLang';
 import styles from './dishPreview.module.css';
 
-
 export default function DishPreview({ dish, available }) {
-  const { t } = useTranslation('dishEdit');
+  const { t } = useTranslation('components');
   const local = useLocalField();
 
   return (
@@ -20,7 +19,9 @@ export default function DishPreview({ dish, available }) {
         <div className={styles.body}>
           <p className={styles.name}>{local(dish, 'name') || '—'}</p>
           <p className={styles.desc}>{local(dish, 'description') || '—'}</p>
-          <p className={styles.price}>{dish?.price ? `${dish.price}₴` : '—'}</p>
+          <p className={styles.price}>
+            {dish?.price ? `${dish.price} ${t('currency_symbol', '₴')}` : '—'}
+          </p>
         </div>
       </div>
       <div className={styles.availRow}>

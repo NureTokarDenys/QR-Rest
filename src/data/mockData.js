@@ -424,10 +424,10 @@ export const TABLES = [
 ];
 
 export const KANBAN_ITEMS = [
-  { id: 'k1', dishName: 'Деруни з м\'ясом',     dishName_en: 'Potato pancakes', tableId: 1, orderId: 'WL-042', dishCount: 3, time: '14:20', status: 'new' },
-  { id: 'k2', dishName: 'Котлета по-київськи',  dishName_en: 'Chicken Kyiv',    tableId: 1, orderId: 'WL-042', dishCount: 3, time: '14:22', status: 'new' },
-  { id: 'k3', dishName: 'Спагетті',             dishName_en: 'Spaghetti',       tableId: 1, orderId: 'WL-042', dishCount: 3, time: '14:22', status: 'new' },
-  { id: 'k4', dishName: 'Деруни з м\'ясом',     dishName_en: 'Potato pancakes', tableId: 2, orderId: 'WL-042', dishCount: 3, time: '14:22', status: 'new' },
+  { id: 'k1', dishName: 'Деруни з м\'ясом',     dishName_en: 'Potato pancakes', tableId: 1, orderId: 'WL-042', dishCount: 3, time: '14:20', status: 'waiting' },
+  { id: 'k2', dishName: 'Котлета по-київськи',  dishName_en: 'Chicken Kyiv',    tableId: 1, orderId: 'WL-042', dishCount: 3, time: '14:22', status: 'waiting' },
+  { id: 'k3', dishName: 'Спагетті',             dishName_en: 'Spaghetti',       tableId: 1, orderId: 'WL-042', dishCount: 3, time: '14:22', status: 'waiting' },
+  { id: 'k4', dishName: 'Деруни з м\'ясом',     dishName_en: 'Potato pancakes', tableId: 2, orderId: 'WL-042', dishCount: 3, time: '14:22', status: 'waiting' },
   { id: 'k5', dishName: 'Шніцель (×2)',         dishName_en: 'Schnitzel (×2)',  tableId: 3, orderId: 'WL-042', dishCount: 3, time: '14:23', status: 'cooking' },
   { id: 'k6', dishName: 'Спагетті',             dishName_en: 'Spaghetti',       tableId: 3, orderId: 'WL-042', dishCount: 3, time: '14:23', status: 'ready' },
   { id: 'k7', dishName: 'Картопляне пюре',      dishName_en: 'Mashed potatoes', tableId: 3, orderId: 'WL-045', dishCount: 3, time: '14:10', status: 'served' },

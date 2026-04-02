@@ -4,6 +4,9 @@ import { useStaffLayout } from '../../../context/StaffLayoutContext';
 import { NOTIFICATIONS } from '../../../data/mockData';
 import styles from './staffHeader.module.css';
 
+import { MdNotifications } from "react-icons/md";
+import { MdAccessTime } from "react-icons/md";
+
 export default function StaffHeader({ title, backTo, rightActions }) {
   const navigate = useNavigate();
   const { panelOpen, togglePanel } = useStaffLayout();
@@ -31,12 +34,12 @@ export default function StaffHeader({ title, backTo, rightActions }) {
       </div>
       <div className={styles.right}>
         {rightActions}
-        <span className={styles.time}>🕐 {time}</span>
+        <span className={styles.time}> <MdAccessTime className={styles.timeIcon} /> {time}</span>
         <button
           className={`${styles.bell} ${panelOpen ? styles.bellActive : ''}`}
           onClick={togglePanel}
         >
-          🔔
+          <MdNotifications className={styles.bellIcon} />
           {unread > 0 && <span className={styles.badge}>{unread}</span>}
         </button>
       </div>

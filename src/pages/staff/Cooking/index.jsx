@@ -5,7 +5,7 @@ import KanbanColumn from '../../../components/staff/KanbanColumn';
 import { KANBAN_ITEMS } from '../../../data/mockData';
 import styles from './cooking.module.css';
 
-const STATUSES = ['new', 'cooking', 'ready', 'served'];
+const STATUSES = ['waiting', 'cooking', 'ready', 'served'];
 
 export default function Cooking() {
   const { t } = useTranslation('cooking');

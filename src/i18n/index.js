@@ -23,7 +23,7 @@ import uaDishEdit from './locales/ua/staff/dishEdit.json';
 import uaPdfGenerator from './locales/ua/staff/pdfGenerator.json';
 import uaAnalytics from './locales/ua/staff/analytics.json';
 import uaStaffSettings from './locales/ua/staff/staffSettings.json';
-
+import uaComponents from './locales/ua/staff/components.json';
 
 import enMenu from './locales/en/client/menu.json';
 import enCategory from './locales/en/client/category.json';
@@ -47,6 +47,7 @@ import enDishEdit from './locales/en/staff/dishEdit.json';
 import enPdfGenerator from './locales/en/staff/pdfGenerator.json';
 import enAnalytics from './locales/en/staff/analytics.json';
 import enStaffSettings from './locales/en/staff/staffSettings.json';
+import enComponents from './locales/en/staff/components.json';
 
 i18n.use(initReactI18next).init({
   resources: {
@@ -60,6 +61,7 @@ i18n.use(initReactI18next).init({
       orderDetail: uaOrderDetail, menuManagement: uaMenuManagement,
       dishEdit: uaDishEdit, pdfGenerator: uaPdfGenerator,
       analytics: uaAnalytics, staffSettings: uaStaffSettings,
+      components: uaComponents,
     },
     en: {
       menu: enMenu, category: enCategory, footer: enFooter,
@@ -71,6 +73,7 @@ i18n.use(initReactI18next).init({
       orderDetail: enOrderDetail, menuManagement: enMenuManagement,
       dishEdit: enDishEdit, pdfGenerator: enPdfGenerator,
       analytics: enAnalytics, staffSettings: enStaffSettings,
+      components: enComponents,
     },
   },
   lng: localStorage.getItem('lang') ?? 'ua',

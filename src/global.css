@@ -61,6 +61,11 @@
   --trigger-focus-shadow: rgba(29, 122, 252, 0.15);
 
   --rating-text:#f5a623;
+
+  --waiter--notification-bg: #fef2f2;
+  --waiter-notification-border: #dc2626;
+  --order--notification-bg: #eff6ff;
+  --order-notification-border: #2563eb;
 }
 
 [data-theme="dark"] {
@@ -126,4 +131,9 @@
   --trigger-focus-shadow: rgba(10, 132, 255, 0.2);
 
   --rating-text:#f5a623;
+
+  --waiter--notification-bg: #fef2f2;
+  --waiter-notification-border: #dc2626;
+  --order--notification-bg: #eff6ff;
+  --order-notification-border: #2563eb;
 }

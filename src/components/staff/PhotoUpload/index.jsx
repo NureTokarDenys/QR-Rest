@@ -1,9 +1,11 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import styles from './photoUpload.module.css';
 
+import { MdAddAPhoto } from "react-icons/md";
+
 export default function PhotoUpload({ images, onChange }) {
-  const { t } = useTranslation('dishEdit');
+  const { t } = useTranslation('components');
   const inputRef = useRef(null);
 
   function handleFiles(files) {
@@ -30,7 +32,9 @@ export default function PhotoUpload({ images, onChange }) {
         onDragOver={e => e.preventDefault()}
         onClick={() => inputRef.current?.click()}
       >
-        <span className={styles.icon}>📷</span>
+        <span className={styles.icon}>
+          <MdAddAPhoto />
+        </span>
         <p className={styles.hint}>{t('uploadHint')}</p>
         <p className={styles.formats}>{t('uploadFormats')}</p>
         <input

@@ -4,13 +4,14 @@ import { useTranslation } from 'react-i18next';
 import { useLocalField } from '../../../i18n/useLang';
 import styles from './kanbanCard.module.css';
 
-const NEXT_STATUS = { new: 'cooking', cooking: 'ready', ready: 'served' };
-const BTN_LABELS  = { new: 'Прийняти', cooking: 'Готово', ready: 'Подати' };
-const BTN_COLORS  = { new: '#dc2626', cooking: '#d97706', ready: '#16a34a' };
+const NEXT_STATUS = { waiting: 'cooking', cooking: 'ready', ready: 'served' };
+const BTN_COLORS  = { waiting: '#dc2626', cooking: '#d97706', ready: '#16a34a' };
 
 export default function KanbanCard({ item, status, onStatusChange }) {
   const navigate = useNavigate();
   const local = useLocalField();
+  const { t } = useTranslation('components');
+  
   const next = NEXT_STATUS[status];
 
   return (
@@ -23,9 +24,11 @@ export default function KanbanCard({ item, status, onStatusChange }) {
         <span className={styles.time}>{item.time}</span>
       </div>
       <div className={styles.meta}>
-        <span className={styles.meta_tag}>Стіл #{item.tableId}</span>
+        <span className={styles.meta_tag}>{t('table_number')} {item.tableId}</span>
         <span className={styles.meta_tag}>#{item.orderId}</span>
-        <span className={styles.meta_tag}>{item.dishCount} страви</span>
+        <span className={styles.meta_tag}>
+          {item.dishCount} {t('dish', { count: item.dishCount })}
+        </span>
       </div>
       {next && (
         <button
@@ -36,7 +39,7 @@ export default function KanbanCard({ item, status, onStatusChange }) {
             onStatusChange && onStatusChange(item.id, next);
           }}
         >
-          {BTN_LABELS[status]}
+          {t(`kanban_btn_${status}`)}
         </button>
       )}
     </div>

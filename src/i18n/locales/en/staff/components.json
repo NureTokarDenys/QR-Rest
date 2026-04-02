@@ -1,0 +1,47 @@
+{
+  "change": "Change",
+  "yesterday": "yesterday",
+  "preview": "Preview",
+  "available": "Available",
+  "currency_symbol": "UAH",
+  "table_number": "Table #",
+
+  "dishes": "Dishes",
+  
+  "dish_one": "dish",
+  "dish_other": "dishes",
+
+  "status_waiting": "Waiting",
+  "status_cooking": "Cooking",
+  "status_ready": "Ready",
+  "status_served": "Served",
+
+  "kanban_btn_waiting": "Accept",
+  "kanban_btn_cooking": "Done",
+  "kanban_btn_ready": "Serve",
+
+  "kanban_col_waiting": "NEW",
+  "kanban_col_cooking": "COOKING",
+  "kanban_col_ready": "READY",
+  "kanban_col_served": "SERVED",
+
+  "categories": "Categories",
+  "all": "All",
+  "newCategory": "New category",
+  "edit": "Edit",
+  "delete": "Delete",
+  "waiterCalled": "needs a waiter",
+  "newOrder": "New order",
+  "accept": "Accept",
+  "uploadHint": "Drag photo here or click",
+  "uploadFormats": "Supports JPG, PNG, WEBP (up to 5MB)",
+  
+  "nav_tableMap": "Table Map",
+  "nav_cooking": "Cooking",
+  "nav_menu": "Menu",
+  "nav_analytics": "Analytics",
+  "nav_settings": "Settings",
+  
+  "role_admin": "Administrator",
+  "role_waiter": "Waiter"
+}
