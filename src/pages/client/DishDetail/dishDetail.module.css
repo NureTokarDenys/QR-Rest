@@ -159,3 +159,191 @@
   color: var(--secondary-text);
   text-align: center;
 }
+
+/* Sections */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ComponentGroups */
+.requiredBadge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-left: 8px;
+  background: #fff3e0;
+  color: #f57c00;
+  vertical-align: middle;
+}
+
+.requiredBadgeDone {
+  background: var(--success-bg);
+  color: var(--success-text);
+}
+
+.optionsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.optionBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: var(--surface-color);
+  color: var(--primary-text);
+  font-size: 14px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.optionBtn:hover {
+  border-color: var(--primary-btn-active);
+}
+
+.optionBtnSelected {
+  border-color: var(--primary-btn-active);
+  background: #e8f4ff;
+  color: var(--primary-btn-active);
+  font-weight: 600;
+}
+
+.optionPrice {
+  font-size: 12px;
+  color: var(--secondary-text);
+}
+
+/* Ingredients */
+.ingredientsList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ingredientRow {
+  display: flex;
+  align-items: center;
+}
+
+.ingredientLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--primary-text);
+  user-select: none;
+}
+
+.ingredientCheckbox {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary-btn-active);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.ingredientFixed {
+  font-size: 14px;
+  color: var(--secondary-text);
+  padding-left: 26px;
+}
+
+.ingredientExcluded {
+  text-decoration: line-through;
+  color: var(--secondary-text);
+}
+
+.ingredientHint {
+  font-size: 12px;
+  color: var(--secondary-text);
+  margin-top: 2px;
+}
+
+/* Add-ons */
+.addonsList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.addonRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  user-select: none;
+}
+
+.addonRow:hover {
+  border-color: var(--primary-btn-active);
+}
+
+.addonRowSelected {
+  border-color: var(--primary-btn-active);
+  background: #e8f4ff;
+}
+
+.addonCheckbox {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary-btn-active);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.addonName {
+  flex: 1;
+  font-size: 14px;
+  color: var(--primary-text);
+}
+
+.addonPrice {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--primary-btn-active);
+}
+
+/* Comment */
+.commentWrapper {
+  position: relative;
+}
+
+.commentArea {
+  width: 100%;
+  min-height: 72px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  padding: 10px 12px;
+  font-size: 14px;
+  color: var(--primary-text);
+  background: var(--surface-color);
+  resize: none;
+  box-sizing: border-box;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+.commentArea:focus {
+  outline: none;
+  border-color: var(--primary-btn-active);
+}
+
+.commentCount {
+  position: absolute;
+  bottom: 8px;
+  right: 10px;
+  font-size: 11px;
+  color: var(--secondary-text);
+}

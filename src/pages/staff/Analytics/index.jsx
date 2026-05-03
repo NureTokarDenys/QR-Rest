@@ -6,7 +6,7 @@ import TopCategoryItem from '../../../components/staff/TopCategoryItem';
 import TopDishRow from '../../../components/staff/TopDishRow';
 import { ANALYTICS_DATA } from '../../../data/mockData';
 import styles from './analytics.module.css';
-import { MdBarChart } from "react-icons/md";
+import { MdBarChart, MdWarning, MdTimelapse, MdCheckCircle } from 'react-icons/md';
 
 const PERIODS = ['today', 'week', 'month'];
 
@@ -37,6 +37,7 @@ export default function Analytics() {
       }
     >
       <div className={styles.page}>
+        {/* Primary KPI row */}
         <div className={styles.kpiRow}>
           <AnalyticsMicro
             label={t('revenue')}
@@ -56,6 +57,48 @@ export default function Analytics() {
             change={Math.abs(data.avgCheckChange)}
             changeUp={data.avgCheckChange > 0}
           />
+        </div>
+
+        {/* Secondary KPI row — new v4.3 metrics */}
+        <div className={styles.kpiRow2}>
+          <div className={styles.kpiCard}>
+            <div className={styles.kpiCardIcon} style={{ background: '#fef2f2', color: '#dc2626' }}>
+              <MdWarning />
+            </div>
+            <div className={styles.kpiCardBody}>
+              <p className={styles.kpiCardLabel}>{t('walkout')}</p>
+              <p className={styles.kpiCardValue}>{data.walkoutCount}</p>
+              <p className={`${styles.kpiCardChange} ${data.walkoutChange < 0 ? styles.changeGood : styles.changeBad}`}>
+                {data.walkoutChange > 0 ? '+' : ''}{data.walkoutChange} {t('vsYesterday')}
+              </p>
+            </div>
+          </div>
+
+          <div className={styles.kpiCard}>
+            <div className={styles.kpiCardIcon} style={{ background: '#e8f5e9', color: '#2e7d32' }}>
+              <MdCheckCircle />
+            </div>
+            <div className={styles.kpiCardBody}>
+              <p className={styles.kpiCardLabel}>{t('conversion')}</p>
+              <p className={styles.kpiCardValue}>{data.conversionPct}%</p>
+              <p className={styles.kpiCardSub}>
+                {data.completedOrders} {t('completed')} / {data.voidOrders} {t('void')}
+              </p>
+            </div>
+          </div>
+
+          <div className={styles.kpiCard}>
+            <div className={styles.kpiCardIcon} style={{ background: '#fff3e0', color: '#f57c00' }}>
+              <MdTimelapse />
+            </div>
+            <div className={styles.kpiCardBody}>
+              <p className={styles.kpiCardLabel}>{t('avgCooking')}</p>
+              <p className={styles.kpiCardValue}>{data.avgCookingMin} {t('min')}</p>
+              <p className={`${styles.kpiCardChange} ${data.avgCookingChange < 0 ? styles.changeGood : styles.changeBad}`}>
+                {data.avgCookingChange > 0 ? '+' : ''}{data.avgCookingChange} {t('vsYesterday')}
+              </p>
+            </div>
+          </div>
         </div>
 
         <div className={styles.chartsRow}>

@@ -15,5 +15,11 @@
   "dish": "DISH",
   "ordered": "ORDERED",
   "dishRevenue": "REVENUE",
-  "rating": "RATING"
+  "rating": "RATING",
+  "walkout": "Walk-outs",
+  "conversion": "Order conversion",
+  "completed": "completed",
+  "void": "voided",
+  "avgCooking": "Avg. cooking time",
+  "min": "min"
 }

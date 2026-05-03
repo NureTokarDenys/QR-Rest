@@ -47,8 +47,28 @@ export const dishes = {
       image: deruni,
       description: 'Традиційні хрусткі картопляні млинці з соковитою м\'ясною начинкою зі свинини та яловичини. Подаються гарячими з домашньою сметаною та свіжою зеленню на ваш вибір.',
       description_en: 'Traditional crispy potato pancakes filled with juicy pork and beef stuffing. Served hot with homemade sour cream and fresh herbs of your choice.',
-      ingredients: 'Картопля, свинина, яловичина, цибуля, борошно пшеничне, яйце, соняшникова олія, сіль, чорний перець, сметана',
-      ingredients_en: 'Potato, pork, beef, onion, wheat flour, egg, sunflower oil, salt, black pepper, sour cream',
+      ingredientsList: [
+        { id: 'i1-1', name: 'Картопля',            name_en: 'Potato',           isRemovable: false },
+        { id: 'i1-2', name: 'Свинина',             name_en: 'Pork',             isRemovable: false },
+        { id: 'i1-3', name: 'Цибуля',              name_en: 'Onion',            isRemovable: true  },
+        { id: 'i1-4', name: 'Яйце',                name_en: 'Egg',              isRemovable: false },
+        { id: 'i1-5', name: 'Сметана',             name_en: 'Sour cream',       isRemovable: true  },
+        { id: 'i1-6', name: 'Чорний перець',       name_en: 'Black pepper',     isRemovable: true  },
+      ],
+      addons: [
+        { id: 'a1-1', name: 'Додаткова сметана',   name_en: 'Extra sour cream', price: 15 },
+        { id: 'a1-2', name: 'Свіжа зелень',        name_en: 'Fresh herbs',      price: 10 },
+        { id: 'a1-3', name: 'Часниковий соус',     name_en: 'Garlic sauce',     price: 20 },
+      ],
+      componentGroups: [
+        {
+          id: 'cg1-1', name: 'Порція', name_en: 'Portion', isRequired: true,
+          options: [
+            { id: 'cgo1-1', name: '3 шт',  name_en: '3 pcs',  priceModifier: 0   },
+            { id: 'cgo1-2', name: '5 шт',  name_en: '5 pcs',  priceModifier: 60  },
+          ],
+        },
+      ],
       reviews: [
         { author: 'Олена', rating: 5, text: 'Дуже ситно і смачно! М\'яса багато, скоринка ідеально хрустка.', text_en: 'Very filling and delicious! Lots of meat, the crust is perfectly crispy.' },
         { author: 'Ігор',  rating: 4, text: 'Смачні, але трохи жирнуваті як на мене.', text_en: 'Tasty, but a bit greasy for my taste.' },
@@ -64,8 +84,18 @@ export const dishes = {
       image: spagetti,
       description: 'Класична паста з томатним соусом та базиліком.',
       description_en: 'Classic pasta with tomato sauce and fresh basil.',
-      ingredients: 'Спагетті, томати, базилік, часник, оливкова олія',
-      ingredients_en: 'Spaghetti, tomatoes, basil, garlic, olive oil',
+      ingredientsList: [
+        { id: 'i2-1', name: 'Спагетті',          name_en: 'Spaghetti',      isRemovable: false },
+        { id: 'i2-2', name: 'Томати',             name_en: 'Tomatoes',       isRemovable: false },
+        { id: 'i2-3', name: 'Базилік',            name_en: 'Basil',          isRemovable: true  },
+        { id: 'i2-4', name: 'Часник',             name_en: 'Garlic',         isRemovable: true  },
+        { id: 'i2-5', name: 'Оливкова олія',      name_en: 'Olive oil',      isRemovable: false },
+      ],
+      addons: [
+        { id: 'a2-1', name: 'Пармезан',           name_en: 'Parmesan',       price: 25 },
+        { id: 'a2-2', name: 'М\'ясні кульки',     name_en: 'Meatballs',      price: 45 },
+      ],
+      componentGroups: [],
       reviews: [
         { author: 'Марина', rating: 5, text: 'Соус просто топ, дуже ароматний!', text_en: 'The sauce is amazing, very aromatic!' },
       ],
@@ -80,8 +110,27 @@ export const dishes = {
       image: kotleta,
       description: 'Ніжне куряче філе з вершковим маслом та зеленню всередині.',
       description_en: 'Tender chicken fillet stuffed with butter and fresh herbs inside.',
-      ingredients: 'Куряче філе, вершкове масло, петрушка, яйце, панірувальні сухарі',
-      ingredients_en: 'Chicken fillet, butter, parsley, egg, breadcrumbs',
+      ingredientsList: [
+        { id: 'i3-1', name: 'Куряче філе',        name_en: 'Chicken fillet',  isRemovable: false },
+        { id: 'i3-2', name: 'Вершкове масло',     name_en: 'Butter',          isRemovable: false },
+        { id: 'i3-3', name: 'Петрушка',           name_en: 'Parsley',         isRemovable: true  },
+        { id: 'i3-4', name: 'Панірувальні сухарі',name_en: 'Breadcrumbs',     isRemovable: false },
+      ],
+      addons: [
+        { id: 'a3-1', name: 'Картопляне пюре',    name_en: 'Mashed potatoes', price: 55 },
+        { id: 'a3-2', name: 'Овочі гриль',        name_en: 'Grilled veggies', price: 40 },
+        { id: 'a3-3', name: 'Соус тартар',        name_en: 'Tartar sauce',    price: 15 },
+      ],
+      componentGroups: [
+        {
+          id: 'cg3-1', name: 'Гарнір', name_en: 'Side dish', isRequired: true,
+          options: [
+            { id: 'cgo3-1', name: 'Картопля фрі',   name_en: 'French fries',     priceModifier: 0  },
+            { id: 'cgo3-2', name: 'Рис',            name_en: 'Rice',             priceModifier: 0  },
+            { id: 'cgo3-3', name: 'Гречка',         name_en: 'Buckwheat',        priceModifier: 0  },
+          ],
+        },
+      ],
       reviews: [
         { author: 'Андрій',   rating: 5, text: 'Соковита всередині, масло витікає як треба 😍', text_en: 'Juicy inside, the butter flows out just right 😍' },
         { author: 'Світлана', rating: 5, text: 'Одна з найкращих, що я їла.', text_en: 'One of the best I have ever had.' },
@@ -97,8 +146,25 @@ export const dishes = {
       image: shnitzel,
       description: 'Відбивна з свинини у хрусткій паніровці.',
       description_en: 'Pork cutlet in a crispy breading.',
-      ingredients: 'Свинина, яйце, борошно, панірувальні сухарі, олія',
-      ingredients_en: 'Pork, egg, flour, breadcrumbs, oil',
+      ingredientsList: [
+        { id: 'i4-1', name: 'Свинина',            name_en: 'Pork',             isRemovable: false },
+        { id: 'i4-2', name: 'Яйце',               name_en: 'Egg',              isRemovable: false },
+        { id: 'i4-3', name: 'Борошно',            name_en: 'Flour',            isRemovable: false },
+        { id: 'i4-4', name: 'Панірувальні сухарі',name_en: 'Breadcrumbs',      isRemovable: false },
+      ],
+      addons: [
+        { id: 'a4-1', name: 'Лимонний сік',       name_en: 'Lemon juice',      price: 0  },
+        { id: 'a4-2', name: 'Брусничний соус',    name_en: 'Lingonberry sauce', price: 20 },
+      ],
+      componentGroups: [
+        {
+          id: 'cg4-1', name: 'Гарнір', name_en: 'Side dish', isRequired: true,
+          options: [
+            { id: 'cgo4-1', name: 'Картопля фрі',  name_en: 'French fries',    priceModifier: 0  },
+            { id: 'cgo4-2', name: 'Салат',         name_en: 'Salad',           priceModifier: 0  },
+          ],
+        },
+      ],
       reviews: [
         { author: 'Олег', rating: 5, text: 'Ідеальна хрустка скоринка, м\'ясо ніжне.', text_en: 'Perfect crispy crust, the meat is tender.' },
       ],
@@ -113,8 +179,13 @@ export const dishes = {
       image: mPotato,
       description: 'Ніжне картопляне пюре з вершковим маслом.',
       description_en: 'Smooth mashed potatoes with butter.',
-      ingredients: 'Картопля, вершкове масло, молоко, сіль',
-      ingredients_en: 'Potato, butter, milk, salt',
+      ingredientsList: [
+        { id: 'i5-1', name: 'Картопля',        name_en: 'Potato',   isRemovable: false },
+        { id: 'i5-2', name: 'Вершкове масло',  name_en: 'Butter',   isRemovable: true  },
+        { id: 'i5-3', name: 'Молоко',          name_en: 'Milk',     isRemovable: false },
+        { id: 'i5-4', name: 'Сіль',            name_en: 'Salt',     isRemovable: true  },
+      ],
+      addons: [], componentGroups: [],
       reviews: [
         { author: 'Ірина', rating: 5, text: 'Дуже ніжне, як домашнє.', text_en: 'Very smooth, just like homemade.' },
         { author: 'Петро', rating: 4, text: 'Смачно, але хотілось би більше масла.', text_en: 'Tasty, but I would like more butter.' },
@@ -130,8 +201,17 @@ export const dishes = {
       image: vareniki,
       description: 'Домашні вареники з ніжним картопляним пюре.',
       description_en: 'Homemade dumplings filled with smooth mashed potatoes.',
-      ingredients: 'Борошно, яйця, картопля, цибуля, вершкове масло',
-      ingredients_en: 'Flour, eggs, potato, onion, butter',
+      ingredientsList: [
+        { id: 'i6-1', name: 'Борошно',         name_en: 'Flour',   isRemovable: false },
+        { id: 'i6-2', name: 'Картопля',        name_en: 'Potato',  isRemovable: false },
+        { id: 'i6-3', name: 'Цибуля',          name_en: 'Onion',   isRemovable: true  },
+        { id: 'i6-4', name: 'Вершкове масло',  name_en: 'Butter',  isRemovable: false },
+      ],
+      addons: [
+        { id: 'a6-1', name: 'Сметана',   name_en: 'Sour cream', price: 15 },
+        { id: 'a6-2', name: 'Шкварки',   name_en: 'Cracklings', price: 25 },
+      ],
+      componentGroups: [],
       reviews: [
         { author: 'Наталя', rating: 5, text: 'Як у бабусі! Дуже смачно.', text_en: 'Just like grandma used to make! Delicious.' },
         { author: 'Денис',  rating: 4, text: 'Начинки достатньо, тісто хороше.', text_en: 'Good amount of filling, dough is great.' },
@@ -147,8 +227,12 @@ export const dishes = {
       image: grechka,
       description: 'Смачна розсипчаста гречка з вершковим маслом.',
       description_en: 'Tasty fluffy buckwheat served with butter.',
-      ingredients: 'Гречка, вершкове масло, сіль',
-      ingredients_en: 'Buckwheat, butter, salt',
+      ingredientsList: [
+        { id: 'i7-1', name: 'Гречка',          name_en: 'Buckwheat', isRemovable: false },
+        { id: 'i7-2', name: 'Вершкове масло',  name_en: 'Butter',    isRemovable: true  },
+        { id: 'i7-3', name: 'Сіль',            name_en: 'Salt',      isRemovable: true  },
+      ],
+      addons: [], componentGroups: [],
       reviews: [
         { author: 'Віктор', rating: 4, text: 'Просто і смачно, без зайвого.', text_en: 'Simple and tasty, nothing unnecessary.' },
       ],
@@ -163,8 +247,14 @@ export const dishes = {
       image: plov,
       description: 'Ароматний плов з рисом, м\'ясом та спеціями.',
       description_en: 'Aromatic plov with rice, meat and spices.',
-      ingredients: 'Рис, м\'ясо (свинина або курка), морква, цибуля, часник, спеції',
-      ingredients_en: 'Rice, meat (pork or chicken), carrot, onion, garlic, spices',
+      ingredientsList: [
+        { id: 'i8-1', name: 'Рис',     name_en: 'Rice',    isRemovable: false },
+        { id: 'i8-2', name: 'Морква',  name_en: 'Carrot',  isRemovable: true  },
+        { id: 'i8-3', name: 'Цибуля',  name_en: 'Onion',   isRemovable: true  },
+        { id: 'i8-4', name: 'Часник',  name_en: 'Garlic',  isRemovable: true  },
+        { id: 'i8-5', name: 'Спеції',  name_en: 'Spices',  isRemovable: true  },
+      ],
+      addons: [], componentGroups: [],
       reviews: [
         { author: 'Аліна',  rating: 5, text: 'Дуже ароматний, спеції супер.', text_en: 'Very aromatic, the spices are great.' },
         { author: 'Руслан', rating: 4, text: 'Смачний, але хотілось би більше м\'яса.', text_en: 'Tasty, but I would like more meat.' },
@@ -183,8 +273,19 @@ export const dishes = {
       image: borsh,
       description: 'Традиційний український борщ.',
       description_en: 'Traditional Ukrainian borscht.',
-      ingredients: 'Буряк, капуста, морква, картопля, м\'ясо, томатна паста',
-      ingredients_en: 'Beetroot, cabbage, carrot, potato, meat, tomato paste',
+      ingredientsList: [
+        { id: 'i9-1', name: 'Буряк',        name_en: 'Beetroot',     isRemovable: false },
+        { id: 'i9-2', name: 'Капуста',      name_en: 'Cabbage',      isRemovable: true  },
+        { id: 'i9-3', name: 'Морква',       name_en: 'Carrot',       isRemovable: true  },
+        { id: 'i9-4', name: 'Картопля',     name_en: 'Potato',       isRemovable: false },
+        { id: 'i9-5', name: 'М\'ясо',       name_en: 'Meat',         isRemovable: false },
+        { id: 'i9-6', name: 'Томатна паста',name_en: 'Tomato paste', isRemovable: true  },
+      ],
+      addons: [
+        { id: 'a9-1', name: 'Сметана',   name_en: 'Sour cream',  price: 15 },
+        { id: 'a9-2', name: 'Пампушка',  name_en: 'Bun',         price: 20 },
+      ],
+      componentGroups: [],
       reviews: [
         { author: 'Ганна',  rating: 5, text: 'Справжній український борщ ❤️', text_en: 'Real Ukrainian borscht ❤️' },
         { author: 'Сергій', rating: 5, text: 'Зі сметаною — просто ідеально.', text_en: 'With sour cream — absolutely perfect.' },
@@ -200,8 +301,14 @@ export const dishes = {
       image: soup,
       description: 'Рибна юшка зі свіжої риби.',
       description_en: 'Light fish soup made from fresh fish.',
-      ingredients: 'Риба, картопля, морква, цибуля, зелень',
-      ingredients_en: 'Fish, potato, carrot, onion, herbs',
+      ingredientsList: [
+        { id: 'i10-1', name: 'Риба',      name_en: 'Fish',    isRemovable: false },
+        { id: 'i10-2', name: 'Картопля',  name_en: 'Potato',  isRemovable: false },
+        { id: 'i10-3', name: 'Морква',    name_en: 'Carrot',  isRemovable: true  },
+        { id: 'i10-4', name: 'Цибуля',    name_en: 'Onion',   isRemovable: true  },
+        { id: 'i10-5', name: 'Зелень',    name_en: 'Herbs',   isRemovable: true  },
+      ],
+      addons: [], componentGroups: [],
       reviews: [
         { author: 'Микола', rating: 4, text: 'Легка і смачна, як на природі.', text_en: 'Light and tasty, feels like being outdoors.' },
       ],
@@ -216,8 +323,14 @@ export const dishes = {
       image: mushroom,
       description: 'Ароматний суп з лісових грибів.',
       description_en: 'Aromatic soup made from forest mushrooms.',
-      ingredients: 'Гриби, картопля, цибуля, сметана, зелень',
-      ingredients_en: 'Mushrooms, potato, onion, sour cream, herbs',
+      ingredientsList: [
+        { id: 'i11-1', name: 'Гриби',    name_en: 'Mushrooms', isRemovable: false },
+        { id: 'i11-2', name: 'Картопля', name_en: 'Potato',    isRemovable: false },
+        { id: 'i11-3', name: 'Цибуля',   name_en: 'Onion',     isRemovable: true  },
+        { id: 'i11-4', name: 'Сметана',  name_en: 'Sour cream',isRemovable: true  },
+        { id: 'i11-5', name: 'Зелень',   name_en: 'Herbs',     isRemovable: true  },
+      ],
+      addons: [], componentGroups: [],
       reviews: [
         { author: 'Оксана', rating: 5, text: 'Дуже ароматний, гриби відчуваються добре.', text_en: 'Very aromatic, you can really taste the mushrooms.' },
         { author: 'Ілля',   rating: 4, text: 'Смачний, але трохи густий.', text_en: 'Tasty, but a bit thick.' },
@@ -236,8 +349,18 @@ export const dishes = {
       image: chezar,
       description: 'Класичний салат Цезар з курячим філе.',
       description_en: 'Classic Caesar salad with chicken fillet.',
-      ingredients: 'Курка, салат ромен, пармезан, сухарики, соус цезар',
-      ingredients_en: 'Chicken, romaine lettuce, parmesan, croutons, Caesar dressing',
+      ingredientsList: [
+        { id: 'i12-1', name: 'Курка',       name_en: 'Chicken',          isRemovable: false },
+        { id: 'i12-2', name: 'Салат ромен', name_en: 'Romaine lettuce',  isRemovable: false },
+        { id: 'i12-3', name: 'Пармезан',    name_en: 'Parmesan',         isRemovable: true  },
+        { id: 'i12-4', name: 'Сухарики',    name_en: 'Croutons',         isRemovable: true  },
+        { id: 'i12-5', name: 'Соус цезар',  name_en: 'Caesar dressing',  isRemovable: true  },
+      ],
+      addons: [
+        { id: 'a12-1', name: 'Яйце пашот',  name_en: 'Poached egg',     price: 30 },
+        { id: 'a12-2', name: 'Бекон',       name_en: 'Bacon',           price: 35 },
+      ],
+      componentGroups: [],
       reviews: [
         { author: 'Марія', rating: 5, text: 'Соус просто бомба!', text_en: 'The dressing is absolutely amazing!' },
       ],
@@ -252,8 +375,14 @@ export const dishes = {
       image: greek,
       description: 'Свіжий грецький салат з фетою.',
       description_en: 'Fresh Greek salad with feta cheese.',
-      ingredients: 'Огірки, помідори, оливки, фета, цибуля, оливкова олія',
-      ingredients_en: 'Cucumber, tomatoes, olives, feta cheese, onion, olive oil',
+      ingredientsList: [
+        { id: 'i13-1', name: 'Огірки',       name_en: 'Cucumber',   isRemovable: false },
+        { id: 'i13-2', name: 'Помідори',     name_en: 'Tomatoes',   isRemovable: false },
+        { id: 'i13-3', name: 'Оливки',       name_en: 'Olives',     isRemovable: true  },
+        { id: 'i13-4', name: 'Фета',         name_en: 'Feta',       isRemovable: false },
+        { id: 'i13-5', name: 'Цибуля',       name_en: 'Onion',      isRemovable: true  },
+      ],
+      addons: [], componentGroups: [],
       reviews: [
         { author: 'Юля', rating: 4, text: 'Свіжий і легкий салат.', text_en: 'Fresh and light salad.' },
       ],
@@ -271,8 +400,15 @@ export const dishes = {
       image: lemonade,
       description: 'Свіжий домашній лимонад.',
       description_en: 'Fresh homemade lemonade.',
-      ingredients: 'Лимон, цукор, вода, м\'ята',
-      ingredients_en: 'Lemon, sugar, water, mint',
+      ingredientsList: [
+        { id: 'i14-1', name: 'Лимон',  name_en: 'Lemon',  isRemovable: false },
+        { id: 'i14-2', name: 'Цукор',  name_en: 'Sugar',  isRemovable: true  },
+        { id: 'i14-3', name: 'М\'ята', name_en: 'Mint',   isRemovable: true  },
+      ],
+      addons: [
+        { id: 'a14-1', name: 'Лід',     name_en: 'Ice',    price: 0 },
+      ],
+      componentGroups: [],
       reviews: [
         { author: 'Артем', rating: 5, text: 'Дуже освіжає!', text_en: 'Very refreshing!' },
         { author: 'Оля',   rating: 5, text: 'Ідеально в спеку.', text_en: 'Perfect in the heat.' },
@@ -288,8 +424,15 @@ export const dishes = {
       image: tea,
       description: 'Ароматний чай на вибір.',
       description_en: 'Aromatic tea of your choice.',
-      ingredients: 'Чайний лист, вода',
-      ingredients_en: 'Tea leaves, water',
+      ingredientsList: [
+        { id: 'i15-1', name: 'Чайний лист', name_en: 'Tea leaves', isRemovable: false },
+        { id: 'i15-2', name: 'Вода',        name_en: 'Water',      isRemovable: false },
+      ],
+      addons: [
+        { id: 'a15-1', name: 'Лимон',  name_en: 'Lemon',  price: 0  },
+        { id: 'a15-2', name: 'Мед',    name_en: 'Honey',  price: 10 },
+      ],
+      componentGroups: [],
       reviews: [
         { author: 'Ігор', rating: 4, text: 'Звичайний, але хороший чай.', text_en: 'Plain but good tea.' },
       ],
@@ -307,8 +450,13 @@ export const dishes = {
       image: tiramisu,
       description: 'Класичний італійський десерт.',
       description_en: 'Classic Italian dessert.',
-      ingredients: 'Маскарпоне, кава, савоярді, яйця, цукор, какао',
-      ingredients_en: 'Mascarpone, coffee, ladyfingers, eggs, sugar, cocoa',
+      ingredientsList: [
+        { id: 'i16-1', name: 'Маскарпоне', name_en: 'Mascarpone',   isRemovable: false },
+        { id: 'i16-2', name: 'Кава',       name_en: 'Coffee',       isRemovable: false },
+        { id: 'i16-3', name: 'Савоярді',   name_en: 'Ladyfingers',  isRemovable: false },
+        { id: 'i16-4', name: 'Какао',      name_en: 'Cocoa',        isRemovable: true  },
+      ],
+      addons: [], componentGroups: [],
       reviews: [
         { author: 'Катя', rating: 5, text: 'Ніжний і дуже смачний!', text_en: 'Delicate and absolutely delicious!' },
       ],
@@ -323,8 +471,13 @@ export const dishes = {
       image: cheesecake,
       description: 'Ніжний чізкейк з ягідним соусом.',
       description_en: 'Smooth cheesecake with berry sauce.',
-      ingredients: 'Вершковий сир, яйця, цукор, пісочна основа',
-      ingredients_en: 'Cream cheese, eggs, sugar, shortcrust base',
+      ingredientsList: [
+        { id: 'i17-1', name: 'Вершковий сир',  name_en: 'Cream cheese',    isRemovable: false },
+        { id: 'i17-2', name: 'Яйця',           name_en: 'Eggs',            isRemovable: false },
+        { id: 'i17-3', name: 'Пісочна основа', name_en: 'Shortcrust base', isRemovable: false },
+        { id: 'i17-4', name: 'Ягідний соус',   name_en: 'Berry sauce',     isRemovable: true  },
+      ],
+      addons: [], componentGroups: [],
       reviews: [
         { author: 'Влад',  rating: 5, text: 'Ідеальна текстура.', text_en: 'Perfect texture.' },
         { author: 'Софія', rating: 4, text: 'Трохи солодкий, але смачний.', text_en: 'A bit sweet, but tasty.' },
@@ -343,8 +496,25 @@ export const dishes = {
       image: margarita,
       description: 'Класична піца з томатами та моцарелою.',
       description_en: 'Classic pizza with tomatoes and mozzarella.',
-      ingredients: 'Тісто, томатний соус, моцарела, базилік',
-      ingredients_en: 'Dough, tomato sauce, mozzarella, basil',
+      ingredientsList: [
+        { id: 'i18-1', name: 'Тісто',        name_en: 'Dough',         isRemovable: false },
+        { id: 'i18-2', name: 'Томатний соус', name_en: 'Tomato sauce',  isRemovable: false },
+        { id: 'i18-3', name: 'Моцарела',     name_en: 'Mozzarella',    isRemovable: false },
+        { id: 'i18-4', name: 'Базилік',      name_en: 'Basil',         isRemovable: true  },
+      ],
+      addons: [
+        { id: 'a18-1', name: 'Подвійна моцарела', name_en: 'Double mozzarella', price: 35 },
+        { id: 'a18-2', name: 'Оливки',            name_en: 'Olives',            price: 20 },
+      ],
+      componentGroups: [
+        {
+          id: 'cg18-1', name: 'Розмір', name_en: 'Size', isRequired: true,
+          options: [
+            { id: 'cgo18-1', name: '30 см', name_en: '30 cm', priceModifier: 0  },
+            { id: 'cgo18-2', name: '40 см', name_en: '40 cm', priceModifier: 60 },
+          ],
+        },
+      ],
       reviews: [
         { author: 'Макс', rating: 5, text: 'Класика, завжди топ.', text_en: 'A classic, always great.' },
       ],
@@ -359,8 +529,25 @@ export const dishes = {
       image: peperoni,
       description: 'Гостра піца з пепероні.',
       description_en: 'Spicy pizza with pepperoni.',
-      ingredients: 'Тісто, томатний соус, моцарела, пепероні',
-      ingredients_en: 'Dough, tomato sauce, mozzarella, pepperoni',
+      ingredientsList: [
+        { id: 'i19-1', name: 'Тісто',        name_en: 'Dough',         isRemovable: false },
+        { id: 'i19-2', name: 'Томатний соус', name_en: 'Tomato sauce',  isRemovable: false },
+        { id: 'i19-3', name: 'Моцарела',     name_en: 'Mozzarella',    isRemovable: false },
+        { id: 'i19-4', name: 'Пепероні',     name_en: 'Pepperoni',     isRemovable: false },
+      ],
+      addons: [
+        { id: 'a19-1', name: 'Гострий соус',        name_en: 'Hot sauce',          price: 0  },
+        { id: 'a19-2', name: 'Подвійна моцарела',   name_en: 'Double mozzarella',  price: 35 },
+      ],
+      componentGroups: [
+        {
+          id: 'cg19-1', name: 'Розмір', name_en: 'Size', isRequired: true,
+          options: [
+            { id: 'cgo19-1', name: '30 см', name_en: '30 cm', priceModifier: 0  },
+            { id: 'cgo19-2', name: '40 см', name_en: '40 cm', priceModifier: 80 },
+          ],
+        },
+      ],
       reviews: [
         { author: 'Дмитро', rating: 5, text: 'Гостренька як треба 🔥', text_en: 'Spicy just right 🔥' },
         { author: 'Аня',    rating: 5, text: 'Моя улюблена піца.', text_en: 'My favourite pizza.' },
@@ -476,6 +663,13 @@ export const ANALYTICS_DATA = {
   ordersChange: 12,
   avgCheck: 390,
   avgCheckChange: -5,
+  completedOrders: 34,
+  voidOrders: 4,
+  walkoutCount: 2,
+  walkoutChange: -1,
+  conversionPct: 89,
+  avgCookingMin: 14,
+  avgCookingChange: -2,
   hourlyBars: [2, 3, 5, 8, 12, 15, 18, 14, 20, 16, 10, 8],
   hours: ['09','10','11','12','13','14','15','16','17','18','19','20'],
   topCategories: [

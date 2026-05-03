@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import StaffShell from '../../../components/staff/StaffShell';
@@ -14,6 +14,10 @@ export default function TableDetail() {
   const { id } = useParams();
   const table = TABLES.find(t => t.id === Number(id)) || TABLES[1];
   const { t } = useTranslation('tableDetail');
+  const [voidMode, setVoidMode] = useState(false);
+  const [voidReason, setVoidReason] = useState('');
+  const [isWalkout, setIsWalkout] = useState(false);
+  const [paid, setPaid] = useState(false);
 
   return (
     <StaffShell
@@ -73,6 +77,72 @@ export default function TableDetail() {
                 {table.dishes.reduce((s, d) => s + d.price, 0)}₴
               </span>
             </div>
+
+            {!paid && (
+              <div className={styles.paymentRow}>
+                {!voidMode ? (
+                  <>
+                    <button
+                      className={styles.cashBtn}
+                      onClick={() => setPaid(true)}
+                    >
+                      💵 {t('payCash')}
+                    </button>
+                    <button
+                      className={styles.voidBtn}
+                      onClick={() => setVoidMode(true)}
+                    >
+                      🚫 {t('voidOrder')}
+                    </button>
+                  </>
+                ) : (
+                  <div className={styles.voidPanel}>
+                    <label className={styles.walkoutLabel}>
+                      <input
+                        type="checkbox"
+                        checked={isWalkout}
+                        onChange={e => {
+                          setIsWalkout(e.target.checked);
+                          if (e.target.checked) setVoidReason(t('walkoutReason'));
+                        }}
+                      />
+                      {t('markWalkout')}
+                    </label>
+                    <textarea
+                      className={styles.voidReasonInput}
+                      placeholder={t('voidReasonPlaceholder')}
+                      value={voidReason}
+                      rows={2}
+                      onChange={e => setVoidReason(e.target.value)}
+                    />
+                    <p className={styles.voidReasonHint}>
+                      {voidReason.length}/10 {t('minChars')}
+                    </p>
+                    <div className={styles.voidActions}>
+                      <button
+                        className={styles.voidConfirmBtn}
+                        disabled={voidReason.trim().length < 10}
+                        onClick={() => setPaid(true)}
+                      >
+                        {t('confirmVoid')}
+                      </button>
+                      <button
+                        className={styles.voidCancelBtn}
+                        onClick={() => { setVoidMode(false); setVoidReason(''); setIsWalkout(false); }}
+                      >
+                        {t('cancel')}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {paid && (
+              <div className={styles.paidBanner}>
+                ✅ {t('orderClosed')}
+              </div>
+            )}
           </div>
         ) : (
           <div className={styles.noOrder}>{t('noOrder')}</div>

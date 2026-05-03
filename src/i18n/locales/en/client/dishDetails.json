@@ -3,5 +3,12 @@
     "review_other": "reviews",
     "contents": "Contents",
     "reviews": "Reviews",
-    "add": "Add"
+    "add": "Add",
+    "ingredients_hint": "removable",
+    "addons": "Add-ons",
+    "free": "free",
+    "comment": "Dish comment",
+    "comment_placeholder": "Cooking preferences...",
+    "choose_required": "Choose",
+    "chosen": "chosen"
 }

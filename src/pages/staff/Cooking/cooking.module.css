@@ -29,3 +29,141 @@
   height: calc(100vh - 140px);
   overflow-x: auto;
 }
+
+/* View toggle */
+.viewToggle {
+  display: flex;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.viewBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--secondary-text);
+  transition: background 0.15s, color 0.15s;
+}
+
+.viewBtnActive {
+  background: var(--primary-btn-active);
+  color: #fff;
+}
+
+/* Table View */
+.tableView {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 20px;
+}
+
+.noItems {
+  text-align: center;
+  color: var(--secondary-text);
+  padding: 40px 0;
+  font-size: 15px;
+}
+
+.tableCard {
+  background: var(--surface-color);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--separator-color);
+}
+
+.tableCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--bg-color);
+  border-bottom: 1px solid var(--separator-color);
+}
+
+.tableCardTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--primary-text);
+  flex: 1;
+}
+
+.tableCardMeta {
+  font-size: 13px;
+  color: var(--secondary-text);
+}
+
+.tableReadyBtn {
+  padding: 5px 12px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: none;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--secondary-text);
+  cursor: pointer;
+}
+
+.tableReadyBtnHighlight {
+  border-color: #16a34a;
+  color: #16a34a;
+}
+
+.tableCardItems {
+  display: flex;
+  flex-direction: column;
+}
+
+.tableItemRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--separator-color);
+}
+
+.tableItemRow:last-child {
+  border-bottom: none;
+}
+
+.tableItemDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.tableItemName {
+  flex: 1;
+  font-size: 14px;
+  color: var(--primary-text);
+}
+
+.tableItemStatus {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 8px;
+}
+
+.status_waiting  { background: var(--order-status-waiting-bg);  color: var(--order-status-waiting-text);  }
+.status_cooking  { background: var(--order-status-cooking-bg);  color: var(--order-status-cooking-text);  }
+.status_ready    { background: var(--order-status-ready-bg);    color: var(--order-status-ready-text);    }
+.status_served   { background: var(--separator-color);          color: var(--secondary-text);             }
+
+.tableItemBtn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--primary-text);
+}

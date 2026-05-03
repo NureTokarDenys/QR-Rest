@@ -82,3 +82,137 @@
   gap: 8px;
   background: var(--bg-color);
 }
+
+/* Serving groups */
+.groupBlock {
+  background: var(--surface-color);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.groupHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 12px 8px;
+  border-bottom: 1px solid var(--separator-color);
+}
+
+.groupName {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--primary-text);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.groupNameInput {
+  flex: 1;
+  border: 1.5px solid var(--primary-btn-active);
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary-text);
+  background: var(--bg-color);
+  outline: none;
+}
+
+.groupIconBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--secondary-text);
+  font-size: 16px;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+}
+
+.groupIconBtn:hover {
+  color: var(--primary-btn-active);
+}
+
+.groupDeleteBtn:hover {
+  color: var(--danger-color);
+}
+
+.itemRow {
+  display: flex;
+  flex-direction: column;
+}
+
+.moveRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 8px;
+  flex-wrap: wrap;
+}
+
+.moveLabel {
+  font-size: 12px;
+  color: var(--secondary-text);
+}
+
+.moveBtn {
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  border: 1.5px solid var(--primary-btn-active);
+  background: none;
+  color: var(--primary-btn-active);
+  cursor: pointer;
+}
+
+.emptyGroup {
+  font-size: 13px;
+  color: var(--secondary-text);
+  padding: 10px 12px;
+  font-style: italic;
+}
+
+.addGroupBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1.5px dashed var(--border);
+  background: none;
+  color: var(--primary-btn-active);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  justify-content: center;
+}
+
+.addGroupRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.addGroupConfirm {
+  background: var(--primary-btn-active);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  padding: 6px 10px;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.addGroupCancel {
+  background: none;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  color: var(--secondary-text);
+  padding: 6px 10px;
+  font-size: 14px;
+  cursor: pointer;
+}

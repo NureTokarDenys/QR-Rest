@@ -73,3 +73,14 @@
   padding: 0;
   color: var(--primary-text);
 }
+
+.exclusions {
+  font-size: 12px;
+  color: var(--secondary-text);
+  font-style: italic;
+}
+
+.comment {
+  font-size: 12px;
+  color: var(--secondary-text);
+}

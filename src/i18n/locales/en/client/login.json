@@ -4,5 +4,6 @@
     "password": "Password",
     "login": "Login",
     "guest_mode": "Guest mode",
-    "or": "or"
+    "or": "or",
+    "google_login": "Sign in with Google"
 }

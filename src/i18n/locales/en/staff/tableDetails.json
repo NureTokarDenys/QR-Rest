@@ -18,5 +18,14 @@
   "history": "History (today)",
   "hall": "Hall A",
   "seats": "seats",
-  "noOrder": "No active orders"
+  "noOrder": "No active orders",
+  "payCash": "Pay cash",
+  "voidOrder": "Void order",
+  "markWalkout": "Walk-out (left without paying)",
+  "voidReasonPlaceholder": "Reason for voiding (min. 10 chars)...",
+  "minChars": "min chars",
+  "confirmVoid": "Confirm void",
+  "cancel": "Cancel",
+  "orderClosed": "Order closed",
+  "walkoutReason": "Customer left without paying (walk-out)"
 }

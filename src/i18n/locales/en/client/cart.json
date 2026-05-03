@@ -5,5 +5,10 @@
     "empty": "Your cart is empty",
     "confirm_offer": "Verify order",
     "order_comment": "Order comment",
-    "order_comment_placeholder": "Add any notes for the restaurant (e.g., allergies, preferences)"
+    "order_comment_placeholder": "Add any notes for the restaurant (e.g., allergies, preferences)",
+    "add_group": "Add serving group",
+    "group_name_placeholder": "Group name...",
+    "move_to": "Move to",
+    "empty_group": "Group is empty",
+    "back_to_menu": "Back to menu"
 }

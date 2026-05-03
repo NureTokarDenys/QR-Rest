@@ -18,5 +18,19 @@
   "preview": "Preview",
   "available": "Available",
   "pricePlaceholder": "0",
-  "selectCategory": "Select category"
+  "selectCategory": "Select category",
+  "ingredientsSection": "INGREDIENTS",
+  "addIngredient": "Add ingredient",
+  "noIngredients": "No ingredients",
+  "removable": "Removable",
+  "addonsSection": "ADD-ONS",
+  "addAddon": "Add add-on",
+  "noAddons": "No add-ons",
+  "addonPrice": "Price (₴)",
+  "componentGroupsSection": "COMPONENT GROUPS",
+  "addGroup": "Add group",
+  "noGroups": "No groups",
+  "required": "Required choice",
+  "priceModifier": "Price modifier (₴)",
+  "addOption": "Add option"
 }

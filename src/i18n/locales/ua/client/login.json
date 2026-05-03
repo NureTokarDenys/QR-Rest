@@ -4,5 +4,6 @@
     "password": "Пароль",
     "login": "Увійти",
     "guest_mode": "Гостьовий вхід",
-    "or": "або"
+    "or": "або",
+    "google_login": "Увійти через Google"
 }

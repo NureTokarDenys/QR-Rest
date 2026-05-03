@@ -12,5 +12,9 @@
   "serve": "Serve",
   "table": "Table",
   "order": "Ord.",
-  "noItems": "No dishes"
+  "noItems": "No dishes",
+  "waiting": "Waiting",
+  "order_view": "By orders",
+  "table_view": "By tables",
+  "mark_ready": "Mark ready"
 }

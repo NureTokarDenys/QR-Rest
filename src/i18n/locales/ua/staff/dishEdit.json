@@ -18,5 +18,19 @@
   "preview": "Попередній перегляд",
   "available": "Доступна",
   "pricePlaceholder": "0",
-  "selectCategory": "Оберіть категорію"
+  "selectCategory": "Оберіть категорію",
+  "ingredientsSection": "ІНГРЕДІЄНТИ",
+  "addIngredient": "Додати інгредієнт",
+  "noIngredients": "Немає інгредієнтів",
+  "removable": "Можна прибрати",
+  "addonsSection": "ДОПОВНЕННЯ (ADD-ONS)",
+  "addAddon": "Додати доповнення",
+  "noAddons": "Немає доповнень",
+  "addonPrice": "Ціна (₴)",
+  "componentGroupsSection": "ГРУПИ КОМПОНЕНТІВ",
+  "addGroup": "Додати групу",
+  "noGroups": "Немає груп",
+  "required": "Обов'язковий вибір",
+  "priceModifier": "Доплата (₴)",
+  "addOption": "Додати варіант"
 }

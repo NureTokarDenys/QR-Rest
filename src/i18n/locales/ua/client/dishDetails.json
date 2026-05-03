@@ -4,5 +4,12 @@
     "review_many": "відгуків",
     "contents": "Зміст",
     "reviews": "Відгуки",
-    "add": "Додати"
+    "add": "Додати",
+    "ingredients_hint": "можна прибрати",
+    "addons": "Доповнення",
+    "free": "безкоштовно",
+    "comment": "Коментар до страви",
+    "comment_placeholder": "Побажання щодо приготування...",
+    "choose_required": "Оберіть",
+    "chosen": "обрано"
 }
