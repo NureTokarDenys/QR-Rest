@@ -55,3 +55,9 @@
 .order_btn {
   background: var(--order-notification-border);
 }
+
+@media (max-width: 768px) {
+  .text {
+    font-size: 14px;
+  }
+}

@@ -23,3 +23,19 @@
 .highlight {
   color: var(--accent-color);
 }
+
+@media (max-width: 768px) {
+  .block {
+    padding: 10px 12px;
+  }
+
+  .value {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .block {
+    flex: 0 0 calc(50% - 6px);
+  }
+}

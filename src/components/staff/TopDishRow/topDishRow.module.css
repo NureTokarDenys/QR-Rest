@@ -22,3 +22,10 @@
   color: var(--rating-text);
   font-weight: 600;
 }
+
+@media (max-width: 768px) {
+  .cell {
+    padding: 9px 10px;
+    font-size: 13px;
+  }
+}

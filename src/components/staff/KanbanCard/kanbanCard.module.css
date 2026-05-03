@@ -1,8 +1,8 @@
 .card {
   background: var(--surface-color);
   border: 1px solid var(--separator-color);
-  border-right-width: 4px; 
-  border-right-color: var(--separator-color); 
+  border-right-width: 4px;
+  border-right-color: var(--separator-color);
   border-radius: 10px;
   padding: 10px 12px;
   cursor: pointer;
@@ -61,4 +61,14 @@
   font-weight: 600;
   cursor: pointer;
   margin-top: 2px;
+}
+
+@media (max-width: 768px) {
+  .card {
+    padding: 8px 10px;
+  }
+
+  .dishName {
+    font-size: 13px;
+  }
 }

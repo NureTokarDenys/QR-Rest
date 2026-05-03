@@ -66,3 +66,29 @@
   color: var(--secondary-text);
   margin-top: 2px;
 }
+
+@media (max-width: 768px) {
+  .iconContainer {
+    width: 120px;
+    height: 120px;
+  }
+
+  .tableNum {
+    font-size: 20px;
+  }
+
+  .seats {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .iconContainer {
+    width: 100px;
+    height: 100px;
+  }
+
+  .tableNum {
+    font-size: 18px;
+  }
+}

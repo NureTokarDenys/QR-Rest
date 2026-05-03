@@ -2,6 +2,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 .periods {
@@ -50,16 +51,19 @@
 .kpiRow {
   display: flex;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 /* Secondary KPI row (v4.3) */
 .kpiRow2 {
   display: flex;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .kpiCard {
   flex: 1;
+  min-width: 160px;
   background: var(--surface-color);
   border: 1px solid var(--separator-color);
   border-radius: 14px;
@@ -196,4 +200,31 @@
 .headerIcon {
   font-size: 20px;
   color: var(--primary-text);
+}
+
+@media (max-width: 1024px) {
+  .chartsRow {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .chartsRow {
+    grid-template-columns: 1fr;
+  }
+
+  .kpiCard {
+    flex: 0 0 calc(50% - 6px);
+  }
+}
+
+@media (max-width: 480px) {
+  .kpiCard {
+    flex: 0 0 100%;
+  }
+
+  .chartBox,
+  .catBox {
+    padding: 14px;
+  }
 }

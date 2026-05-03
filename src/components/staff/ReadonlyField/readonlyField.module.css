@@ -19,3 +19,9 @@
   font-size: 14px;
   min-height: 40px;
 }
+
+@media (max-width: 480px) {
+  .field {
+    font-size: 13px;
+  }
+}

@@ -33,3 +33,13 @@
   color: var(--primary-text);
   line-height: 1.4;
 }
+
+@media (max-width: 480px) {
+  .wrapper {
+    padding: 10px;
+  }
+
+  .text {
+    font-size: 13px;
+  }
+}

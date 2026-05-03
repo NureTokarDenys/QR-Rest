@@ -7,6 +7,7 @@
 .legendRow {
   display: flex;
   gap: 20px;
+  flex-wrap: wrap;
 }
 
 .legendItem {
@@ -48,7 +49,7 @@
 
 .tablesGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   gap: 32px 20px;
   align-items: start;
 }
@@ -70,4 +71,25 @@
   font-size: 18px;
   font-weight: 700;
   color: #fff;
+}
+
+@media (max-width: 768px) {
+  .hall {
+    padding: 14px;
+  }
+
+  .tablesGrid {
+    gap: 20px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tablesGrid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 16px 10px;
+  }
+
+  .hall {
+    padding: 12px;
+  }
 }

@@ -58,3 +58,11 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+@media (max-width: 768px) {
+  .img,
+  .imgPlaceholder {
+    width: 44px;
+    height: 44px;
+  }
+}

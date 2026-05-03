@@ -26,3 +26,9 @@
 .input::placeholder {
   color: var(--secondary-text);
 }
+
+@media (max-width: 480px) {
+  .input {
+    font-size: 14px;
+  }
+}

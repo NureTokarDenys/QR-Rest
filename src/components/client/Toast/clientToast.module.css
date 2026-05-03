@@ -29,3 +29,12 @@
     width: 0%;
   }
 }
+
+@media (max-width: 480px) {
+  .toast {
+    bottom: 72px;
+    right: 12px;
+    left: 12px;
+    min-width: unset;
+  }
+}

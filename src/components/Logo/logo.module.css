@@ -43,3 +43,14 @@
 .lessWhite {
   color: #ffffff;
 }
+
+@media (max-width: 480px) {
+  .wordmark {
+    font-size: clamp(24px, 7vw, 32px);
+  }
+
+  .icon {
+    width: 56px;
+    height: 56px;
+  }
+}

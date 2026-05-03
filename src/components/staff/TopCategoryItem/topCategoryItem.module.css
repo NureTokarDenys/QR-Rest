@@ -34,3 +34,14 @@
   text-align: right;
   flex-shrink: 0;
 }
+
+@media (max-width: 480px) {
+  .name {
+    font-size: 12px;
+    width: 60px;
+  }
+
+  .pct {
+    font-size: 12px;
+  }
+}

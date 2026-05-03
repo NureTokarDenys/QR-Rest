@@ -2,6 +2,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 .count {
@@ -26,7 +27,7 @@
 .board {
   display: flex;
   gap: 12px;
-  height: calc(100vh - 140px);
+  height: calc(100dvh - 56px - 52px);
   overflow-x: auto;
 }
 
@@ -166,4 +167,10 @@
   cursor: pointer;
   font-size: 14px;
   color: var(--primary-text);
+}
+
+@media (max-width: 768px) {
+  .board {
+    height: calc(100dvh - 52px - 52px - 48px);
+  }
 }

@@ -84,3 +84,23 @@
   font-size: 12px;
   color: var(--secondary-text);
 }
+
+@media (max-width: 480px) {
+  .image {
+    width: 60px;
+    height: 60px;
+  }
+
+  .name {
+    font-size: 14px;
+  }
+
+  .price {
+    font-size: 15px;
+  }
+
+  .wrapper {
+    padding: 8px;
+    gap: 10px;
+  }
+}

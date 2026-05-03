@@ -12,6 +12,7 @@
 .statsRow {
   display: flex;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .tableBox {
@@ -56,6 +57,7 @@
 .bottom {
   display: flex;
   gap: 16px;
+  flex-wrap: wrap;
 }
 
 .commentBox {
@@ -64,6 +66,7 @@
   border-radius: 14px;
   padding: 16px;
   flex: 1;
+  min-width: 200px;
 }
 
 .commentLabel {
@@ -100,4 +103,19 @@
   font-size: 28px;
   font-weight: 800;
   color: var(--accent-color);
+}
+
+@media (max-width: 768px) {
+  .statsRow {
+    flex-wrap: wrap;
+  }
+
+  .bottom {
+    flex-direction: column;
+  }
+
+  .totalBox {
+    align-items: flex-start;
+    min-width: unset;
+  }
 }

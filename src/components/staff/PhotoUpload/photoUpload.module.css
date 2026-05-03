@@ -73,3 +73,9 @@
   align-items: center;
   justify-content: center;
 }
+
+@media (max-width: 768px) {
+  .dropzone {
+    padding: 24px 16px;
+  }
+}

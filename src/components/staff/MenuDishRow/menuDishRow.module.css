@@ -113,3 +113,15 @@
   color: var(--danger-color);
   font-size: 24px;
 }
+
+@media (max-width: 768px) {
+  .dishCell,
+  .cell {
+    padding: 10px 10px;
+    font-size: 13px;
+  }
+
+  .price {
+    font-size: 14px;
+  }
+}

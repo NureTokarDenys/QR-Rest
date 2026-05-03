@@ -43,3 +43,11 @@
   border-radius: 6px;
   white-space: nowrap;
 }
+
+@media (max-width: 768px) {
+  .box {
+    min-width: unset;
+    max-width: 100%;
+    width: 100%;
+  }
+}

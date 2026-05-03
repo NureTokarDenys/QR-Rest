@@ -14,3 +14,10 @@
   color: var(--primary-btn-disabled);
   cursor: not-allowed;
 }
+
+@media (max-width: 480px) {
+  .button {
+    height: 48px;
+    font-size: 16px;
+  }
+}

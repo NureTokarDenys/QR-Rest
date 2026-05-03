@@ -1,9 +1,8 @@
 .shell {
   display: flex;
-  width: 1440px;
-  height: 1024px;
-  max-width: 100vw;
-  max-height: 100vh;
+  width: 100vw;
+  height: 100dvh;
+  max-width: 100%;
   background: var(--bg-color);
   overflow: hidden;
   position: relative;
@@ -26,4 +25,37 @@
   flex: 1;
   overflow-y: auto;
   padding: 24px;
+}
+
+/* Sidebar backdrop for mobile */
+.sidebarBackdrop {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .content {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .shell {
+    flex-direction: column;
+  }
+
+  .mainShifted {
+    margin-right: 0;
+  }
+
+  .content {
+    padding: 12px;
+  }
+
+  .sidebarBackdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 199;
+  }
 }

@@ -7,7 +7,7 @@
   display: flex;
   gap: 20px;
   align-items: flex-start;
-  height: calc(100vh - 140px);
+  height: calc(100dvh - 140px);
 }
 
 .settingsCol {
@@ -200,4 +200,27 @@
   border-radius: 6px;
   padding: 4px 10px;
   font-size: 14px;
+}
+
+@media (max-width: 1024px) {
+  .layout {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .settingsCol {
+    width: 100%;
+    height: auto;
+  }
+
+  .previewCol {
+    height: auto;
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .previewDoc {
+    padding: 16px;
+  }
 }

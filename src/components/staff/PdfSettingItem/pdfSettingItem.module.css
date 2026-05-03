@@ -20,3 +20,9 @@
 .control {
   flex-shrink: 0;
 }
+
+@media (max-width: 768px) {
+  .label {
+    font-size: 13px;
+  }
+}

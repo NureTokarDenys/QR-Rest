@@ -4,10 +4,9 @@ import { useStaffLayout } from '../../../context/StaffLayoutContext';
 import { NOTIFICATIONS } from '../../../data/mockData';
 import styles from './staffHeader.module.css';
 
-import { MdNotifications } from "react-icons/md";
-import { MdAccessTime } from "react-icons/md";
+import { MdNotifications, MdAccessTime, MdMenu } from "react-icons/md";
 
-export default function StaffHeader({ title, backTo, rightActions }) {
+export default function StaffHeader({ title, backTo, rightActions, onMenuToggle }) {
   const navigate = useNavigate();
   const { panelOpen, togglePanel } = useStaffLayout();
   const [time, setTime] = useState('');
@@ -27,6 +26,9 @@ export default function StaffHeader({ title, backTo, rightActions }) {
   return (
     <header className={styles.header}>
       <div className={styles.left}>
+        <button className={styles.hamburger} onClick={onMenuToggle} aria-label="Menu">
+          <MdMenu />
+        </button>
         {backTo && (
           <button className={styles.back} onClick={() => navigate(backTo)}>←</button>
         )}

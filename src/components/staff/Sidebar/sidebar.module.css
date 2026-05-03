@@ -83,3 +83,21 @@
   font-size: 13px;
   color: var(--menu-secondary-text);
 }
+
+/* Mobile: hidden by default, shown as overlay drawer */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 220px;
+    height: 100dvh;
+    z-index: 200;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .sidebarMobileOpen {
+    transform: translateX(0);
+  }
+}

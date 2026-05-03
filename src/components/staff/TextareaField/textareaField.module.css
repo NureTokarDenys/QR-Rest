@@ -25,6 +25,7 @@
   resize: vertical;
   outline: none;
   transition: border-color 0.15s;
+  box-sizing: border-box;
 }
 
 .textarea:focus {
@@ -33,4 +34,10 @@
 
 .textarea::placeholder {
   color: var(--value-text);
+}
+
+@media (max-width: 480px) {
+  .textarea {
+    font-size: 13px;
+  }
 }

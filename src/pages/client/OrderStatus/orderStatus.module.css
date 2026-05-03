@@ -1,13 +1,14 @@
 .page {
-  width: 390px;
-  min-height: 844px;
+  width: 100%;
+  max-width: 480px;
+  min-height: 100dvh;
   background: var(--bg-color);
   display: flex;
   flex-direction: column;
-  max-width: 100vw;
+  margin: 0 auto;
 }
 
-.online { 
+.online {
   font-size: 12px;
   font-weight: 600;
   color: var(--success-text);
@@ -165,4 +166,14 @@
   margin-top: 50px;
   font-size: 24px;
   color: var(--primary-text);
+}
+
+@media (max-width: 480px) {
+  .content {
+    padding: 12px;
+  }
+
+  .orderId {
+    font-size: 22px;
+  }
 }

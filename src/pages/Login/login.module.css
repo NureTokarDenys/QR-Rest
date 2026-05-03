@@ -6,15 +6,19 @@
   justify-content: center;
   align-items: center;
   padding: 20px;
+  box-sizing: border-box;
 }
 
 .container {
-  width: 390px;
-  max-width: 100%;
+  width: 100%;
+  max-width: 360px;
   background: var(--bg-color);
   display: flex;
   flex-direction: column;
   gap: 24px;
+  padding: 24px;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .logoSection {
@@ -95,6 +99,7 @@
   font-weight: 600;
   cursor: pointer;
   transition: border-color 0.15s, box-shadow 0.15s;
+  box-sizing: border-box;
 }
 
 .googleBtn:hover {
@@ -106,4 +111,17 @@
   width: 20px;
   height: 20px;
   flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 16px;
+    gap: 18px;
+  }
+
+  .page {
+    padding: 12px;
+    align-items: flex-start;
+    padding-top: 40px;
+  }
 }

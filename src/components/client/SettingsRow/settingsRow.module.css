@@ -150,3 +150,14 @@
   flex-shrink: 0;
   color: var(--icon-color);
 }
+
+@media (max-width: 480px) {
+  .row {
+    padding: 12px 14px;
+  }
+
+  .label,
+  .value {
+    font-size: 14px;
+  }
+}

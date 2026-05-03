@@ -10,7 +10,7 @@
   border: 1px solid var(--separator-color);
   border-radius: 14px;
   overflow: hidden;
-  height: calc(100vh - 140px);
+  height: calc(100dvh - 140px);
 }
 
 .right {
@@ -67,4 +67,12 @@
   border-radius: 6px;
   padding: 4px 10px;
   font-size: 16px;
+}
+
+@media (max-width: 768px) {
+  .layout {
+    flex-direction: column;
+    height: auto;
+    min-height: calc(100dvh - 120px);
+  }
 }

@@ -43,3 +43,15 @@
   color: var(--secondary-text);
   text-align: center;
 }
+
+@media (max-width: 768px) {
+  .qrPlaceholder {
+    width: 100px;
+    height: 100px;
+  }
+
+  .qrGrid {
+    width: 76px;
+    height: 76px;
+  }
+}

@@ -24,3 +24,11 @@
   font-weight: 500;
   color: var(--accent-color);
 }
+
+@media (max-width: 480px) {
+  .qty,
+  .name,
+  .price {
+    font-size: 14px;
+  }
+}

@@ -68,3 +68,17 @@
   align-items: center;
   justify-content: center;
 }
+
+@media (max-width: 480px) {
+  .name {
+    font-size: 12px;
+  }
+
+  .price {
+    font-size: 14px;
+  }
+
+  .body {
+    padding: 6px 8px 8px;
+  }
+}

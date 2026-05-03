@@ -15,7 +15,7 @@ const NAV = [
   { path: '/staff/settings',  icon: <MdSettings />,          labelKey: 'nav_settings' },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen = false, onClose = () => {} }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation('components');
@@ -25,7 +25,7 @@ export default function Sidebar() {
   const roleName = isAdmin ? t('role_admin') : t('role_waiter');
 
   return (
-    <aside className={styles.sidebar}>
+    <aside className={`${styles.sidebar} ${isOpen ? styles.sidebarMobileOpen : ''}`}>
       <div className={styles.logoWrap}>
         <Logo compact />
       </div>
@@ -37,7 +37,7 @@ export default function Sidebar() {
             <button
               key={item.path}
               className={`${styles.navItem} ${active ? styles.active : ''}`}
-              onClick={() => navigate(item.path)}
+              onClick={() => { navigate(item.path); onClose(); }}
             >
               <span className={styles.navIcon}>{item.icon}</span>
               <span className={styles.navLabel}>{t(item.labelKey)}</span>

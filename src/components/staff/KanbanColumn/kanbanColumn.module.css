@@ -1,6 +1,6 @@
 .column {
   flex: 1;
-  min-width: 280px;
+  min-width: 200px;
   background: var(--bg-color);
   border-radius: 12px;
   padding: 12px;
@@ -36,4 +36,11 @@
 
 .cards > * {
   pointer-events: auto;
+}
+
+@media (max-width: 768px) {
+  .column {
+    min-width: 200px;
+    padding: 10px;
+  }
 }

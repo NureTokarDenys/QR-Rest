@@ -109,3 +109,26 @@
   color: #dc2626;
   font-size: 16px;
 }
+
+@media (max-width: 768px) {
+  .wrapper {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--separator-color);
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 10px;
+    gap: 4px;
+  }
+
+  .header {
+    width: 100%;
+    margin-bottom: 2px;
+  }
+
+  .item {
+    width: auto;
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+}

@@ -1,10 +1,11 @@
 .page {
-  width: 390px;
-  min-height: 844px;
+  width: 100%;
+  max-width: 480px;
+  min-height: 100dvh;
   background: var(--bg-color);
   display: flex;
   flex-direction: column;
-  max-width: 100vw;
+  margin: 0 auto;
 }
 
 .content {
@@ -41,4 +42,16 @@
 .email {
   font-size: 14px;
   color: var(--primary-text);
+}
+
+@media (max-width: 480px) {
+  .avatar {
+    padding: 20px 12px;
+  }
+
+  .avatarCircle {
+    width: 60px;
+    height: 60px;
+    font-size: 28px;
+  }
 }

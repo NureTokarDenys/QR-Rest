@@ -54,3 +54,10 @@
   font-size: 20px;
   color: var(--accent-color);
 }
+
+@media (max-width: 768px) {
+  .panel {
+    width: 100%;
+    max-width: 320px;
+  }
+}

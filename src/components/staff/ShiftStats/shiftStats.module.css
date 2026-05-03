@@ -24,3 +24,9 @@
   font-weight: 700;
   color: var(--primary-text);
 }
+
+@media (max-width: 768px) {
+  .row {
+    font-size: 13px;
+  }
+}
