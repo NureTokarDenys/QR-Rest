@@ -4,7 +4,9 @@ import { AppProvider } from './context/AppContext';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { ClientToastProvider } from "./context/ClientToastContext";
+import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
+import Forbidden from './pages/Forbidden';
 import Menu from './pages/client/Menu';
 import Category from './pages/client/Category';
 import DishDetail from './pages/client/DishDetail';
@@ -23,6 +25,11 @@ import PdfGenerator from './pages/staff/PdfGenerator';
 import Analytics from './pages/staff/Analytics';
 import StaffSettings from './pages/staff/StaffSettings';
 
+// Helper to wrap a page with ProtectedRoute
+function Guard({ roles, children }) {
+  return <ProtectedRoute requiredRoles={roles}>{children}</ProtectedRoute>;
+}
+
 export default function App() {
   return (
     <AuthProvider>
@@ -33,6 +40,9 @@ export default function App() {
             <Routes>
               <Route path="/" element={<Navigate to="/login" replace />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/forbidden" element={<Forbidden />} />
+
+              {/* Client routes — open to everyone */}
               <Route path="/menu" element={<Menu />} />
               <Route path="/category/:id" element={<Category />} />
               <Route path="/dish/:id" element={<DishDetail />} />
@@ -43,17 +53,39 @@ export default function App() {
               <Route path="/profile" element={<Profile />} />
               <Route path="/order-history" element={<OrderHistory />} />
 
+              {/* Staff routes — role-gated */}
               <Route path="/staff" element={<Navigate to="/staff/map" replace />} />
-              <Route path="/staff/map" element={<TableMap />} />
-              <Route path="/staff/table/:id" element={<TableDetail />} />
-              <Route path="/staff/cooking" element={<Cooking />} />
-              <Route path="/staff/order/:id" element={<OrderDetail />} />
-              <Route path="/staff/menu" element={<MenuManagement />} />
-              <Route path="/staff/menu/dish/new" element={<DishEdit />} />
-              <Route path="/staff/menu/dish/:id" element={<DishEdit />} />
-              <Route path="/staff/menu/pdf" element={<PdfGenerator />} />
-              <Route path="/staff/analytics" element={<Analytics />} />
-              <Route path="/staff/settings" element={<StaffSettings />} />
+
+              <Route path="/staff/map" element={
+                <Guard roles={['admin', 'waiter']}><TableMap /></Guard>
+              } />
+              <Route path="/staff/table/:id" element={
+                <Guard roles={['admin', 'waiter']}><TableDetail /></Guard>
+              } />
+              <Route path="/staff/cooking" element={
+                <Guard roles={['admin', 'cook']}><Cooking /></Guard>
+              } />
+              <Route path="/staff/order/:id" element={
+                <Guard roles={['admin', 'waiter', 'cook']}><OrderDetail /></Guard>
+              } />
+              <Route path="/staff/menu" element={
+                <Guard roles={['admin']}><MenuManagement /></Guard>
+              } />
+              <Route path="/staff/menu/dish/new" element={
+                <Guard roles={['admin']}><DishEdit /></Guard>
+              } />
+              <Route path="/staff/menu/dish/:id" element={
+                <Guard roles={['admin']}><DishEdit /></Guard>
+              } />
+              <Route path="/staff/menu/pdf" element={
+                <Guard roles={['admin']}><PdfGenerator /></Guard>
+              } />
+              <Route path="/staff/analytics" element={
+                <Guard roles={['admin']}><Analytics /></Guard>
+              } />
+              <Route path="/staff/settings" element={
+                <Guard roles={['admin', 'waiter', 'cook']}><StaffSettings /></Guard>
+              } />
             </Routes>
           </ClientToastProvider>
         </ThemeProvider>

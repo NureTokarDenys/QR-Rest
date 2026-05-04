@@ -1,0 +1,17 @@
+{
+  "title": "Access Denied",
+  "subtitle": "You don't have permission to view this page",
+  "your_role": "Your role",
+  "required_role": "Required role",
+  "no_role": "Guest (not signed in)",
+  "role_guest": "Guest",
+  "role_admin": "Administrator",
+  "role_waiter": "Waiter",
+  "role_cook": "Cook",
+  "role_any_staff": "Any staff member",
+  "role_unknown": "Unknown role",
+  "go_back": "Go back",
+  "go_login": "Sign in",
+  "go_menu": "Go to menu",
+  "hint": "Contact an administrator if you believe this is a mistake."
+}
