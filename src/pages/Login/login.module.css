@@ -40,6 +40,17 @@
   gap: 14px;
 }
 
+.errorMsg {
+  font-size: 13px;
+  font-weight: 500;
+  color: #e53935;
+  background: #fff0f0;
+  border: 1px solid #ffcdd2;
+  border-radius: 8px;
+  padding: 8px 12px;
+  line-height: 1.4;
+}
+
 .actions {
   display: flex;
   flex-direction: column;
