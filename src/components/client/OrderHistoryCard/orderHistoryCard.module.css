@@ -1,10 +1,15 @@
 .card {
   background: var(--surface-color);
   border-radius: 14px;
-  padding: 14px;
+  padding: 14px 16px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
+  transition: box-shadow 0.15s;
+}
+
+.card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
 }
 
 .top {
@@ -22,33 +27,17 @@
 .badge {
   font-size: 12px;
   font-weight: 600;
-  padding: 3px 9px;
+  padding: 3px 10px;
   border-radius: 8px;
   display: flex;
   align-items: center;
-  gap: 4px; /* Додано для відступу між іконкою та текстом статусу */
+  gap: 4px;
 }
 
-/* Нові статуси замовлення */
-.waiting {
-  background: var(--order-status-waiting-bg);
-  color: var(--order-status-waiting-text);
-}
-
-.cooking {
-  background: var(--order-status-cooking-bg);
-  color: var(--order-status-cooking-text);
-}
-
-.ready {
-  background: var(--order-status-ready-bg);
-  color: var(--order-status-ready-text);
-}
-
-.served {
-  background: var(--badge-done-bg);
-  color: var(--badge-done-text);
-}
+.waiting { background: var(--order-status-waiting-bg); color: var(--order-status-waiting-text); }
+.cooking { background: var(--order-status-cooking-bg); color: var(--order-status-cooking-text); }
+.ready   { background: var(--order-status-ready-bg);   color: var(--order-status-ready-text);   }
+.served  { background: var(--badge-done-bg);            color: var(--badge-done-text);            }
 
 .date {
   font-size: 13px;
@@ -59,11 +48,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
 .total {
-  font-size: 14px;
+  font-size: 15px;
+  font-weight: 600;
   color: var(--primary-text);
 }
 
@@ -74,14 +64,18 @@
   color: var(--accent-color);
   cursor: pointer;
   padding: 0;
+  font-weight: 500;
 }
 
-@media (max-width: 480px) {
-  .card {
-    padding: 12px;
-  }
+/* ════════ Responsive ════════ */
 
-  .id {
-    font-size: 14px;
+@media (min-width: 600px) {
+  .id   { font-size: 16px; }
+  .date { font-size: 14px; }
+}
+
+@media (min-width: 1024px) {
+  .card {
+    padding: 18px 20px;
   }
 }

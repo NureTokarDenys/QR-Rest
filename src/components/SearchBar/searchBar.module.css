@@ -4,8 +4,14 @@
   gap: 8px;
   background: var(--bg-color);
   border-radius: 12px;
-  padding: 0 12px;
-  min-height: 40px;
+  padding: 0 14px;
+  min-height: 44px;
+  border: 1.5px solid transparent;
+  transition: border-color 0.15s;
+}
+
+.wrapper:focus-within {
+  border-color: var(--primary-btn-active);
 }
 
 .icon {
@@ -27,8 +33,20 @@
   color: var(--secondary-text);
 }
 
-@media (max-width: 480px) {
+/* ════════ Responsive ════════ */
+
+@media (min-width: 768px) {
+  .wrapper {
+    min-height: 48px;
+    border-radius: 14px;
+    padding: 0 16px;
+  }
+
   .input {
-    font-size: 14px;
+    font-size: 16px;
+  }
+
+  .icon {
+    font-size: 22px;
   }
 }

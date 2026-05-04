@@ -4,6 +4,12 @@
   overflow: hidden;
   aspect-ratio: 1;
   cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.14);
 }
 
 .image {
@@ -15,37 +21,51 @@
 .overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, transparent 30%, rgba(0,0,0,0.6) 100%);
+  background: linear-gradient(to bottom, transparent 20%, rgba(0,0,0,0.65) 100%);
 }
 
 .content {
   position: absolute;
   bottom: 10px;
   left: 12px;
+  right: 8px;
   color: var(--surface-color);
 }
 
 .name {
   display: block;
-  font-size: 18px;
+  font-size: clamp(14px, 3.5vw, 18px);
   font-weight: 700;
   color: var(--menu-primary-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .count {
   display: block;
-  font-size: 13px;
-  opacity: 0.9;
+  font-size: clamp(11px, 2.5vw, 13px);
+  opacity: 0.85;
   color: var(--menu-secondary-text);
+  margin-top: 1px;
 }
 
-@media (max-width: 480px) {
-  .name {
-    font-size: clamp(14px, 4vw, 18px);
+/* ════════ Responsive ════════ */
+
+@media (min-width: 600px) {
+  .content {
+    bottom: 12px;
+    left: 14px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .card {
+    border-radius: 20px;
   }
 
   .content {
-    bottom: 8px;
-    left: 10px;
+    bottom: 16px;
+    left: 18px;
   }
 }

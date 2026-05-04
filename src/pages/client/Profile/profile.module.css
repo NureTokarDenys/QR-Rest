@@ -1,17 +1,22 @@
 .page {
   width: 100%;
-  max-width: 480px;
   min-height: 100dvh;
   background: var(--bg-color);
   display: flex;
   flex-direction: column;
-  margin: 0 auto;
+  padding-bottom: 76px;
+  box-sizing: border-box;
 }
 
 .content {
   flex: 1;
+  max-width: 480px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
   padding-bottom: 16px;
-  overflow-y: auto;
+  box-sizing: border-box;
 }
 
 .avatar {
@@ -19,39 +24,80 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 24px 16px;
-  gap: 8px;
+  padding: 32px 16px;
+  gap: 10px;
 }
 
 .avatarCircle {
-  width: 72px;
-  height: 72px;
-  background: var(--primary-text);
+  width: 80px;
+  height: 80px;
+  background: rgba(255,255,255,0.2);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 36px;
 }
 
 .avatarIcon {
-  color: var(--accent-color);
-  font-size: 36px;
+  color: #fff;
+  font-size: 40px;
 }
 
 .email {
-  font-size: 14px;
-  color: var(--primary-text);
+  font-size: 15px;
+  color: rgba(255,255,255,0.9);
+  font-weight: 500;
 }
 
-@media (max-width: 480px) {
+/* ════════ Responsive ════════ */
+
+@media (min-width: 600px) {
+  .content {
+    max-width: 640px;
+  }
+
+  .avatar {
+    padding: 40px 24px;
+  }
+
+  .avatarCircle {
+    width: 96px;
+    height: 96px;
+  }
+
+  .avatarIcon {
+    font-size: 48px;
+  }
+}
+
+@media (min-width: 768px) {
+  .content {
+    max-width: 720px;
+  }
+
+  .avatar {
+    border-radius: 0 0 24px 24px;
+    padding: 48px 32px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .content {
+    max-width: 860px;
+  }
+}
+
+@media (max-width: 380px) {
   .avatar {
     padding: 20px 12px;
   }
 
   .avatarCircle {
-    width: 60px;
-    height: 60px;
-    font-size: 28px;
+    width: 64px;
+    height: 64px;
+  }
+
+  .avatarIcon {
+    font-size: 32px;
   }
 }
