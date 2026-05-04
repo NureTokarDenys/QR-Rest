@@ -15,15 +15,23 @@ export default function Login() {
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  // Store error as { key, serverMsg } so t(key) re-evaluates on locale change.
+  // serverMsg holds a raw API message that isn't translatable.
+  const [errorKey, setErrorKey] = useState('');
+  const [serverMsg, setServerMsg] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // Derive the displayed error string at render time so locale switches work
+  const error = errorKey === 'server' ? serverMsg : errorKey ? t(errorKey) : '';
 
   async function handleLogin() {
     if (!email || !password) {
-      setError(t('fill_fields') || 'Please fill in all fields');
+      setErrorKey('fill_fields');
+      setServerMsg('');
       return;
     }
-    setError('');
+    setErrorKey('');
+    setServerMsg('');
     setLoading(true);
     try {
       const user = await login(email, password);
@@ -34,12 +42,15 @@ export default function Login() {
       }
     } catch (err) {
       console.error('Login error:', err);
-      setError(
-        err?.response?.data?.message ||
-        err?.message ||
-        t('login_error') ||
-        'Login failed. Please check your credentials.'
-      );
+      const apiMsg = err?.response?.data?.message;
+      if (apiMsg) {
+        // Raw server message — not translatable, display as-is
+        setErrorKey('server');
+        setServerMsg(apiMsg);
+      } else {
+        setErrorKey('login_error');
+        setServerMsg('');
+      }
     } finally {
       setLoading(false);
     }
