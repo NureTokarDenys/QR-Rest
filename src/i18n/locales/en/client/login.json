@@ -5,5 +5,7 @@
     "login": "Login",
     "guest_mode": "Guest mode",
     "or": "or",
-    "google_login": "Sign in with Google"
+    "google_login": "Sign in with Google",
+    "fill_fields": "Please fill in all fields",
+    "login_error": "Login failed. Please check your credentials and try again."
 }
