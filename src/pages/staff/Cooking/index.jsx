@@ -1,8 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import StaffShell from '../../../components/staff/StaffShell';
 import KanbanColumn from '../../../components/staff/KanbanColumn';
-import { KANBAN_ITEMS, TABLES } from '../../../data/mockData';
+import { KANBAN_ITEMS } from '../../../data/mockData';
+import { getKitchenOrders, updateItemStatus } from '../../../api/kitchen';
 import styles from './cooking.module.css';
 
 import { MdLocalFireDepartment, MdViewColumn, MdTableChart } from 'react-icons/md';
@@ -22,24 +23,72 @@ const getOrderColor = (orderId) => {
   return ORDER_COLORS[hash % ORDER_COLORS.length];
 };
 
+function flattenOrders(orders) {
+  if (!Array.isArray(orders) || orders.length === 0) return null;
+  return orders.flatMap(order => {
+    const orderId = order._id || order.id;
+    const tableNum = order.table?.number ?? order.tableNumber ?? order.tableId ?? 0;
+    return (order.items || []).map(item => ({
+      id: item._id || item.id,
+      orderId,
+      tableId: tableNum,
+      dishName: (typeof item.menuItemId === 'object' ? item.menuItemId?.name : null) || item.name || item.dishName || '—',
+      status: item.dishStatus || item.status || 'waiting',
+    }));
+  });
+}
+
 export default function Cooking() {
   const { t } = useTranslation('cooking');
   const { t: tc } = useTranslation('components');
   const [items, setItems] = useState(KANBAN_ITEMS);
   const [view, setView] = useState('order'); // 'order' | 'table'
+  const [loading, setLoading] = useState(true);
 
-  function handleStatusChange(itemId, newStatus) {
+  const fetchOrders = useCallback(async () => {
+    try {
+      const data = await getKitchenOrders('order');
+      const flattened = flattenOrders(data);
+      if (flattened !== null) setItems(flattened);
+    } catch (err) {
+      console.error('getKitchenOrders error:', err);
+      // keep mock data as fallback
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchOrders();
+    const interval = setInterval(fetchOrders, 15000);
+    return () => clearInterval(interval);
+  }, [fetchOrders]);
+
+  async function handleStatusChange(itemId, newStatus) {
+    // Optimistic update
     setItems(prev => prev.map(it =>
       String(it.id) === String(itemId) ? { ...it, status: newStatus } : it
     ));
+    // Find orderId for this item
+    const item = items.find(it => String(it.id) === String(itemId));
+    if (item?.orderId) {
+      try {
+        await updateItemStatus(item.orderId, itemId, newStatus);
+      } catch (err) {
+        console.error('updateItemStatus error:', err);
+        // Revert on failure
+        fetchOrders();
+      }
+    }
   }
 
   function handleTableGroupReady(tableId) {
-    setItems(prev => prev.map(it =>
-      it.tableId === tableId && it.status !== 'served'
-        ? { ...it, status: STATUSES[Math.min(STATUSES.indexOf(it.status) + 1, STATUSES.length - 1)] }
-        : it
-    ));
+    items
+      .filter(it => it.tableId === tableId && it.status !== 'served')
+      .forEach(it => {
+        const next = STATUSES[Math.min(STATUSES.indexOf(it.status) + 1, STATUSES.length - 1)];
+        handleStatusChange(it.id, next);
+      });
   }
 
   const enrichedItems = useMemo(() => items.map(item => ({
@@ -47,7 +96,6 @@ export default function Cooking() {
     orderColor: getOrderColor(item.orderId)
   })), [items]);
 
-  const activeItems = enrichedItems.filter(it => it.status !== 'served');
   const totalDishes = items.filter(it => it.status !== 'served').length;
 
   const tableGroups = useMemo(() => {

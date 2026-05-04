@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
+import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { ClientToastProvider } from "./context/ClientToastContext";
 import Login from './pages/Login';
@@ -24,6 +25,7 @@ import StaffSettings from './pages/staff/StaffSettings';
 
 export default function App() {
   return (
+    <AuthProvider>
     <AppProvider>
       <BrowserRouter>
         <ThemeProvider>
@@ -57,5 +59,6 @@ export default function App() {
         </ThemeProvider>
       </BrowserRouter>
     </AppProvider>
+    </AuthProvider>
   );
 }

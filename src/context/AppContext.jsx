@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState } from 'react';
 import { orderHistory as initialOrderHistory } from '../data/mockData';
+import { scanQR } from '../api/qr';
+import { createOrder } from '../api/orders';
 
 const AppContext = createContext(null);
 
@@ -8,12 +10,38 @@ const DEFAULT_GROUP_ID = 'main';
 export function AppProvider({ children }) {
   const [orderHistory, setOrderHistory] = useState(initialOrderHistory);
   const [cart, setCart] = useState([]);
-  const [tableNumber] = useState(5);
   const [currentOrder, setCurrentOrder] = useState(null);
   const [orderComment, setOrderComment] = useState('');
   const [servingGroups, setServingGroups] = useState([
     { id: DEFAULT_GROUP_ID, name: 'Основна група', name_en: 'Main group' }
   ]);
+
+  // Session / table state (read from localStorage, kept in sync)
+  const [sessionToken, setSessionToken] = useState(() => localStorage.getItem('sessionToken'));
+  const [tableId, setTableId] = useState(() => localStorage.getItem('tableId'));
+  const [tableNumber, setTableNumber] = useState(
+    () => localStorage.getItem('tableNumber') || '5'
+  );
+  const [restaurantId, setRestaurantId] = useState(() => localStorage.getItem('restaurantId'));
+
+  async function initSession(shortCode) {
+    try {
+      const data = await scanQR(shortCode);
+      const { sessionToken: st, tableId: tid, tableNumber: tn, restaurantId: rid } = data;
+      localStorage.setItem('sessionToken', st);
+      localStorage.setItem('tableId', String(tid));
+      localStorage.setItem('tableNumber', String(tn));
+      localStorage.setItem('restaurantId', String(rid));
+      setSessionToken(st);
+      setTableId(String(tid));
+      setTableNumber(String(tn));
+      setRestaurantId(String(rid));
+      return data;
+    } catch (err) {
+      console.error('initSession error:', err);
+      throw err;
+    }
+  }
 
   // cartItem shape: { cartItemId, id, name, name_en, price, image,
   //   quantity, groupId,
@@ -113,6 +141,50 @@ export function AppProvider({ children }) {
     setOrderHistory(prevHistory => [newOrder, ...prevHistory]);
   };
 
+  async function submitOrder() {
+    try {
+      const currentTableId = tableId || localStorage.getItem('tableId');
+      const currentSessionToken = sessionToken || localStorage.getItem('sessionToken');
+
+      // Build serving groups for API (exclude default)
+      const apiServingGroups = servingGroups
+        .filter(g => g.id !== DEFAULT_GROUP_ID)
+        .map((g, i) => ({ name: g.name, sortOrder: i + 1 }));
+
+      const items = cart.map(item => ({
+        menuItemId: item.id,
+        qty: item.quantity,
+        excludedIngredients: (item.excludedIngredients || []).map(i =>
+          typeof i === 'object' ? i.id : i
+        ),
+        addons: (item.selectedAddons || []).map(a => ({
+          addOnId: typeof a === 'object' ? a.id : a,
+          quantity: 1,
+        })),
+        comment: item.comment || '',
+        servingGroupId: item.groupId !== DEFAULT_GROUP_ID ? item.groupId : undefined,
+      }));
+
+      const payload = {
+        tableId: currentTableId,
+        sessionToken: currentSessionToken,
+        items,
+        servingGroups: apiServingGroups,
+      };
+
+      const result = await createOrder(payload);
+      const orderId = result?._id || result?.id;
+      if (orderId) {
+        localStorage.setItem('orderId', String(orderId));
+      }
+      clearCart();
+      return result;
+    } catch (err) {
+      console.error('submitOrder error:', err);
+      throw err;
+    }
+  }
+
   const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -121,6 +193,9 @@ export function AppProvider({ children }) {
       cart, addToCart, removeFromCart, updateQuantity, clearCart, moveToGroup,
       cartTotal, cartCount,
       tableNumber,
+      sessionToken, tableId, restaurantId,
+      initSession,
+      submitOrder,
       currentOrder, setCurrentOrder,
       orderHistory, addOrderToHistory,
       orderComment, setOrderComment,

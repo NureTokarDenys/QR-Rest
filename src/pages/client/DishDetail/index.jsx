@@ -1,15 +1,57 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../../../context/AppContext';
 import ReviewItem from '../../../components/client/ReviewItem';
 import PrimaryButton from '../../../components/PrimaryButton';
 import { getDishById } from '../../../data/mockData';
+import { getDishDetail } from '../../../api/menu';
 import styles from './dishDetail.module.css';
 import { useToast } from '../../../context/ClientToastContext';
 import { useTranslation } from 'react-i18next';
 import { useLocalField } from '../../../i18n/useLang';
 
 const MAX_COMMENT = 300;
+
+function normaliseDish(raw) {
+  if (!raw) return null;
+  // Map API shape to internal shape used by addToCart and rendering
+  return {
+    id: raw._id || raw.id,
+    name: raw.name,
+    name_en: raw.name_en || raw.name,
+    price: raw.basePrice !== undefined ? raw.basePrice : raw.price,
+    image: raw.imageUrl || raw.image,
+    description: raw.description,
+    description_en: raw.description_en || raw.description,
+    rating: raw.rating,
+    reviewCount: raw.reviewCount,
+    reviews: raw.reviews || [],
+    ingredientsList: (raw.ingredients || raw.ingredientsList || []).map(i => ({
+      id: i._id || i.id,
+      name: i.name,
+      name_en: i.name_en || i.name,
+      isRemovable: i.isRemovable,
+    })),
+    addons: (raw.addons || []).map(a => ({
+      id: a._id || a.id,
+      name: a.name,
+      name_en: a.name_en || a.name,
+      price: a.price,
+    })),
+    componentGroups: (raw.componentGroups || []).map(g => ({
+      id: g._id || g.id,
+      name: g.name,
+      name_en: g.name_en || g.name,
+      isRequired: g.isRequired,
+      options: (g.options || []).map(o => ({
+        id: o._id || o.id,
+        name: o.name,
+        name_en: o.name_en || o.name,
+        priceModifier: o.priceModifier,
+      })),
+    })),
+  };
+}
 
 export default function DishDetail() {
   const { t: t1 } = useTranslation('clientToast');
@@ -19,15 +61,46 @@ export default function DishDetail() {
   const local = useLocalField();
   const { id } = useParams();
   const navigate = useNavigate();
-  const dish = getDishById(id);
   const { addToCart } = useApp();
   const { showToast } = useToast();
+
+  const [dish, setDish] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const [quantity, setQuantity] = useState(1);
   const [excludedIngredients, setExcludedIngredients] = useState([]);
   const [selectedAddons, setSelectedAddons] = useState([]);
   const [componentGroupSelections, setComponentGroupSelections] = useState({});
   const [comment, setComment] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+
+    getDishDetail(id)
+      .then((data) => {
+        if (!cancelled) {
+          setDish(normaliseDish(data));
+        }
+      })
+      .catch((err) => {
+        console.error('getDishDetail error:', err);
+        if (!cancelled) {
+          // Fallback to mock data
+          const mockDish = getDishById(id);
+          setDish(mockDish || null);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => { cancelled = true; };
+  }, [id]);
+
+  if (loading) {
+    return <div className={styles.notFound}>Завантаження...</div>;
+  }
 
   if (!dish) return <div className={styles.notFound}>{t2('dish_not_found')}</div>;
 
@@ -94,13 +167,15 @@ export default function DishDetail() {
       <div className={styles.content}>
         <h1 className={styles.name}>{local(dish, 'name')}</h1>
 
-        <div className={styles.ratingRow}>
-          {[1, 2, 3, 4, 5].map(i => (
-            <span key={i} className={i <= Math.floor(dish.rating) ? styles.starFilled : styles.starEmpty}>★</span>
-          ))}
-          <span className={styles.ratingVal}>{dish.rating}</span>
-          <span className={styles.reviewCount}>· {dish.reviewCount} {t3('review', { count: dish.reviewCount })}</span>
-        </div>
+        {dish.rating !== undefined && (
+          <div className={styles.ratingRow}>
+            {[1, 2, 3, 4, 5].map(i => (
+              <span key={i} className={i <= Math.floor(dish.rating) ? styles.starFilled : styles.starEmpty}>★</span>
+            ))}
+            <span className={styles.ratingVal}>{dish.rating}</span>
+            <span className={styles.reviewCount}>· {dish.reviewCount} {t3('review', { count: dish.reviewCount })}</span>
+          </div>
+        )}
 
         <p className={styles.description}>{local(dish, 'description')}</p>
 

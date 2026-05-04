@@ -6,13 +6,48 @@ import PrimaryButton from '../../components/PrimaryButton';
 import SecondaryButton from '../../components/SecondaryButton';
 import styles from './login.module.css';
 import { useTranslation } from 'react-i18next';
+import { useAuth } from '../../context/AuthContext';
 
 export default function Login() {
   const { i18n } = useTranslation();
   const { t } = useTranslation('login');
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  async function handleLogin() {
+    if (!email || !password) {
+      setError(t('fill_fields') || 'Please fill in all fields');
+      return;
+    }
+    setError('');
+    setLoading(true);
+    try {
+      const user = await login(email, password);
+      if (user && ['admin', 'waiter', 'cook'].includes(user.role)) {
+        navigate('/staff/map');
+      } else {
+        navigate('/menu');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError(
+        err?.response?.data?.message ||
+        err?.message ||
+        t('login_error') ||
+        'Login failed. Please check your credentials.'
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function handleKeyDown(e) {
+    if (e.key === 'Enter') handleLogin();
+  }
 
   return (
     <div className={styles.page}>
@@ -25,11 +60,11 @@ export default function Login() {
         <div className={styles.form}>
           <InputField
             label={t('email')}
-
             placeholder="email@example.com"
             type="email"
             value={email}
             onChange={e => setEmail(e.target.value)}
+            onKeyDown={handleKeyDown}
           />
           <InputField
             label={t('password')}
@@ -37,11 +72,17 @@ export default function Login() {
             type="password"
             value={password}
             onChange={e => setPassword(e.target.value)}
+            onKeyDown={handleKeyDown}
           />
+          {error && <p className={styles.errorMsg}>{error}</p>}
         </div>
 
         <div className={styles.actions}>
-          <PrimaryButton label={t('login')} onClick={() => navigate('/staff')} />
+          <PrimaryButton
+            label={loading ? '...' : t('login')}
+            onClick={handleLogin}
+            disabled={loading}
+          />
           <div className={styles.divider}><span>{t('or')}</span></div>
           <button className={styles.googleBtn} onClick={() => navigate('/menu')}>
             <svg className={styles.googleIcon} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -57,15 +98,15 @@ export default function Login() {
         </div>
 
         <div className={styles.langRow}>
-          <button 
+          <button
             className={`${styles.langBtn} ${i18n.language === 'ua' ? styles.langActive : ''}`}
             onClick={() => i18n.changeLanguage('ua')}
           >
             UA
           </button>
-          
-          <button 
-            className={`${styles.langBtn} ${i18n.language === 'en' ? styles.langActive : ''}`} 
+
+          <button
+            className={`${styles.langBtn} ${i18n.language === 'en' ? styles.langActive : ''}`}
             onClick={() => i18n.changeLanguage('en')}
           >
             EN

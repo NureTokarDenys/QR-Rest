@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import StaffShell from '../../../components/staff/StaffShell';
@@ -7,14 +7,37 @@ import MenuDishRow from '../../../components/staff/MenuDishRow';
 import SearchBar from '../../../components/SearchBar';
 import PrimaryButton from '../../../components/PrimaryButton';
 import SecondaryButton from '../../../components/SecondaryButton';
-import { dishes as dishesData, categories as initialCategories } from '../../../data/mockData';
+import { dishes as dishesData, categories as mockCategories } from '../../../data/mockData';
+import { getCategories, getMenuItems, deleteMenuItem } from '../../../api/admin';
 import styles from './menuManagement.module.css';
 import { MdOutlineRestaurant } from "react-icons/md";
 
-const flattenDishes = (dishesObj) =>
+const flattenMockDishes = (dishesObj) =>
   Object.entries(dishesObj).flatMap(([categoryId, items]) =>
     items.map(dish => ({ ...dish, category: categoryId, available: true }))
   );
+
+function normaliseApiDish(item) {
+  return {
+    id: item._id || item.id,
+    name: item.name,
+    name_en: item.name_en || item.name,
+    price: item.basePrice ?? item.price,
+    image: item.imageUrl || item.image,
+    category: item.categoryId?._id || item.categoryId || item.category,
+    available: item.isAvailable ?? item.available ?? true,
+  };
+}
+
+function normaliseApiCategory(cat) {
+  return {
+    id: cat._id || cat.id,
+    name: cat.name,
+    name_en: cat.name_en || cat.name,
+    count: cat.itemCount ?? (cat.items?.length) ?? 0,
+    image: cat.image || null,
+  };
+}
 
 export default function MenuManagement() {
   const navigate = useNavigate();
@@ -22,14 +45,38 @@ export default function MenuManagement() {
   const { i18n } = useTranslation();
   const [selectedCat, setSelectedCat] = useState('all');
   const [query, setQuery] = useState('');
-  const [dishes, setDishes] = useState(() => flattenDishes(dishesData));
-  const [cats, setCats] = useState(initialCategories);
+  const [dishes, setDishes] = useState(() => flattenMockDishes(dishesData));
+  const [cats, setCats] = useState(mockCategories);
+  const [usingApi, setUsingApi] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        const [apiCats, apiItems] = await Promise.all([getCategories(), getMenuItems()]);
+        if (cancelled) return;
+        if (Array.isArray(apiCats) && apiCats.length > 0) {
+          setCats(apiCats.map(normaliseApiCategory));
+          setUsingApi(true);
+        }
+        if (Array.isArray(apiItems) && apiItems.length > 0) {
+          setDishes(apiItems.map(normaliseApiDish));
+        }
+      } catch (err) {
+        console.error('MenuManagement load error:', err);
+      }
+    }
+    load();
+    return () => { cancelled = true; };
+  }, []);
 
   const filtered = dishes.filter(d => {
-    const matchCat = selectedCat === 'all' || d.category === selectedCat;
+    const matchCat = selectedCat === 'all' || String(d.category) === String(selectedCat);
+    const name = d.name || '';
+    const name_en = d.name_en || '';
     const matchQ = !query.trim() ||
-      d.name.toLowerCase().includes(query.toLowerCase()) ||
-      d.name_en.toLowerCase().includes(query.toLowerCase());
+      name.toLowerCase().includes(query.toLowerCase()) ||
+      name_en.toLowerCase().includes(query.toLowerCase());
     return matchCat && matchQ;
   });
 
@@ -37,8 +84,16 @@ export default function MenuManagement() {
     setDishes(prev => prev.map(d => d.id === id ? { ...d, available: !d.available } : d));
   }
 
-  function handleDelete(id) {
+  async function handleDelete(id) {
     if (window.confirm(t('confirmDelete'))) {
+      if (usingApi) {
+        try {
+          await deleteMenuItem(id);
+        } catch (err) {
+          console.error('deleteMenuItem error:', err);
+          return;
+        }
+      }
       setDishes(prev => prev.filter(d => d.id !== id));
     }
   }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import StaffShell from '../../../components/staff/StaffShell';
@@ -9,14 +9,12 @@ import DishPreview from '../../../components/staff/DishPreview';
 import { Dropdown } from '../../../components/Dropdown';
 import PrimaryButton from '../../../components/PrimaryButton';
 import SecondaryButton from '../../../components/SecondaryButton';
-import { categories, dishes as dishesData } from '../../../data/mockData';
+import { categories as mockCategories } from '../../../data/mockData';
+import { getCategories, createMenuItem, updateMenuItem } from '../../../api/admin';
+import { getDishDetail } from '../../../api/menu';
 import styles from './dishEdit.module.css';
 import { useLocalField } from '../../../i18n/useLang';
 import { MdAdd, MdDelete } from 'react-icons/md';
-
-const allDishes = Object.entries(dishesData).flatMap(([categoryId, items]) =>
-  items.map(dish => ({ ...dish, category: categoryId }))
-);
 
 const EMPTY_FORM = {
   name: '', name_en: '',
@@ -53,24 +51,93 @@ export default function DishEdit() {
   const { t } = useTranslation('dishEdit');
   const isNew = !id || id === 'new';
 
-  const [form, setForm] = useState(() => {
-    if (isNew) return EMPTY_FORM;
-    const existing = allDishes.find(d => String(d.id) === String(id));
-    if (!existing) return EMPTY_FORM;
-    return {
-      name:            existing.name          ?? '',
-      name_en:         existing.name_en       ?? '',
-      description:     existing.description   ?? '',
-      description_en:  existing.description_en ?? '',
-      price:           existing.price         ?? '',
-      category:        existing.category      ?? '',
-      images:          existing.image ? [existing.image] : [],
-      available:       existing.available     ?? true,
-      ingredientsList: existing.ingredientsList ?? [],
-      addons:          existing.addons         ?? [],
-      componentGroups: existing.componentGroups ?? [],
-    };
-  });
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [categories, setCategories] = useState(mockCategories);
+  const [saving, setSaving] = useState(false);
+
+  // Load categories from API
+  useEffect(() => {
+    getCategories()
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setCategories(data.map(c => ({ id: c._id || c.id, name: c.name, name_en: c.name_en || c.name })));
+        }
+      })
+      .catch(err => console.error('getCategories error:', err));
+  }, []);
+
+  // Load existing dish if editing
+  useEffect(() => {
+    if (isNew) return;
+    getDishDetail(id)
+      .then(raw => {
+        if (!raw) return;
+        setForm({
+          name:            raw.name          ?? '',
+          name_en:         raw.name_en       ?? '',
+          description:     raw.description   ?? '',
+          description_en:  raw.description_en ?? '',
+          price:           raw.basePrice ?? raw.price ?? '',
+          category:        raw.categoryId?._id || raw.categoryId || raw.category || '',
+          images:          raw.imageUrl ? [raw.imageUrl] : raw.image ? [raw.image] : [],
+          available:       raw.isAvailable ?? raw.available ?? true,
+          ingredientsList: (raw.ingredients || raw.ingredientsList || []).map(i => ({
+            id: i._id || i.id || `ing-${Math.random()}`,
+            name: i.name || '',
+            name_en: i.name_en || '',
+            isRemovable: i.isRemovable ?? true,
+          })),
+          addons: (raw.addons || []).map(a => ({
+            id: a._id || a.id || `ao-${Math.random()}`,
+            name: a.name || '',
+            name_en: a.name_en || '',
+            price: a.price ?? 0,
+          })),
+          componentGroups: (raw.componentGroups || []).map(g => ({
+            id: g._id || g.id || `cg-${Math.random()}`,
+            name: g.name || '',
+            name_en: g.name_en || '',
+            isRequired: g.isRequired ?? true,
+            options: (g.options || []).map(o => ({
+              id: o._id || o.id || `cgo-${Math.random()}`,
+              name: o.name || '',
+              name_en: o.name_en || '',
+              priceModifier: o.priceModifier ?? 0,
+            })),
+          })),
+        });
+      })
+      .catch(err => console.error('getDishDetail error:', err));
+  }, [id, isNew]);
+
+  async function handleSave() {
+    setSaving(true);
+    try {
+      const payload = {
+        name: form.name,
+        name_en: form.name_en,
+        description: form.description,
+        description_en: form.description_en,
+        basePrice: Number(form.price),
+        categoryId: form.category,
+        isAvailable: form.available,
+        ingredients: form.ingredientsList,
+        addons: form.addons,
+        componentGroups: form.componentGroups,
+      };
+      if (isNew) {
+        await createMenuItem(payload);
+      } else {
+        await updateMenuItem(id, payload);
+      }
+      navigate('/staff/menu');
+    } catch (err) {
+      console.error('Save dish error:', err);
+      alert(err?.response?.data?.message || 'Save failed');
+    } finally {
+      setSaving(false);
+    }
+  }
 
   function set(field, val) {
     setForm(prev => ({ ...prev, [field]: val }));
@@ -135,7 +202,7 @@ export default function DishEdit() {
       rightActions={
         <div className={styles.headerActions}>
           <SecondaryButton label={t('cancel')} onClick={() => navigate('/staff/menu')} className={styles.cancelBtn} />
-          <PrimaryButton label={t('save')} onClick={() => navigate('/staff/menu')} className={styles.saveBtn} />
+          <PrimaryButton label={saving ? '...' : t('save')} onClick={handleSave} disabled={saving} className={styles.saveBtn} />
         </div>
       }
     >

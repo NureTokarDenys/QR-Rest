@@ -1,19 +1,89 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import StaffShell from '../../../components/staff/StaffShell';
 import AnalyticsMicro from '../../../components/staff/AnalyticsMicro';
 import TopCategoryItem from '../../../components/staff/TopCategoryItem';
 import TopDishRow from '../../../components/staff/TopDishRow';
 import { ANALYTICS_DATA } from '../../../data/mockData';
+import { getRevenue, getOrderStats, getPopularDishes } from '../../../api/admin';
 import styles from './analytics.module.css';
 import { MdBarChart, MdWarning, MdTimelapse, MdCheckCircle } from 'react-icons/md';
 
 const PERIODS = ['today', 'week', 'month'];
 
+function periodToDates(period) {
+  const now = new Date();
+  const to = now.toISOString().slice(0, 10);
+  let from;
+  if (period === 'today') {
+    from = to;
+  } else if (period === 'week') {
+    const d = new Date(now);
+    d.setDate(d.getDate() - 7);
+    from = d.toISOString().slice(0, 10);
+  } else {
+    const d = new Date(now);
+    d.setMonth(d.getMonth() - 1);
+    from = d.toISOString().slice(0, 10);
+  }
+  return { from, to };
+}
+
+function buildAnalyticsData(revenue, orderStats, popularDishes) {
+  const base = ANALYTICS_DATA;
+  if (!revenue && !orderStats && !popularDishes) return base;
+
+  const completed = orderStats?.completed ?? orderStats?.totalOrders ?? base.orders;
+  const voided = orderStats?.void ?? orderStats?.voidedOrders ?? base.voidOrders;
+  const total = completed + voided;
+  const conversionPct = total > 0 ? Math.round((completed / total) * 100) : base.conversionPct;
+  const totalRevenue = revenue?.total ?? revenue?.revenue ?? base.revenue;
+  const avgCheck = completed > 0 ? Math.round(totalRevenue / completed) : base.avgCheck;
+
+  const topDishes = Array.isArray(popularDishes)
+    ? popularDishes.slice(0, 5).map((d, i) => ({
+        num: i + 1,
+        name: d.name || d.menuItemId?.name || '—',
+        ordered: d.count ?? d.orderedCount ?? 0,
+        revenue: d.revenue ?? 0,
+        rating: d.rating ?? '—',
+      }))
+    : base.topDishes;
+
+  return {
+    ...base,
+    revenue: totalRevenue,
+    orders: completed,
+    avgCheck,
+    completedOrders: completed,
+    voidOrders: voided,
+    conversionPct,
+    topDishes,
+    avgCookingMin: orderStats?.avgCookingMin ?? base.avgCookingMin,
+  };
+}
+
 export default function Analytics() {
   const { t } = useTranslation('analytics');
   const [period, setPeriod] = useState('today');
-  const data = ANALYTICS_DATA;
+  const [revenue, setRevenue] = useState(null);
+  const [orderStats, setOrderStats] = useState(null);
+  const [popularDishes, setPopularDishes] = useState(null);
+
+  useEffect(() => {
+    const { from, to } = periodToDates(period);
+    Promise.allSettled([
+      getRevenue(from, to),
+      getOrderStats(from, to),
+      getPopularDishes(from, to),
+    ]).then(([r, o, p]) => {
+      if (r.status === 'fulfilled') setRevenue(r.value);
+      if (o.status === 'fulfilled') setOrderStats(o.value);
+      if (p.status === 'fulfilled') setPopularDishes(p.value);
+    }).catch(err => console.error('Analytics fetch error:', err));
+  }, [period]);
+
+  const data = useMemo(() => buildAnalyticsData(revenue, orderStats, popularDishes), [revenue, orderStats, popularDishes]);
   const maxBar = Math.max(...data.hourlyBars);
 
   return (
