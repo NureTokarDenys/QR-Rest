@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import StaffShell from '../../../components/staff/StaffShell';
 import TableMapItem from '../../../components/staff/TableMapItem';
-import { TABLES } from '../../../data/mockData';
 import { getTables } from '../../../api/admin';
 import styles from './tableMap.module.css';
 
@@ -40,7 +39,7 @@ function normaliseTable(t) {
 export default function TableMap() {
   const { t, i18n } = useTranslation('tableMap');
   const lang = i18n.language === 'en' ? 'en' : 'ua';
-  const [tables, setTables] = useState(TABLES);
+  const [tables, setTables] = useState([]);
 
   useEffect(() => {
     let cancelled = false;

@@ -1,0 +1,15 @@
+{
+  "title": "Відгуки",
+  "title_for": "{{name}} — Відгуки",
+  "review_one": "відгук",
+  "review_few": "відгуки",
+  "review_many": "відгуків",
+  "loading": "Завантаження відгуків…",
+  "empty": "Відгуків ще немає. Залиш перший!",
+  "no_restaurant": "Ресторан не обраний.",
+  "load_more": "Завантажити ще",
+  "loading_more": "Завантаження…",
+  "anonymous": "Анонім",
+  "rating_aria": "{{rating}} з 5 — переглянути всі відгуки",
+  "no_reviews_for_rating": "Ще без оцінки"
+}

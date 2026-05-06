@@ -1,19 +1,28 @@
-import apiClient from './client';
+import apiClient, { getStoredRestaurantId } from './client';
 
-export async function getMenu(tableId) {
-  const params = tableId ? { tableId } : {};
-  const res = await apiClient.get('/menu', { params });
+/**
+ * Fetch the full menu (categories + items) for a restaurant.
+ *
+ * The restaurant is identified by its publicId in the URL path.
+ * When called without an argument the publicId is read from localStorage.
+ */
+export async function getMenu(restaurantId = getStoredRestaurantId()) {
+  const res = await apiClient.get(`/${restaurantId}/menu`);
   return res.data?.data;
 }
 
-export async function getDishDetail(itemId) {
-  const res = await apiClient.get(`/menu/items/${itemId}`);
+/**
+ * Fetch a single menu item by its ID.
+ */
+export async function getDishDetail(itemId, restaurantId = getStoredRestaurantId()) {
+  const res = await apiClient.get(`/${restaurantId}/menu/items/${itemId}`);
   return res.data?.data;
 }
 
-export async function searchMenu(q, tableId) {
-  const params = { q };
-  if (tableId) params.tableId = tableId;
-  const res = await apiClient.get('/menu/search', { params });
+/**
+ * Full-text menu search.
+ */
+export async function searchMenu(q, restaurantId = getStoredRestaurantId()) {
+  const res = await apiClient.get(`/${restaurantId}/menu/search`, { params: { q } });
   return res.data?.data;
 }

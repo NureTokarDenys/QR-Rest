@@ -3,8 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useApp } from '../../../context/AppContext';
 import ReviewItem from '../../../components/client/ReviewItem';
 import PrimaryButton from '../../../components/PrimaryButton';
-import { getDishById } from '../../../data/mockData';
 import { getDishDetail } from '../../../api/menu';
+import { getDishReviews } from '../../../api/reviews';
 import styles from './dishDetail.module.css';
 import { useToast } from '../../../context/ClientToastContext';
 import { useTranslation } from 'react-i18next';
@@ -64,8 +64,10 @@ export default function DishDetail() {
   const { addToCart } = useApp();
   const { showToast } = useToast();
 
-  const [dish, setDish] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [dish, setDish]         = useState(null);
+  const [loading, setLoading]   = useState(true);
+  const [reviews, setReviews]   = useState([]);
+  const [ratingSummary, setRatingSummary] = useState(null); // { averageRating, totalCount }
 
   const [quantity, setQuantity] = useState(1);
   const [excludedIngredients, setExcludedIngredients] = useState([]);
@@ -77,19 +79,22 @@ export default function DishDetail() {
     let cancelled = false;
     setLoading(true);
 
-    getDishDetail(id)
-      .then((data) => {
-        if (!cancelled) {
-          setDish(normaliseDish(data));
+    // Fetch dish details and reviews in parallel
+    Promise.all([
+      getDishDetail(id),
+      getDishReviews(id).catch(() => null),
+    ])
+      .then(([dishData, reviewEnvelope]) => {
+        if (cancelled) return;
+        setDish(normaliseDish(dishData));
+        if (reviewEnvelope) {
+          setReviews(reviewEnvelope.data || []);
+          setRatingSummary(reviewEnvelope.summary || null);
         }
       })
       .catch((err) => {
-        console.error('getDishDetail error:', err);
-        if (!cancelled) {
-          // Fallback to mock data
-          const mockDish = getDishById(id);
-          setDish(mockDish || null);
-        }
+        console.error('DishDetail fetch error:', err);
+        if (!cancelled) setDish(null);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -167,13 +172,13 @@ export default function DishDetail() {
       <div className={styles.content}>
         <h1 className={styles.name}>{local(dish, 'name')}</h1>
 
-        {dish.rating !== undefined && (
+        {ratingSummary && ratingSummary.totalCount > 0 && (
           <div className={styles.ratingRow}>
             {[1, 2, 3, 4, 5].map(i => (
-              <span key={i} className={i <= Math.floor(dish.rating) ? styles.starFilled : styles.starEmpty}>★</span>
+              <span key={i} className={i <= Math.round(ratingSummary.averageRating) ? styles.starFilled : styles.starEmpty}>★</span>
             ))}
-            <span className={styles.ratingVal}>{dish.rating}</span>
-            <span className={styles.reviewCount}>· {dish.reviewCount} {t3('review', { count: dish.reviewCount })}</span>
+            <span className={styles.ratingVal}>{ratingSummary.averageRating.toFixed(1)}</span>
+            <span className={styles.reviewCount}>· {ratingSummary.totalCount} {t3('review', { count: ratingSummary.totalCount })}</span>
           </div>
         )}
 
@@ -282,13 +287,19 @@ export default function DishDetail() {
           </div>
         </div>
 
-        {/* Reviews */}
-        {dish.reviews && dish.reviews.length > 0 && (
+        {/* Reviews — loaded from GET /reviews/dish/:id */}
+        {reviews.length > 0 && (
           <div className={styles.section}>
             <h3 className={styles.sectionTitle}>{t3('reviews')}</h3>
             <div className={styles.reviews}>
-              {dish.reviews.map((r, i) => (
-                <ReviewItem key={i} author={r.author} rating={r.rating} text={local(r, 'text')} />
+              {reviews.map(r => (
+                <ReviewItem
+                  key={r._id}
+                  author={r.userId?.name || t3('anonymous')}
+                  rating={r.rating}
+                  text={r.comment || ''}
+                  date={r.createdAt}
+                />
               ))}
             </div>
           </div>

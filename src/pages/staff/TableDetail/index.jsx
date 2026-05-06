@@ -7,7 +7,6 @@ import ActiveOrderRow from '../../../components/staff/ActiveOrderRow';
 import TableQrBlock from '../../../components/staff/TableQrBlock';
 import TableHistoryBlock from '../../../components/staff/TableHistoryBlock';
 import PrimaryButton from '../../../components/PrimaryButton';
-import { TABLES, TABLE_HISTORY } from '../../../data/mockData';
 import { getTables } from '../../../api/admin';
 import { getOrder, voidOrder } from '../../../api/orders';
 import styles from './tableDetail.module.css';
@@ -26,7 +25,7 @@ export default function TableDetail() {
   const [voidReason, setVoidReason] = useState('');
   const [isWalkout, setIsWalkout] = useState(false);
   const [paid, setPaid] = useState(false);
-  const [table, setTable] = useState(TABLES.find(t => t.id === Number(id)) || TABLES[1]);
+  const [table, setTable] = useState({ id: id, status: 'busy', seats: 4, name: `Стіл ${id}` });
   const [orderId, setOrderId] = useState(null);
   const [dishes, setDishes] = useState([]);
 
@@ -54,7 +53,8 @@ export default function TableDetail() {
           try {
             const orderData = await getOrder(currentOrderId);
             if (cancelled) return;
-            const items = (orderData?.items || []).map(i => ({
+            // orderData shape: { order, servingGroups, items }
+          const items = (orderData?.items || []).map(i => ({
               id: i._id || i.id,
               name: (typeof i.menuItemId === 'object' ? i.menuItemId?.name : null) || i.name || '—',
               qty: i.qty ?? i.quantity ?? 1,
@@ -216,7 +216,7 @@ export default function TableDetail() {
 
         <div className={styles.bottomRow}>
           <TableQrBlock tableId={table.id} />
-          <TableHistoryBlock history={TABLE_HISTORY} />
+          <TableHistoryBlock history={[]} />
         </div>
       </div>
     </StaffShell>

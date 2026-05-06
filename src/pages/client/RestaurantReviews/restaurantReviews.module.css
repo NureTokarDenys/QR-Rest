@@ -1,0 +1,147 @@
+.page {
+  width: 100%;
+  min-height: 100dvh;
+  background: var(--bg-color);
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 76px;
+  box-sizing: border-box;
+}
+
+.content {
+  flex: 1;
+  padding: 20px 16px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 680px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+/* ── Summary hero ─────────────────────────────────────────────────────────── */
+.hero {
+  background: var(--surface-color);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 20px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.heroScore {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.heroRating {
+  font-size: 42px;
+  font-weight: 800;
+  color: var(--primary-text);
+  line-height: 1;
+}
+
+.heroStars {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.starFilled { color: #f6ad55; font-size: 18px; }
+.starEmpty  { color: var(--separator-color); font-size: 18px; }
+
+.heroCount {
+  font-size: 13px;
+  color: var(--secondary-text);
+  margin-left: auto;
+}
+
+/* ── Distribution bars ───────────────────────────────────────────────────── */
+.barBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.barRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.barLabel {
+  font-size: 12px;
+  color: var(--secondary-text);
+  width: 20px;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.barTrack {
+  flex: 1;
+  height: 6px;
+  background: var(--separator-color);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.barFill {
+  height: 100%;
+  background: #f6ad55;
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.barPct {
+  font-size: 11px;
+  color: var(--secondary-text);
+  width: 30px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* ── Review list ─────────────────────────────────────────────────────────── */
+.list {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-color);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.empty {
+  text-align: center;
+  color: var(--secondary-text);
+  font-size: 15px;
+  padding: 40px 0;
+}
+
+/* ── Load more ───────────────────────────────────────────────────────────── */
+.loadMore {
+  align-self: center;
+  background: none;
+  border: 1.5px solid var(--accent-color);
+  color: var(--accent-color);
+  border-radius: 20px;
+  padding: 9px 28px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-top: 4px;
+}
+.loadMore:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent-color) 10%, transparent);
+}
+.loadMore:disabled { opacity: 0.5; cursor: default; }
+
+/* ── Responsive ─────────────────────────────────────────────────────────── */
+@media (min-width: 600px) {
+  .content { padding: 24px 24px 40px; }
+  .hero    { padding: 24px 22px; }
+  .heroRating { font-size: 52px; }
+}

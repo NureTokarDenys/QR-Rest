@@ -21,25 +21,27 @@ export default function Cart() {
     servingGroups, addServingGroup, removeServingGroup, renameServingGroup, moveToGroup,
   } = useApp();
 
-  const [addingGroup, setAddingGroup] = useState(false);
-  const [newGroupName, setNewGroupName] = useState('');
   const [editingGroupId, setEditingGroupId] = useState(null);
   const [editGroupName, setEditGroupName] = useState('');
-  const [movingItemId, setMovingItemId] = useState(null);
 
   const totalItems = cart.reduce((s, i) => s + i.quantity, 0);
 
-  function handleAddGroup() {
-    const name = newGroupName.trim();
-    if (!name) return;
-    addServingGroup(name);
-    setNewGroupName('');
-    setAddingGroup(false);
+  /**
+   * Returns the display name for a serving group:
+   * - Generic (auto-created, never renamed) → localized "Serving group N" key,
+   *   so it changes when the user switches language.
+   * - Manually renamed → the literal saved string (does not change with language).
+   * - Main group and legacy groups with name/name_en fields → handled by local().
+   */
+  function getGroupDisplayName(group) {
+    if (group.isGeneric) return t('serving_group', { n: group.genericIndex });
+    return local(group, 'name');
   }
 
   function startEditGroup(group) {
     setEditingGroupId(group.id);
-    setEditGroupName(local(group, 'name'));
+    // Pre-fill with whatever the group currently displays (localized if generic)
+    setEditGroupName(getGroupDisplayName(group));
   }
 
   function commitEditGroup() {
@@ -82,7 +84,7 @@ export default function Cart() {
                       </>
                     ) : (
                       <>
-                        <span className={styles.groupName}>{local(group, 'name')}</span>
+                        <span className={styles.groupName}>{getGroupDisplayName(group)}</span>
                         <button className={styles.groupIconBtn} onClick={() => startEditGroup(group)}>
                           <MdEdit />
                         </button>
@@ -108,7 +110,7 @@ export default function Cart() {
                                 className={styles.moveBtn}
                                 onClick={() => moveToGroup(item.cartItemId, g.id)}
                               >
-                                {local(g, 'name')}
+                                {getGroupDisplayName(g)}
                               </button>
                             ))}
                           </div>
@@ -124,25 +126,10 @@ export default function Cart() {
               );
             })}
 
-            {/* Add new serving group */}
-            {addingGroup ? (
-              <div className={styles.addGroupRow}>
-                <input
-                  className={styles.groupNameInput}
-                  placeholder={t('group_name_placeholder')}
-                  value={newGroupName}
-                  onChange={e => setNewGroupName(e.target.value.slice(0, 50))}
-                  onKeyDown={e => e.key === 'Enter' && handleAddGroup()}
-                  autoFocus
-                />
-                <button className={styles.addGroupConfirm} onClick={handleAddGroup}><MdCheck /></button>
-                <button className={styles.addGroupCancel} onClick={() => { setAddingGroup(false); setNewGroupName(''); }}>✕</button>
-              </div>
-            ) : (
-              <button className={styles.addGroupBtn} onClick={() => setAddingGroup(true)}>
-                <MdAdd /> {t('add_group')}
-              </button>
-            )}
+            {/* Add new serving group — creates immediately with a generic name */}
+            <button className={styles.addGroupBtn} onClick={addServingGroup}>
+              <MdAdd /> {t('add_group')}
+            </button>
 
             <div className={styles.commentBox}>
               <p className={styles.commentLabel}>{t('order_comment')}</p>

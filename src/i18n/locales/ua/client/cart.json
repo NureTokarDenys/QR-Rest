@@ -9,6 +9,8 @@
     "order_comment_placeholder": "Додайте будь-які примітки для ресторану (алергени, подача)",
     "add_group": "Додати групу подачі",
     "group_name_placeholder": "Назва групи...",
+    "serving_group": "Група подачі {{n}}",
+    "main_group": "Основна група",
     "move_to": "Перенести до",
     "empty_group": "Група порожня",
     "back_to_menu": "До меню"

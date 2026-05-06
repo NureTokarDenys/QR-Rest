@@ -1,0 +1,14 @@
+{
+  "title": "Reviews",
+  "title_for": "{{name}} — Reviews",
+  "review_one": "review",
+  "review_other": "reviews",
+  "loading": "Loading reviews…",
+  "empty": "No reviews yet. Be the first to leave one!",
+  "no_restaurant": "No restaurant selected.",
+  "load_more": "Load more",
+  "loading_more": "Loading…",
+  "anonymous": "Anonymous",
+  "rating_aria": "{{rating}} out of 5 — see all reviews",
+  "no_reviews_for_rating": "Not rated yet"
+}

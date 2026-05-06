@@ -1,0 +1,93 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: var(--surface-color);
+  border-bottom: 1px solid var(--separator-color);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  gap: 10px;
+}
+
+/* ── Logo ────────────────────────────────────────────────────────────────── */
+.logo {
+  font-size: 24px;
+  font-weight: 800;
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  line-height: 1;
+}
+.logoWait { color: var(--accent-color); }
+.logoLess  { color: var(--logo-color); }
+
+/* ── Right cluster ───────────────────────────────────────────────────────── */
+.right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* ── Context chip (table / restaurant name) ──────────────────────────────── */
+.contextChip {
+  background: var(--separator-color);
+  color: var(--primary-text);
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+/* ── Rating badge ────────────────────────────────────────────────────────── */
+.ratingBadge {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  background: color-mix(in srgb, #f6ad55 15%, var(--surface-color));
+  border: 1px solid color-mix(in srgb, #f6ad55 40%, transparent);
+  border-radius: 20px;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.ratingBadge:hover {
+  background: color-mix(in srgb, #f6ad55 25%, var(--surface-color));
+  transform: translateY(-1px);
+}
+.ratingBadge:active {
+  transform: translateY(0);
+}
+
+.ratingStar {
+  font-size: 13px;
+  color: #f6ad55;
+  line-height: 1;
+}
+.ratingValue {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary-text);
+}
+.ratingCount {
+  font-size: 11px;
+  color: var(--secondary-text);
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────────── */
+@media (min-width: 600px) {
+  .header { padding: 16px 24px; }
+  .logo   { font-size: 26px; }
+  .contextChip { font-size: 13px; max-width: 200px; }
+  .ratingBadge, .ratingValue { font-size: 14px; }
+}

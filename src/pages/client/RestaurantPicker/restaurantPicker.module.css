@@ -1,0 +1,289 @@
+/* ── Page shell ─────────────────────────────────────────────────────────── */
+.page {
+  width: 100%;
+  min-height: 100dvh;
+  background: var(--bg-color);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 20px;
+  background: var(--surface-color);
+  border-bottom: 1px solid var(--separator-color);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.logo {
+  font-size: 26px;
+  font-weight: 800;
+}
+.logoWait { color: var(--accent-color); }
+.logoLess  { color: var(--logo-color); }
+
+/* ── Content ─────────────────────────────────────────────────────────────── */
+.content {
+  flex: 1;
+  padding: 24px 16px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 600px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+/* ── Hero ────────────────────────────────────────────────────────────────── */
+.hero {
+  text-align: center;
+  padding: 8px 0 4px;
+}
+
+.heroTitle {
+  font-size: clamp(22px, 6vw, 30px);
+  font-weight: 800;
+  color: var(--primary-text);
+  margin: 0 0 6px;
+}
+
+.heroSub {
+  font-size: 14px;
+  color: var(--secondary-text);
+  line-height: 1.5;
+}
+
+/* ── Restaurant list ─────────────────────────────────────────────────────── */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.searching {
+  font-size: 13px;
+  color: var(--secondary-text);
+  text-align: center;
+  padding: 4px 0;
+}
+
+/* ── Restaurant card ─────────────────────────────────────────────────────── */
+.card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--surface-color);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px 16px;
+  cursor: pointer;
+  text-align: left;
+  transition: box-shadow 0.18s, border-color 0.18s, transform 0.12s;
+  width: 100%;
+  appearance: none;
+}
+
+.card:hover {
+  border-color: var(--accent-color);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+
+.card:active {
+  transform: translateY(0);
+}
+
+/* Logo / avatar */
+.cardLogo {
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--accent-color) 14%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cardLogoImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cardLogoInitials {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent-color);
+  letter-spacing: -0.5px;
+}
+
+/* Body */
+.cardBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.cardName {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--primary-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cardCuisine {
+  font-size: 13px;
+  color: var(--accent-color);
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.cardAddress {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  color: var(--secondary-text);
+  margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cardAddrIcon {
+  flex-shrink: 0;
+  font-size: 13px;
+}
+
+/* Arrow icon */
+.cardArrow {
+  flex-shrink: 0;
+  font-size: 22px;
+  color: var(--secondary-text);
+  opacity: 0.5;
+}
+
+.card:hover .cardArrow {
+  color: var(--accent-color);
+  opacity: 1;
+}
+
+/* ── States ──────────────────────────────────────────────────────────────── */
+.stateMsg {
+  text-align: center;
+  font-size: 15px;
+  color: var(--secondary-text);
+  padding: 40px 0;
+}
+
+/* API-not-available box */
+.noApiBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface-color);
+  border: 1.5px dashed var(--border);
+  border-radius: 16px;
+  padding: 32px 24px;
+  text-align: center;
+}
+
+.noApiIcon {
+  font-size: 52px;
+  color: var(--accent-color);
+  opacity: 0.55;
+}
+
+.noApiTitle {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--primary-text);
+}
+
+.noApiSub {
+  font-size: 14px;
+  color: var(--secondary-text);
+  line-height: 1.5;
+}
+
+.noApiRemark {
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--secondary-text);
+  background: var(--bg-color);
+  border-radius: 8px;
+  padding: 10px 14px;
+  text-align: left;
+  line-height: 1.6;
+}
+
+.noApiRemark code {
+  background: color-mix(in srgb, var(--accent-color) 10%, transparent);
+  color: var(--accent-color);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 11px;
+}
+
+/* ════════ Responsive ════════ */
+
+@media (min-width: 600px) {
+  .content {
+    max-width: 680px;
+    padding: 32px 24px 48px;
+    gap: 18px;
+  }
+
+  .card {
+    padding: 16px 20px;
+    gap: 16px;
+  }
+
+  .cardLogo {
+    width: 60px;
+    height: 60px;
+  }
+
+  .cardName {
+    font-size: 17px;
+  }
+}
+
+@media (min-width: 768px) {
+  .list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .content {
+    max-width: 860px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .content {
+    max-width: 1060px;
+  }
+
+  .list {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+}
+
+@media (max-width: 380px) {
+  .content {
+    padding: 16px 12px 32px;
+  }
+}

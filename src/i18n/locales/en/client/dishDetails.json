@@ -10,5 +10,6 @@
     "comment": "Dish comment",
     "comment_placeholder": "Cooking preferences...",
     "choose_required": "Choose",
-    "chosen": "chosen"
+    "chosen": "chosen",
+    "anonymous": "Anonymous"
 }

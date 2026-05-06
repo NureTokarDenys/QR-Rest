@@ -3,7 +3,7 @@
     "orders": "Замовлення",
     "my_orders": "Мої замовлення",
     "look": "Дивитись",
-    "overall": "Загальне",
+    "overall": "Обліковий запис",
     "name": "Ім'я",
     "enail": "Електронна пошта",
     "settings": "Налаштування",
@@ -15,6 +15,48 @@
     "theme_dark": "Темна",
     "security": "Безпека",
     "change_password": "Змінити пароль",
+    "change_password_title": "Змінити пароль",
     "change": "Змінити",
-    "logout": "Вихід"
+    "logout": "Вихід",
+
+    "guest": "Гість",
+    "guest_message": "Увійдіть, щоб зберегти історію замовлень та налаштування.",
+    "sign_in": "Увійти",
+    "create_account": "Створити акаунт",
+
+    "edit_name": "Змінити ім'я",
+    "edit_email": "Змінити пошту",
+
+    "current_password": "Поточний пароль",
+    "new_password": "Новий пароль",
+    "confirm_password": "Підтвердіть новий пароль",
+    "password_mismatch": "Паролі не збігаються",
+    "password_too_short": "Пароль має містити щонайменше 8 символів",
+    "name_required": "Ім'я не може бути порожнім",
+    "email_required": "Пошта не може бути порожньою",
+    "save": "Зберегти",
+    "cancel": "Скасувати",
+    "save_error": "Не вдалося зберегти. Спробуйте ще раз.",
+
+    "integrations": "Інтеграції",
+    "google_connected": "Google",
+    "google_connect": "Google",
+    "connected": "Підключено",
+    "add": "Підключити",
+    "google_no_password": "Ваш акаунт використовує лише Google — встановіть пароль нижче, щоб також входити через email.",
+    "set_password": "Встановити пароль",
+
+    "storage": "Сховище",
+    "clear_cache": "Очистити кеш",
+    "clear_cache_value": "Очистити",
+    "clear_cache_confirm": "Натисніть ще раз для підтвердження",
+    "clear_cache_desc": "Видаляє збережені сесію, кошик, ресторан та дані замовлень",
+
+    "logout_dialog_title": "Вийти з акаунту?",
+    "logout_dialog_message": "Ви вийдете зі свого облікового запису.",
+    "logout_dialog_confirm": "Вийти",
+
+    "clear_cache_dialog_title": "Очистити кешовані дані?",
+    "clear_cache_dialog_message": "Буде видалено збережену сесію, кошик та дані ресторану. Вас буде перенаправлено до вибору ресторану.",
+    "clear_cache_dialog_confirm": "Очистити дані"
 }

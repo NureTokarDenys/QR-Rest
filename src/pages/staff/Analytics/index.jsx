@@ -4,12 +4,13 @@ import StaffShell from '../../../components/staff/StaffShell';
 import AnalyticsMicro from '../../../components/staff/AnalyticsMicro';
 import TopCategoryItem from '../../../components/staff/TopCategoryItem';
 import TopDishRow from '../../../components/staff/TopDishRow';
-import { ANALYTICS_DATA } from '../../../data/mockData';
 import { getRevenue, getOrderStats, getPopularDishes } from '../../../api/admin';
 import styles from './analytics.module.css';
 import { MdBarChart, MdWarning, MdTimelapse, MdCheckCircle } from 'react-icons/md';
 
 const PERIODS = ['today', 'week', 'month'];
+
+const EMPTY_HOURS = ['08','09','10','11','12','13','14','15','16','17','18','19','20','21','22'];
 
 function periodToDates(period) {
   const now = new Date();
@@ -29,49 +30,74 @@ function periodToDates(period) {
   return { from, to };
 }
 
+/**
+ * Build the analytics display object from real API responses.
+ *
+ * API shapes:
+ *   getRevenue()      → { total, count }
+ *   getOrderStats()   → [{ _id: <status>, count: <n> }, ...]
+ *   getPopularDishes()→ [{ menuItemId, name, totalQty }, ...]
+ *
+ * Fields that have no live API equivalent (change%, hourly bars, etc.)
+ * are set to 0 / [] — they will be replaced once the backend provides them.
+ */
 function buildAnalyticsData(revenue, orderStats, popularDishes) {
-  const base = ANALYTICS_DATA;
-  if (!revenue && !orderStats && !popularDishes) return base;
+  const totalRevenue = revenue?.total ?? 0;
 
-  const completed = orderStats?.completed ?? orderStats?.totalOrders ?? base.orders;
-  const voided = orderStats?.void ?? orderStats?.voidedOrders ?? base.voidOrders;
-  const total = completed + voided;
-  const conversionPct = total > 0 ? Math.round((completed / total) * 100) : base.conversionPct;
-  const totalRevenue = revenue?.total ?? revenue?.revenue ?? base.revenue;
-  const avgCheck = completed > 0 ? Math.round(totalRevenue / completed) : base.avgCheck;
+  // orderStats is an array of { _id: <status>, count }
+  const statsMap = {};
+  if (Array.isArray(orderStats)) {
+    orderStats.forEach(s => { if (s._id) statsMap[s._id] = s.count ?? 0; });
+  }
+  const completed = statsMap.completed ?? 0;
+  const voided    = statsMap.void ?? statsMap.cancelled ?? 0;
+  const total     = completed + voided;
+  const conversionPct = total > 0 ? Math.round((completed / total) * 100) : 0;
+  const avgCheck  = completed > 0 ? Math.round(totalRevenue / completed) : 0;
 
   const topDishes = Array.isArray(popularDishes)
     ? popularDishes.slice(0, 5).map((d, i) => ({
-        num: i + 1,
-        name: d.name || d.menuItemId?.name || '—',
-        ordered: d.count ?? d.orderedCount ?? 0,
+        num:     i + 1,
+        name:    d.name || '—',
+        ordered: d.totalQty ?? d.count ?? 0,
         revenue: d.revenue ?? 0,
-        rating: d.rating ?? '—',
+        rating:  d.rating ?? '—',
       }))
-    : base.topDishes;
+    : [];
 
   return {
-    ...base,
-    revenue: totalRevenue,
-    orders: completed,
+    revenue:          totalRevenue,
+    orders:           completed,
     avgCheck,
-    completedOrders: completed,
-    voidOrders: voided,
+    completedOrders:  completed,
+    voidOrders:       voided,
     conversionPct,
     topDishes,
-    avgCookingMin: orderStats?.avgCookingMin ?? base.avgCookingMin,
+    topCategories:    [],
+    // Trend deltas — no API yet
+    revenueChange:    0,
+    ordersChange:     0,
+    avgCheckChange:   0,
+    walkoutCount:     voided,
+    walkoutChange:    0,
+    avgCookingMin:    0,
+    avgCookingChange: 0,
+    // Hourly bar chart — no API yet
+    hourlyBars: Array(EMPTY_HOURS.length).fill(0),
+    hours:      EMPTY_HOURS.map(h => `${h}:00`),
   };
 }
 
 export default function Analytics() {
   const { t } = useTranslation('analytics');
   const [period, setPeriod] = useState('today');
-  const [revenue, setRevenue] = useState(null);
-  const [orderStats, setOrderStats] = useState(null);
+  const [revenue, setRevenue]           = useState(null);
+  const [orderStats, setOrderStats]     = useState(null);
   const [popularDishes, setPopularDishes] = useState(null);
 
   useEffect(() => {
     const { from, to } = periodToDates(period);
+    setRevenue(null); setOrderStats(null); setPopularDishes(null);
     Promise.allSettled([
       getRevenue(from, to),
       getOrderStats(from, to),
@@ -83,8 +109,8 @@ export default function Analytics() {
     }).catch(err => console.error('Analytics fetch error:', err));
   }, [period]);
 
-  const data = useMemo(() => buildAnalyticsData(revenue, orderStats, popularDishes), [revenue, orderStats, popularDishes]);
-  const maxBar = Math.max(...data.hourlyBars);
+  const data   = useMemo(() => buildAnalyticsData(revenue, orderStats, popularDishes), [revenue, orderStats, popularDishes]);
+  const maxBar = Math.max(...data.hourlyBars, 1); // guard against all-zero
 
   return (
     <StaffShell
@@ -109,27 +135,12 @@ export default function Analytics() {
       <div className={styles.page}>
         {/* Primary KPI row */}
         <div className={styles.kpiRow}>
-          <AnalyticsMicro
-            label={t('revenue')}
-            value={`${data.revenue}₴`}
-            change={data.revenueChange}
-            changeUp={data.revenueChange > 0}
-          />
-          <AnalyticsMicro
-            label={t('orders')}
-            value={data.orders}
-            change={data.ordersChange}
-            changeUp={data.ordersChange > 0}
-          />
-          <AnalyticsMicro
-            label={t('avgCheck')}
-            value={`${data.avgCheck}₴`}
-            change={Math.abs(data.avgCheckChange)}
-            changeUp={data.avgCheckChange > 0}
-          />
+          <AnalyticsMicro label={t('revenue')}  value={`${data.revenue}₴`}  change={data.revenueChange}  changeUp={data.revenueChange  > 0} />
+          <AnalyticsMicro label={t('orders')}   value={data.orders}          change={data.ordersChange}   changeUp={data.ordersChange   > 0} />
+          <AnalyticsMicro label={t('avgCheck')} value={`${data.avgCheck}₴`} change={Math.abs(data.avgCheckChange)} changeUp={data.avgCheckChange > 0} />
         </div>
 
-        {/* Secondary KPI row — new v4.3 metrics */}
+        {/* Secondary KPI row */}
         <div className={styles.kpiRow2}>
           <div className={styles.kpiCard}>
             <div className={styles.kpiCardIcon} style={{ background: '#fef2f2', color: '#dc2626' }}>
@@ -178,7 +189,7 @@ export default function Analytics() {
               {data.hourlyBars.map((val, i) => (
                 <div key={i} className={styles.barWrap}>
                   <div
-                    className={`${styles.bar} ${i === 8 ? styles.barHighlight : ''}`}
+                    className={styles.bar}
                     style={{ height: `${(val / maxBar) * 100}%` }}
                   />
                   <span className={styles.barLabel}>{data.hours[i]}</span>
@@ -189,9 +200,13 @@ export default function Analytics() {
 
           <div className={styles.catBox}>
             <p className={styles.chartTitle}>{t('topCategories')}</p>
-            {data.topCategories.map((cat, i) => (
-              <TopCategoryItem key={i} item={cat} />
-            ))}
+            {data.topCategories.length === 0 ? (
+              <p style={{ fontSize: 13, color: 'var(--secondary-text)', padding: '8px 0' }}>—</p>
+            ) : (
+              data.topCategories.map((cat, i) => (
+                <TopCategoryItem key={i} item={cat} />
+              ))
+            )}
           </div>
         </div>
 
@@ -208,9 +223,13 @@ export default function Analytics() {
               </tr>
             </thead>
             <tbody>
-              {data.topDishes.map(dish => (
-                <TopDishRow key={dish.num} dish={dish} />
-              ))}
+              {data.topDishes.length === 0 ? (
+                <tr><td colSpan={5} style={{ textAlign: 'center', padding: '1rem', color: 'var(--secondary-text)' }}>—</td></tr>
+              ) : (
+                data.topDishes.map(dish => (
+                  <TopDishRow key={dish.num} dish={dish} />
+                ))
+              )}
             </tbody>
           </table>
         </div>

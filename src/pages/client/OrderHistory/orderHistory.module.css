@@ -4,6 +4,8 @@
   background: var(--bg-color);
   display: flex;
   flex-direction: column;
+  padding-bottom: 76px; /* clear fixed footer */
+  box-sizing: border-box;
 }
 
 .content {

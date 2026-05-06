@@ -43,10 +43,113 @@
   font-size: 40px;
 }
 
+.avatarName {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.avatarEmail {
+  font-size: 14px;
+  color: rgba(255,255,255,0.8);
+}
+
+/* kept for backward-compat */
 .email {
   font-size: 15px;
   color: rgba(255,255,255,0.9);
   font-weight: 500;
+}
+
+/* ── Guest section ── */
+.guestSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px 16px 8px;
+  max-width: 480px;
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.guestMessage {
+  font-size: 15px;
+  color: var(--secondary-text);
+  text-align: center;
+  line-height: 1.5;
+  margin-bottom: 4px;
+}
+
+/* ── Google note (inside integrations section) ── */
+.googleNote {
+  font-size: 13px;
+  color: var(--secondary-text);
+  padding: 6px 16px 12px;
+  line-height: 1.5;
+}
+
+/* ── Edit bottom sheet ── */
+.sheetOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+}
+
+.sheet {
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  background: var(--surface-color);
+  border-radius: 20px 20px 0 0;
+  padding: 12px 20px 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-sizing: border-box;
+  animation: slideUp 0.22s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+.sheetHandle {
+  width: 40px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--separator-color);
+  margin: 0 auto 4px;
+}
+
+.sheetTitle {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--primary-text);
+  margin: 0;
+}
+
+.sheetError {
+  font-size: 13px;
+  font-weight: 500;
+  color: #e53935;
+  background: #fff0f0;
+  border: 1px solid #ffcdd2;
+  border-radius: 8px;
+  padding: 8px 12px;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.sheetActions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
 }
 
 /* ════════ Responsive ════════ */

@@ -3,7 +3,7 @@
     "orders": "Orders",
     "my_orders": "My Orders",
     "look": "Open",
-    "overall": "Overall",
+    "overall": "Account",
     "name": "Name",
     "enail": "Email",
     "settings": "Settings",
@@ -15,6 +15,48 @@
     "theme_dark": "Dark",
     "security": "Security",
     "change_password": "Change Password",
+    "change_password_title": "Change Password",
     "change": "Change",
-    "logout": "Logout"
+    "logout": "Logout",
+
+    "guest": "Guest",
+    "guest_message": "Sign in to save your order history and preferences.",
+    "sign_in": "Sign in",
+    "create_account": "Create account",
+
+    "edit_name": "Edit Name",
+    "edit_email": "Edit Email",
+
+    "current_password": "Current password",
+    "new_password": "New password",
+    "confirm_password": "Confirm new password",
+    "password_mismatch": "Passwords do not match",
+    "password_too_short": "Password must be at least 8 characters",
+    "name_required": "Name cannot be empty",
+    "email_required": "Email cannot be empty",
+    "save": "Save",
+    "cancel": "Cancel",
+    "save_error": "Failed to save. Please try again.",
+
+    "integrations": "Integrations",
+    "google_connected": "Google",
+    "google_connect": "Google",
+    "connected": "Connected",
+    "add": "Connect",
+    "google_no_password": "Your account uses Google only — set a password below to also log in with email.",
+    "set_password": "Set Password",
+
+    "storage": "Storage",
+    "clear_cache": "Clear cached data",
+    "clear_cache_value": "Clear",
+    "clear_cache_confirm": "Tap again to confirm",
+    "clear_cache_desc": "Removes saved session, cart, restaurant and order data",
+
+    "logout_dialog_title": "Log out?",
+    "logout_dialog_message": "You will be signed out of your account.",
+    "logout_dialog_confirm": "Log out",
+
+    "clear_cache_dialog_title": "Clear cached data?",
+    "clear_cache_dialog_message": "This will remove your saved session, cart, and restaurant data. You'll be taken to the restaurant picker.",
+    "clear_cache_dialog_confirm": "Clear data"
 }

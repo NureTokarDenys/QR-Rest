@@ -275,7 +275,10 @@
 .reviews {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  background: var(--surface-color);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
 }
 
 /* ── Fixed footer ── */
@@ -352,41 +355,34 @@
   }
 }
 
-/* Tablet — two-column layout */
+/* Tablet — two-column layout via flex row (no floats) */
 @media (min-width: 768px) {
   .page {
-    flex-direction: column;
+    flex-direction: row;      /* image left, content right */
+    align-items: flex-start;
     padding-bottom: 0;
   }
 
-  /* Stack image + content side by side */
   .imageWrapper {
     position: sticky;
     top: 0;
-    height: 100vh;
+    height: 100dvh;
     width: 45%;
-    flex-shrink: 0;
-    float: left; /* simple side-by-side via float */
+    flex-shrink: 0;           /* don't let flex squish it */
   }
 
   .content {
+    flex: 1;                  /* fill the remaining width */
     max-width: none;
-    width: 55%;
-    float: left;
+    width: auto;
     padding: 28px 32px 120px;
     box-sizing: border-box;
-  }
-
-  /* Clear floats on page */
-  .page::after {
-    content: '';
-    display: table;
-    clear: both;
+    min-height: 100dvh;       /* lets body scroll so sticky works */
   }
 
   .footer {
     padding: 14px 32px 24px;
-    left: 45%; /* starts after image column */
+    left: 45%;                /* fixed overlay covers only the content column */
   }
 
   .backBtn {
@@ -394,17 +390,9 @@
     top: 14px;
   }
 
-  .name {
-    font-size: 28px;
-  }
-
-  .description {
-    font-size: 15px;
-  }
-
-  .sectionTitle {
-    font-size: 18px;
-  }
+  .name        { font-size: 28px; }
+  .description { font-size: 15px; }
+  .sectionTitle{ font-size: 18px; }
 }
 
 /* Desktop */
@@ -414,7 +402,6 @@
   }
 
   .content {
-    width: 58%;
     padding: 36px 48px 120px;
   }
 
@@ -423,9 +410,7 @@
     padding: 16px 48px 28px;
   }
 
-  .name {
-    font-size: 32px;
-  }
+  .name { font-size: 32px; }
 }
 
 /* Small phones */

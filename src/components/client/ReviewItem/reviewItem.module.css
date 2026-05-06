@@ -1,45 +1,84 @@
-.wrapper {
-  background: var(--bg-color);
-  border-radius: 12px;
-  padding: 12px;
+.card {
+  background: var(--surface-color);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
 }
 
-.header {
+/* Thin horizontal separator between cards (skip the first one) */
+.card + .card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 20px;
+  right: 20px;
+  height: 1px;
+  background: var(--border);
+  opacity: 0.7;
+}
+
+/* ── Top row: name/date · stars ──────────────────────────────────────────── */
+.topRow {
   display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 6px;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
 
 .author {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--primary-text);
-  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.stars {
+.date {
   font-size: 12px;
+  color: var(--secondary-text);
 }
 
-.ratingText {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--rating-text);
+/* ── Stars ───────────────────────────────────────────────────────────────── */
+.stars {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+  padding-top: 1px;
 }
 
+.starFilled { color: #f6ad55; font-size: 15px; }
+.starEmpty  { color: var(--separator-color); font-size: 15px; }
+
+/* ── Review text ─────────────────────────────────────────────────────────── */
 .text {
   font-size: 14px;
   color: var(--primary-text);
-  line-height: 1.4;
+  line-height: 1.6;
+  margin: 0;
+  word-break: break-word;
+  padding-top: 2px;
 }
 
+/* ── Responsive ─────────────────────────────────────────────────────────── */
 @media (max-width: 480px) {
-  .wrapper {
-    padding: 10px;
-  }
+  .card  { padding: 14px 16px; }
+  .card + .card::before { left: 16px; right: 16px; }
+  .text  { font-size: 13px; }
+}
 
-  .text {
-    font-size: 13px;
-  }
+@media (min-width: 600px) {
+  .card   { padding: 20px 24px; }
+  .card + .card::before { left: 24px; right: 24px; }
+  .author { font-size: 15px; }
+  .text   { font-size: 15px; }
 }

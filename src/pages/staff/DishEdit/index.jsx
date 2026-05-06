@@ -9,7 +9,6 @@ import DishPreview from '../../../components/staff/DishPreview';
 import { Dropdown } from '../../../components/Dropdown';
 import PrimaryButton from '../../../components/PrimaryButton';
 import SecondaryButton from '../../../components/SecondaryButton';
-import { categories as mockCategories } from '../../../data/mockData';
 import { getCategories, createMenuItem, updateMenuItem } from '../../../api/admin';
 import { getDishDetail } from '../../../api/menu';
 import styles from './dishEdit.module.css';
@@ -52,7 +51,7 @@ export default function DishEdit() {
   const isNew = !id || id === 'new';
 
   const [form, setForm] = useState(EMPTY_FORM);
-  const [categories, setCategories] = useState(mockCategories);
+  const [categories, setCategories] = useState([]);
   const [saving, setSaving] = useState(false);
 
   // Load categories from API

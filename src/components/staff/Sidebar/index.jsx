@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Logo from '../../Logo';
-import { STAFF_USER } from '../../../data/mockData';
+import { useAuth } from '../../../context/AuthContext';
 import styles from './sidebar.module.css';
 
 import { MdMap, MdLocalFireDepartment, MdRestaurant, MdBarChart, MdSettings } from "react-icons/md";
@@ -19,9 +19,12 @@ export default function Sidebar({ isOpen = false, onClose = () => {} }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation('components');
+  const { user } = useAuth();
 
-  const isAdmin = STAFF_USER.role === 'admin';
-  const initials = STAFF_USER.initials;
+  const isAdmin  = user?.role === 'admin';
+  const initials = user?.name
+    ? user.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
+    : '?';
   const roleName = isAdmin ? t('role_admin') : t('role_waiter');
 
   return (

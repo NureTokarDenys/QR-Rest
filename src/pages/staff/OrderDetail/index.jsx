@@ -6,27 +6,32 @@ import MicroStat from '../../../components/staff/MicroStat';
 import ActiveOrderRow from '../../../components/staff/ActiveOrderRow';
 import PrimaryButton from '../../../components/PrimaryButton';
 import SecondaryButton from '../../../components/SecondaryButton';
-import { ORDER_DETAIL } from '../../../data/mockData';
 import { getOrder } from '../../../api/orders';
 import { updateItemStatus } from '../../../api/kitchen';
 import styles from './orderDetail.module.css';
 
 function normaliseOrder(raw) {
   if (!raw) return null;
+  // API returns { order, servingGroups, items } shape
+  const orderData = raw.order || raw;
+  const rawItems  = raw.items || orderData.items || [];
+  const orderId   = orderData._id || orderData.id;
   return {
-    id: raw._id || raw.id,
-    tableId: raw.table?.number ?? raw.tableNumber ?? raw.tableId,
-    time: raw.createdAt ? new Date(raw.createdAt).toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' }) : '—',
-    status: raw.status,
-    comment: raw.comment || '',
-    total: raw.totalAmount ?? raw.total ?? 0,
-    items: (raw.items || []).map(i => ({
-      id: i._id || i.id,
-      orderId: raw._id || raw.id,
-      name: (typeof i.menuItemId === 'object' ? i.menuItemId?.name : null) || i.name || '—',
-      qty: i.qty ?? i.quantity ?? 1,
-      price: i.totalPrice ?? i.price ?? 0,
-      status: i.dishStatus || i.status || 'waiting',
+    id:      orderId,
+    tableId: orderData.table?.number ?? orderData.tableNumber ?? orderData.tableId,
+    time:    orderData.createdAt
+               ? new Date(orderData.createdAt).toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })
+               : '—',
+    status:  orderData.status,
+    comment: orderData.comment || '',
+    total:   orderData.totalAmount ?? orderData.total ?? 0,
+    items: rawItems.map(i => ({
+      id:      i._id || i.id,
+      orderId,
+      name:    (typeof i.menuItemId === 'object' ? i.menuItemId?.name : null) || i.name || '—',
+      qty:     i.quantity ?? i.qty ?? 1,
+      price:   i.unitPrice ?? i.totalPrice ?? i.price ?? 0,
+      status:  i.dishStatus || i.status || 'waiting',
     })),
   };
 }
@@ -35,7 +40,7 @@ export default function OrderDetail() {
   const { id } = useParams();
   const { t } = useTranslation('orderDetail');
   const [order, setOrder] = useState(null);
-  const [items, setItems] = useState(ORDER_DETAIL.items);
+  const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -49,7 +54,7 @@ export default function OrderDetail() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  const displayOrder = order || { id: ORDER_DETAIL.id, tableId: ORDER_DETAIL.tableId, time: ORDER_DETAIL.time, status: 'in_progress', comment: ORDER_DETAIL.comment, total: ORDER_DETAIL.total };
+  const displayOrder = order || { id: id, tableId: '—', time: '—', status: '—', comment: '', total: 0 };
 
   async function handleStatusChange(itemId, newStatus) {
     setItems(prev => prev.map(it => it.id === itemId ? { ...it, status: newStatus } : it));

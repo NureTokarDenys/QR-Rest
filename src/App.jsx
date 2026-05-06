@@ -5,8 +5,11 @@ import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { ClientToastProvider } from "./context/ClientToastContext";
 import ProtectedRoute from './components/ProtectedRoute';
+import HttpErrorToast from './components/HttpErrorToast';
 import Login from './pages/Login';
+import RestaurantPicker from './pages/client/RestaurantPicker';
 import Forbidden from './pages/Forbidden';
+import OAuthCallback from './pages/OAuthCallback';
 import Menu from './pages/client/Menu';
 import Category from './pages/client/Category';
 import DishDetail from './pages/client/DishDetail';
@@ -15,6 +18,7 @@ import ConfirmOrder from './pages/client/ConfirmOrder';
 import OrderStatus from './pages/client/OrderStatus';
 import Profile from './pages/client/Profile';
 import OrderHistory from './pages/client/OrderHistory';
+import RestaurantReviews from './pages/client/RestaurantReviews';
 import TableMap from './pages/staff/TableMap';
 import TableDetail from './pages/staff/TableDetail';
 import Cooking from './pages/staff/Cooking';
@@ -30,6 +34,16 @@ function Guard({ roles, children }) {
   return <ProtectedRoute requiredRoles={roles}>{children}</ProtectedRoute>;
 }
 
+// Smart root redirect:
+//   • session token present  → /menu  (QR-scan flow, restaurant auto-resolved)
+//   • restaurantId in storage → /menu  (restaurant-picker flow, already chosen)
+//   • nothing               → /restaurants  (let client pick a restaurant)
+function RootRedirect() {
+  const hasSession    = !!localStorage.getItem('sessionToken');
+  const hasRestaurant = !!localStorage.getItem('restaurantId');
+  return <Navigate to={hasSession || hasRestaurant ? '/menu' : '/restaurants'} replace />;
+}
+
 export default function App() {
   return (
     <AuthProvider>
@@ -37,10 +51,16 @@ export default function App() {
       <BrowserRouter>
         <ThemeProvider>
           <ClientToastProvider>
+            {/* Global HTTP error overlay — catches all unhandled 4xx / 5xx */}
+            <HttpErrorToast />
             <Routes>
-              <Route path="/" element={<Navigate to="/login" replace />} />
+              <Route path="/" element={<RootRedirect />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/auth/callback" element={<OAuthCallback />} />
               <Route path="/forbidden" element={<Forbidden />} />
+
+              {/* Restaurant picker — direct access without QR scan */}
+              <Route path="/restaurants" element={<RestaurantPicker />} />
 
               {/* Client routes — open to everyone */}
               <Route path="/menu" element={<Menu />} />
@@ -52,6 +72,7 @@ export default function App() {
               <Route path="/order-status/:orderId" element={<OrderStatus />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/order-history" element={<OrderHistory />} />
+              <Route path="/restaurant-reviews" element={<RestaurantReviews />} />
 
               {/* Staff routes — role-gated */}
               <Route path="/staff" element={<Navigate to="/staff/map" replace />} />

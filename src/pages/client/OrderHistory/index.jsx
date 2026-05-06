@@ -1,6 +1,7 @@
-import React, { use } from 'react';
+import React from 'react';
 import Header from '../../../components/client/Header';
 import OrderHistoryCard from '../../../components/client/OrderHistoryCard';
+import Footer from '../../../components/client/Footer';
 import { useApp } from '../../../context/AppContext';
 import styles from './orderHistory.module.css';
 import { useTranslation } from 'react-i18next';
@@ -17,6 +18,7 @@ export default function OrderHistory() {
           <OrderHistoryCard key={order.id} order={order} />
         ))}
       </div>
+      <Footer />
     </div>
   );
 }

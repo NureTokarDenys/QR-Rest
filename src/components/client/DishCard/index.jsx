@@ -24,10 +24,17 @@ export default function DishCard({ dish }) {
       <img src={dish.image} alt={dish.name} className={styles.image} />
       <div className={styles.body}>
         <span className={styles.name}>{local(dish, 'name')}</span>
-        <div className={styles.rating}>
-          <span className={styles.star}>⭐</span>
-          <span className={styles.ratingValue}>{dish.rating}</span>
-        </div>
+        {dish.rating != null && (
+          <div className={styles.rating}>
+            <span className={styles.star}>⭐</span>
+            <span className={styles.ratingValue}>
+              {dish.rating.toFixed(1)}
+              {dish.reviewCount > 0 && (
+                <span className={styles.reviewCount}> · {dish.reviewCount}</span>
+              )}
+            </span>
+          </div>
+        )}
         <div className={styles.bottom}>
           <span className={styles.price}>{dish.price}₴</span>
           <button className={styles.addButton} onClick={handleAdd}>+</button>

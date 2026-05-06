@@ -1,25 +1,31 @@
 .card {
   background: var(--surface-color);
-  border-radius: 14px;
+  border-radius: 16px;
   overflow: hidden;
   cursor: pointer;
-  border: 1px solid var(--border);
-  transition: transform 0.15s, box-shadow 0.15s;
+  /* Shadow instead of border — feels lighter and more modern */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 
 .card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0,0,0,0.10);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.13);
+}
+
+.card:active {
+  transform: scale(0.97);
 }
 
 .image {
   width: 100%;
-  aspect-ratio: 4/3;
+  aspect-ratio: 1 / 1;   /* square crop — works great for food photos */
   object-fit: cover;
+  display: block;
 }
 
 .body {
-  padding: 8px 10px 10px;
+  padding: 10px 12px 12px;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -27,7 +33,7 @@
 
 .name {
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--primary-text);
   line-height: 1.35;
   /* Clamp to 2 lines */
@@ -43,14 +49,15 @@
   gap: 3px;
 }
 
-.star        { font-size: 12px; }
-.ratingValue { font-size: 12px; color: var(--secondary-text); }
+.star         { font-size: 11px; }
+.ratingValue  { font-size: 11px; color: var(--secondary-text); }
+.reviewCount  { font-size: 10px; color: var(--secondary-text); opacity: 0.75; }
 
 .bottom {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 4px;
+  margin-top: 6px;
 }
 
 .price {
@@ -60,31 +67,41 @@
 }
 
 .addButton {
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   background: var(--primary-btn-active);
-  color: var(--surface-color);
+  color: #fff;
   border: none;
-  border-radius: 8px;
-  font-size: 20px;
+  border-radius: 50%;    /* circular pill */
+  font-size: 22px;
   line-height: 1;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: background 0.15s;
+  box-shadow: 0 2px 8px rgba(29, 122, 252, 0.30);
+  transition: background 0.15s, transform 0.12s;
 }
 
 .addButton:hover {
   background: var(--primary-btn-hover);
+  transform: scale(1.12);
+}
+
+.addButton:active {
+  transform: scale(0.92);
 }
 
 /* ════════ Responsive ════════ */
 
 @media (min-width: 600px) {
+  .card {
+    border-radius: 18px;
+  }
+
   .body {
-    padding: 10px 12px 12px;
+    padding: 12px 14px 14px;
   }
 
   .name {
@@ -96,18 +113,14 @@
   }
 
   .addButton {
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
   }
 }
 
 @media (min-width: 1024px) {
-  .card {
-    border-radius: 16px;
-  }
-
   .body {
-    padding: 12px 14px 14px;
+    padding: 14px 16px 16px;
   }
 
   .name {
@@ -121,7 +134,6 @@
   .addButton {
     width: 36px;
     height: 36px;
-    font-size: 22px;
-    border-radius: 10px;
+    font-size: 24px;
   }
 }

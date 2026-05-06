@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStaffLayout } from '../../../context/StaffLayoutContext';
-import { NOTIFICATIONS } from '../../../data/mockData';
 import styles from './staffHeader.module.css';
 
 import { MdNotifications, MdAccessTime, MdMenu } from "react-icons/md";
@@ -21,7 +20,7 @@ export default function StaffHeader({ title, backTo, rightActions, onMenuToggle 
     return () => clearInterval(id);
   }, []);
 
-  const unread = NOTIFICATIONS.length;
+  const unread = 0; // live notifications not yet implemented
 
   return (
     <header className={styles.header}>

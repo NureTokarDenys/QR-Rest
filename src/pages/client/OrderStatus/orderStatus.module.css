@@ -150,6 +150,36 @@
   margin-bottom: 4px;
 }
 
+/* ── Serving group sections ── */
+.groupSection {
+  /* no top margin — gap handled by groupSectionGap */
+}
+
+.groupSectionGap {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.groupLabel {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--accent-color);
+  background: color-mix(in srgb, var(--accent-color) 12%, transparent);
+  border-radius: 6px;
+  padding: 3px 8px;
+  margin-bottom: 4px;
+}
+
+.emptyGroup {
+  font-size: 13px;
+  color: var(--secondary-text);
+  padding: 6px 0;
+}
+
 .not_found {
   text-align: center;
   margin-top: 60px;

@@ -1,0 +1,139 @@
+/* ── Stack container ─────────────────────────────────────────────────────────
+   Fixed to the top-right corner on all screen sizes so it never overlaps
+   the client footer tab-bar or staff sidebar.                               */
+.stack {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 360px;
+  width: calc(100vw - 32px);
+  pointer-events: none; /* let clicks pass through the gap between toasts */
+}
+
+/* ── Individual toast ────────────────────────────────────────────────────────*/
+.toast {
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px;
+  padding: 12px 14px 14px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+  pointer-events: all;
+  animation: slideIn 0.22s ease-out;
+  background: var(--surface-color);
+  border: 1.5px solid var(--border);
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(32px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ── Severity tints ──────────────────────────────────────────────────────────*/
+.critical {
+  border-color: #f56565;
+  background: color-mix(in srgb, #f56565 8%, var(--surface-color));
+}
+.warn {
+  border-color: #ed8936;
+  background: color-mix(in srgb, #ed8936 8%, var(--surface-color));
+}
+.info {
+  border-color: var(--accent-color);
+  background: color-mix(in srgb, var(--accent-color) 8%, var(--surface-color));
+}
+
+/* ── Header row ─────────────────────────────────────────────────────────────*/
+.header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.badge {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  padding: 2px 7px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  font-family: monospace;
+}
+
+.critical .badge { background: #f56565; color: #fff; }
+.warn     .badge { background: #ed8936; color: #fff; }
+.info     .badge { background: var(--accent-color); color: #fff; }
+
+.title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--primary-text);
+  flex: 1;
+  line-height: 1.2;
+}
+
+.close {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--secondary-text);
+  padding: 0 2px;
+  line-height: 1;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+.close:hover { opacity: 1; }
+
+/* ── Body ───────────────────────────────────────────────────────────────────*/
+.message {
+  font-size: 13px;
+  color: var(--primary-text);
+  margin: 0 0 2px;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.code {
+  font-size: 11px;
+  font-family: monospace;
+  color: var(--secondary-text);
+  margin: 4px 0 0;
+  opacity: 0.75;
+}
+
+/* ── Auto-dismiss progress bar ───────────────────────────────────────────────*/
+.progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  animation: shrink linear forwards;
+  border-radius: 0 0 14px 14px;
+}
+
+.critical .progress { background: #f56565; }
+.warn     .progress { background: #ed8936; }
+.info     .progress { background: var(--accent-color); }
+
+@keyframes shrink {
+  from { width: 100%; }
+  to   { width: 0%; }
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────────────*/
+@media (max-width: 480px) {
+  .stack {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    width: auto;
+    max-width: unset;
+  }
+}

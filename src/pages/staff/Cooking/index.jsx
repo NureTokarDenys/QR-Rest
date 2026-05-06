@@ -2,7 +2,6 @@ import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import StaffShell from '../../../components/staff/StaffShell';
 import KanbanColumn from '../../../components/staff/KanbanColumn';
-import { KANBAN_ITEMS } from '../../../data/mockData';
 import { getKitchenOrders, updateItemStatus } from '../../../api/kitchen';
 import styles from './cooking.module.css';
 
@@ -41,7 +40,7 @@ function flattenOrders(orders) {
 export default function Cooking() {
   const { t } = useTranslation('cooking');
   const { t: tc } = useTranslation('components');
-  const [items, setItems] = useState(KANBAN_ITEMS);
+  const [items, setItems] = useState([]);
   const [view, setView] = useState('order'); // 'order' | 'table'
   const [loading, setLoading] = useState(true);
 
@@ -52,7 +51,6 @@ export default function Cooking() {
       if (flattened !== null) setItems(flattened);
     } catch (err) {
       console.error('getKitchenOrders error:', err);
-      // keep mock data as fallback
     } finally {
       setLoading(false);
     }
