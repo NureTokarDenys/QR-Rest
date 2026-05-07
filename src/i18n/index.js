@@ -15,6 +15,7 @@ import uaOrderConfirmation from './locales/ua/client/orderConfirmation.json';
 import uaOrderStatus from './locales/ua/client/orderStatus.json';
 import uaMyOrders from './locales/ua/client/myOrders.json';
 import uaRestaurantReviews from './locales/ua/client/restaurantReviews.json';
+import uaRestaurantPicker from './locales/ua/client/restaurantPicker.json';
 
 import uaTableMap from './locales/ua/staff/tableMap.json';
 import uaTableDetail from './locales/ua/staff/tableDetails.json';
@@ -41,6 +42,7 @@ import enOrderConfirmation from './locales/en/client/orderConfirmation.json';
 import enOrderStatus from './locales/en/client/orderStatus.json';
 import enMyOrders from './locales/en/client/myOrders.json';
 import enRestaurantReviews from './locales/en/client/restaurantReviews.json';
+import enRestaurantPicker from './locales/en/client/restaurantPicker.json';
 
 import enTableMap from './locales/en/staff/tableMap.json';
 import enTableDetail from './locales/en/staff/tableDetails.json';
@@ -62,6 +64,7 @@ i18n.use(initReactI18next).init({
       orderConfirmation: uaOrderConfirmation, orderStatus: uaOrderStatus,
       myOrders: uaMyOrders,
       restaurantReviews: uaRestaurantReviews,
+      restaurantPicker: uaRestaurantPicker,
       tableMap: uaTableMap, tableDetail: uaTableDetail, cooking: uaCooking,
       orderDetail: uaOrderDetail, menuManagement: uaMenuManagement,
       dishEdit: uaDishEdit, pdfGenerator: uaPdfGenerator,
@@ -75,6 +78,7 @@ i18n.use(initReactI18next).init({
       orderConfirmation: enOrderConfirmation, orderStatus: enOrderStatus,
       myOrders: enMyOrders,
       restaurantReviews: enRestaurantReviews,
+      restaurantPicker: enRestaurantPicker,
       tableMap: enTableMap, tableDetail: enTableDetail, cooking: enCooking,
       orderDetail: enOrderDetail, menuManagement: enMenuManagement,
       dishEdit: enDishEdit, pdfGenerator: enPdfGenerator,

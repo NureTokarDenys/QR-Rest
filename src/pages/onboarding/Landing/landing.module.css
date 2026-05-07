@@ -1,0 +1,511 @@
+/* ── Base — unified background ───────────────────────────────────────────────
+   Both body and main content use #f1f5f9 so there is no visible seam between
+   the page wrapper and surrounding browser chrome.                            */
+:global(body) {
+  background: #f1f5f9;
+  margin: 0;
+}
+
+.page {
+  width: 100%;            /* fill the flex #root so footer spans full viewport */
+  min-height: 100vh;
+  background: #f1f5f9;   /* same as body above */
+  color: #0f172a;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* ── Navbar ─────────────────────────────────────────────────────────────────── */
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: #1a1f36;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+.navInner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.navLogo { text-decoration: none; }
+
+.navLinks {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.navLink {
+  text-decoration: none;
+  color: rgba(255,255,255,0.75);
+  font-size: 15px;
+  font-weight: 500;
+  transition: color 0.15s;
+}
+.navLink:hover { color: #ffffff; }
+
+.navCta {
+  text-decoration: none;
+  background: #1d7afc;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 18px;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+.navCta:hover { background: #1567e0; }
+
+.burger {
+  display: none;
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 26px;
+  cursor: pointer;
+  padding: 4px;
+}
+
+/* ── Shared buttons ──────────────────────────────────────────────────────────── */
+.btnPrimary {
+  display: inline-block;
+  text-decoration: none;
+  background: #1d7afc;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 14px 28px;
+  border-radius: 10px;
+  text-align: center;
+  transition: background 0.15s, transform 0.1s;
+}
+.btnPrimary:hover { background: #1567e0; transform: translateY(-1px); }
+
+.btnSecondary {
+  display: inline-block;
+  text-decoration: none;
+  color: #1d7afc;
+  font-size: 15px;
+  font-weight: 500;
+  padding: 14px 4px;
+  border-bottom: 2px solid transparent;
+  transition: border-color 0.15s;
+}
+.btnSecondary:hover { border-color: #1d7afc; }
+
+.btnOutline {
+  display: inline-block;
+  text-decoration: none;
+  border: 2px solid #1d7afc;
+  color: #1d7afc;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 12px 28px;
+  border-radius: 10px;
+  text-align: center;
+  transition: background 0.15s, color 0.15s;
+}
+.btnOutline:hover { background: #1d7afc; color: #ffffff; }
+
+/* ── Hero ────────────────────────────────────────────────────────────────────── */
+.hero {
+  padding: 72px 24px 64px;
+  padding-top: calc(64px + 72px); /* 64px navbar + 72px breathing room */
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 56px;
+  align-items: center;
+}
+
+.heroTitle {
+  font-size: clamp(26px, 3.5vw, 46px);
+  font-weight: 800;
+  line-height: 1.15;
+  color: #0f172a;
+  margin: 0 0 20px;
+}
+
+.heroSub {
+  font-size: 17px;
+  line-height: 1.65;
+  color: #475569;
+  margin: 0 0 32px;
+  max-width: 520px;
+}
+
+.heroBtns {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 32px;
+}
+
+
+/* ── Phone mock — square ─────────────────────────────────────────────────────── */
+.heroVisual {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.phoneMock {
+  width: 260px;
+  height: 260px;
+  background: linear-gradient(145deg, #1a1f36, #2d3561);
+  border-radius: 28px;
+  border: 3px solid rgba(255,255,255,0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  box-shadow: 0 28px 64px rgba(29,122,252,0.28), 0 8px 24px rgba(0,0,0,0.2);
+}
+
+.phoneMockQr {
+  font-size: 120px;
+  color: #ffffff;
+}
+
+.phoneMockLabel {
+  font-size: 12px;
+  color: rgba(255,255,255,0.55);
+  text-align: center;
+  padding: 0 20px;
+  margin: 0;
+}
+
+
+/* ── Sections ────────────────────────────────────────────────────────────────── */
+.section {
+  padding: 72px 24px;
+  background: #f1f5f9;   /* same as page + body — seamless */
+}
+
+.sectionInner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.sectionTitle {
+  font-size: clamp(22px, 3vw, 34px);
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 8px;
+  text-align: center;
+}
+
+.sectionSub {
+  font-size: 16px;
+  color: #64748b;
+  text-align: center;
+  margin: 0 0 48px;
+}
+
+/* ── How It Works ────────────────────────────────────────────────────────────── */
+.stepsRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.stepCard {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 36px 24px 28px;
+  text-align: center;
+  position: relative;
+}
+
+.stepNum {
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 32px;
+  height: 32px;
+  background: #1d7afc;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stepIcon {
+  font-size: 36px;
+  color: #1d7afc;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: center;
+}
+
+.stepTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 10px;
+}
+
+.stepDesc {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #64748b;
+  margin: 0;
+}
+
+/* ── Features ────────────────────────────────────────────────────────────────── */
+.featuresGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.featureCard {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 24px;
+  transition: box-shadow 0.18s, border-color 0.18s, transform 0.15s;
+}
+
+.featureCard:hover {
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  border-color: #1d7afc;
+  transform: translateY(-2px);
+}
+
+.featureIcon {
+  font-size: 28px;
+  color: #1d7afc;
+  margin-bottom: 12px;
+}
+
+.featureTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 8px;
+}
+
+.featureDesc {
+  font-size: 13px;
+  line-height: 1.65;
+  color: #64748b;
+  margin: 0;
+}
+
+/* ── Pricing ─────────────────────────────────────────────────────────────────── */
+.pricingRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  max-width: 780px;
+  margin: 0 auto;
+}
+
+.pricingCard {
+  background: #ffffff;
+  border: 2px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 36px 28px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.pricingCardFeatured {
+  background: #ffffff;
+  border-color: #1d7afc;
+  box-shadow: 0 12px 40px rgba(29,122,252,0.15);
+}
+
+.pricingPopular {
+  position: absolute;
+  top: -13px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1d7afc;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 4px 14px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.pricingBadge {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1d7afc;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 12px;
+}
+
+.pricingPrice {
+  font-size: 34px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1;
+}
+
+.pricingSub {
+  font-size: 13px;
+  color: #94a3b8;
+  margin-bottom: 24px;
+  margin-top: 4px;
+}
+
+.pricingList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  flex: 1;
+}
+
+.pricingList li {
+  font-size: 14px;
+  color: #475569;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.pricingListSeparator {
+  font-size: 12px !important;
+  font-weight: 700;
+  color: #94a3b8 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 4px;
+  display: block !important;
+}
+
+.checkmark {
+  color: #22c55e;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ── Footer — truly full-width ────────────────────────────────────────────────
+   No inner max-width wrapper — content stretches edge to edge with padding.   */
+.footer {
+  background: #1a1f36;
+}
+
+.footerTop {
+  padding: 48px 48px 32px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+.footerBrand {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.footerTagline {
+  font-size: 13px;
+  color: rgba(255,255,255,0.45);
+  margin: 0;
+  max-width: 240px;
+  line-height: 1.5;
+}
+
+.footerLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 28px;
+  align-items: center;
+}
+
+.footerLink {
+  text-decoration: none;
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
+  transition: color 0.15s;
+}
+.footerLink:hover { color: #ffffff; }
+
+.footerBottom {
+  border-top: 1px solid rgba(255,255,255,0.07);
+  padding: 16px 48px;
+  text-align: center;
+}
+
+.copyright {
+  font-size: 12px;
+  color: rgba(255,255,255,0.3);
+  margin: 0;
+}
+
+/* ── Mobile ──────────────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .hero {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  .heroVisual { order: -1; justify-content: center; }
+  .heroBtns   { justify-content: center; }
+  .heroStats  { justify-content: center; }
+  .heroSub    { max-width: 100%; margin-left: auto; margin-right: auto; }
+
+  .featuresGrid { grid-template-columns: 1fr 1fr; }
+  .pricingRow   { grid-template-columns: 1fr; max-width: 420px; }
+}
+
+@media (max-width: 768px) {
+  .stepsRow   { grid-template-columns: 1fr; }
+
+  .burger { display: flex; }
+
+  .navLinks {
+    display: none;
+    position: absolute;
+    top: 64px;
+    left: 0;
+    right: 0;
+    background: #1a1f36;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 16px 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    gap: 12px;
+  }
+  .navLinksOpen { display: flex; }
+  .navCta { text-align: center; }
+}
+
+@media (max-width: 480px) {
+  .featuresGrid { grid-template-columns: 1fr; }
+  .heroBtns { flex-direction: column; align-items: center; gap: 12px; }
+  .phoneMock { width: 220px; height: 220px; }
+  .phoneMockQr { font-size: 96px; }
+  .footerTop { flex-direction: column; }
+}

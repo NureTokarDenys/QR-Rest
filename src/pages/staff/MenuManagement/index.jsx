@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { SOURCE_LANG, fieldFor } from '../../../i18n/langs';
 import StaffShell from '../../../components/staff/StaffShell';
 import MenuCategoryList from '../../../components/staff/MenuCategoryList';
 import MenuDishRow from '../../../components/staff/MenuDishRow';
@@ -84,7 +85,7 @@ export default function MenuManagement() {
   }
 
   function handleRename(id, newName) {
-    const field = i18n.language === 'en' ? 'name_en' : 'name';
+    const field = fieldFor('name', i18n.language);
     setCats(prev => prev.map(c => c.id === id ? { ...c, [field]: newName } : c));
   }
 

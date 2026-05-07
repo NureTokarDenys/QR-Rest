@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { toApiLang } from '../i18n/langs';
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
@@ -13,7 +14,7 @@ export function getStoredRestaurantId() {
   return localStorage.getItem('restaurantId') || '';
 }
 
-// Request interceptor – attach tokens
+// Request interceptor – attach tokens + content language
 apiClient.interceptors.request.use((config) => {
   const accessToken = localStorage.getItem('accessToken');
   if (accessToken) {
@@ -23,6 +24,11 @@ apiClient.interceptors.request.use((config) => {
   if (sessionToken) {
     config.headers['X-Session-Token'] = sessionToken;
   }
+  // Forward the user's selected language so the backend returns translated
+  // dish names, descriptions, ingredients, etc.
+  // Maps frontend code ('ua') to backend ISO code ('uk').
+  const i18nLang = localStorage.getItem('lang') ?? 'ua';
+  config.headers['Accept-Language'] = toApiLang(i18nLang);
   return config;
 });
 
@@ -67,7 +73,9 @@ function dispatchApiError(error) {
   }
 
   const status = error.response.status;
-  if (status === 401) return; // auth interceptor handles this
+  // 401 on auth endpoints (login/register) is handled inline by the page.
+  // All other 401s are handled by the refresh interceptor above.
+  if (status === 401) return;
 
   const body = error.response.data?.error || error.response.data || {};
   const code = body.code || '';
@@ -86,7 +94,12 @@ apiClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Auth endpoints (login, register) returning 401 mean "wrong credentials",
+    // not "token expired". Skip the refresh flow so the caller's catch block
+    // can display the error instead of causing a hard redirect to /login.
+    const isAuthEndpoint = /\/auth\/(login|register)/.test(originalRequest.url ?? '');
+
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });

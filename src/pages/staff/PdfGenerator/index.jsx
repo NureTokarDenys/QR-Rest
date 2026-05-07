@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { SOURCE_LANG, fieldFor } from '../../../i18n/langs';
 import StaffShell from '../../../components/staff/StaffShell';
 import PdfSettingItem from '../../../components/staff/PdfSettingItem';
 import PdfMenuDish from '../../../components/staff/PdfMenuDish';
@@ -24,12 +25,13 @@ export default function PdfGenerator() {
   const { t, i18n } = useTranslation('pdfGenerator');
   const local = (obj, field) => {
     if (!obj) return '';
-    return i18n.language === 'en' ? (obj[`${field}_en`] || obj[field] || '') : (obj[field] || '');
+    const key = fieldFor(field, i18n.language);
+    return obj[key] || obj[field] || '';
   };
 
   const [templateId, setTemplateId]           = useState('classic');
   const [format, setFormat]                   = useState('A4');
-  const [pdfLang, setPdfLang]                 = useState(i18n.language === 'en' ? 'en' : 'ua');
+  const [pdfLang, setPdfLang]                 = useState(i18n.language !== SOURCE_LANG ? i18n.language : SOURCE_LANG);
   const [showMainPhoto, setShowMainPhoto]     = useState(true);
   const [showIngredients, setShowIngredients] = useState(false);
 

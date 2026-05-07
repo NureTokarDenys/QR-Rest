@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '../../../context/AppContext';
 import ReviewItem from '../../../components/client/ReviewItem';
 import PrimaryButton from '../../../components/PrimaryButton';
@@ -8,7 +8,8 @@ import { getDishReviews } from '../../../api/reviews';
 import styles from './dishDetail.module.css';
 import { useToast } from '../../../context/ClientToastContext';
 import { useTranslation } from 'react-i18next';
-import { useLocalField } from '../../../i18n/useLang';
+import { useLocalField, useFallbackField, useLang } from '../../../i18n/useLang';
+import FallbackMark from '../../../components/FallbackMark';
 
 const MAX_COMMENT = 300;
 
@@ -48,6 +49,7 @@ function normaliseDish(raw) {
         name: o.name,
         name_en: o.name_en || o.name,
         priceModifier: o.priceModifier,
+        isDefault: o.isDefault ?? false,
       })),
     })),
   };
@@ -59,10 +61,18 @@ export default function DishDetail() {
   const { t: t3 } = useTranslation('dishDetails');
 
   const local = useLocalField();
+  const fb    = useFallbackField();
+  const lang  = useLang();           // triggers re-fetch when language changes
   const { id } = useParams();
   const navigate = useNavigate();
-  const { addToCart } = useApp();
+  const location = useLocation();
+  const { addToCart, updateCartItem } = useApp();
   const { showToast } = useToast();
+
+  // If arriving from the cart via clicking the dish name, pre-fill with saved
+  // modifiers and switch the bottom button to "Save changes" mode.
+  const prefill    = location.state?.prefill;
+  const editCartId = prefill?.cartItemId ?? null; // truthy → edit mode
 
   const [dish, setDish]         = useState(null);
   const [loading, setLoading]   = useState(true);
@@ -70,10 +80,10 @@ export default function DishDetail() {
   const [ratingSummary, setRatingSummary] = useState(null); // { averageRating, totalCount }
 
   const [quantity, setQuantity] = useState(1);
-  const [excludedIngredients, setExcludedIngredients] = useState([]);
-  const [selectedAddons, setSelectedAddons] = useState([]);
-  const [componentGroupSelections, setComponentGroupSelections] = useState({});
-  const [comment, setComment] = useState('');
+  const [excludedIngredients, setExcludedIngredients] = useState(prefill?.excludedIngredients ?? []);
+  const [selectedAddons, setSelectedAddons] = useState(prefill?.selectedAddons ?? []);
+  const [componentGroupSelections, setComponentGroupSelections] = useState(prefill?.componentGroupSelections ?? {});
+  const [comment, setComment] = useState(prefill?.comment ?? '');
 
   useEffect(() => {
     let cancelled = false;
@@ -86,7 +96,25 @@ export default function DishDetail() {
     ])
       .then(([dishData, reviewEnvelope]) => {
         if (cancelled) return;
-        setDish(normaliseDish(dishData));
+        const dish = normaliseDish(dishData);
+        setDish(dish);
+
+        // Pre-select the isDefault option for any group that has no selection yet
+        // (covers both fresh opens and prefill arriving from cart with missing groups)
+        if (dish?.componentGroups?.length) {
+          setComponentGroupSelections(prev => {
+            const next = { ...prev };
+            let changed = false;
+            for (const g of dish.componentGroups) {
+              if (!next[g.id]) {
+                const def = g.options.find(o => o.isDefault);
+                if (def) { next[g.id] = def.id; changed = true; }
+              }
+            }
+            return changed ? next : prev;
+          });
+        }
+
         if (reviewEnvelope) {
           setReviews(reviewEnvelope.data || []);
           setRatingSummary(reviewEnvelope.summary || null);
@@ -101,7 +129,7 @@ export default function DishDetail() {
       });
 
     return () => { cancelled = true; };
-  }, [id]);
+  }, [id, lang]); // re-fetch when language changes so backend returns fresh translations
 
   if (loading) {
     return <div className={styles.notFound}>Завантаження...</div>;
@@ -112,6 +140,10 @@ export default function DishDetail() {
   const ingredientsList = dish.ingredientsList || [];
   const addons = dish.addons || [];
   const componentGroups = dish.componentGroups || [];
+
+  // Pre-compute fallback-aware display values
+  const { value: dishName,        isFallback: nameFallback }  = fb(dish, 'name');
+  const { value: dishDescription, isFallback: descFallback }  = fb(dish, 'description');
 
   const hasRequiredGroups = componentGroups.filter(g => g.isRequired).length > 0;
   const allRequiredGroupsFilled = componentGroups
@@ -150,13 +182,24 @@ export default function DishDetail() {
   }
 
   function handleAdd() {
-    for (let i = 0; i < quantity; i++) {
-      addToCart(dish, {
+    if (editCartId) {
+      // Edit mode — update the existing cart item in-place
+      updateCartItem(editCartId, dish, {
         excludedIngredients,
         selectedAddons,
         componentGroupSelections,
         comment,
       });
+    } else {
+      // Normal mode — add one new cart entry per quantity unit
+      for (let i = 0; i < quantity; i++) {
+        addToCart(dish, {
+          excludedIngredients,
+          selectedAddons,
+          componentGroupSelections,
+          comment,
+        });
+      }
     }
     navigate(-1);
     showToast(`${t1('message_p1')} "${local(dish, 'name')}" ${t1('message_p2')}`);
@@ -170,7 +213,9 @@ export default function DishDetail() {
       </div>
 
       <div className={styles.content}>
-        <h1 className={styles.name}>{local(dish, 'name')}</h1>
+        <h1 className={styles.name}>
+          {dishName}{nameFallback && <FallbackMark tip={t3('fallback_tooltip')} />}
+        </h1>
 
         {ratingSummary && ratingSummary.totalCount > 0 && (
           <div className={styles.ratingRow}>
@@ -182,63 +227,74 @@ export default function DishDetail() {
           </div>
         )}
 
-        <p className={styles.description}>{local(dish, 'description')}</p>
+        <p className={styles.description}>
+          {dishDescription}{descFallback && <FallbackMark tip={t3('fallback_tooltip')} />}
+        </p>
 
         {/* ComponentGroups — mandatory choice */}
-        {componentGroups.map(group => (
-          <div key={group.id} className={styles.section}>
-            <h3 className={styles.sectionTitle}>
-              {local(group, 'name')}
-              {group.isRequired && (
-                <span className={`${styles.requiredBadge} ${componentGroupSelections[group.id] ? styles.requiredBadgeDone : ''}`}>
-                  {componentGroupSelections[group.id] ? t3('chosen') : t3('choose_required')}
-                </span>
-              )}
-            </h3>
-            <div className={styles.optionsList}>
-              {group.options.map(opt => {
-                const selected = componentGroupSelections[group.id] === opt.id;
-                return (
-                  <button
-                    key={opt.id}
-                    className={`${styles.optionBtn} ${selected ? styles.optionBtnSelected : ''}`}
-                    onClick={() => selectComponentGroup(group.id, opt.id)}
-                  >
-                    <span>{local(opt, 'name')}</span>
-                    {opt.priceModifier !== 0 && (
-                      <span className={styles.optionPrice}>+{opt.priceModifier}₴</span>
-                    )}
-                  </button>
-                );
-              })}
+        {componentGroups.map(group => {
+          const { value: groupName, isFallback: groupFb } = fb(group, 'name');
+          return (
+            <div key={group.id} className={styles.section}>
+              <h3 className={styles.sectionTitle}>
+                {groupName}{groupFb && <FallbackMark tip={t3('fallback_tooltip')} />}
+                {group.isRequired && (
+                  <span className={`${styles.requiredBadge} ${componentGroupSelections[group.id] ? styles.requiredBadgeDone : ''}`}>
+                    {componentGroupSelections[group.id] ? t3('chosen') : t3('choose_required')}
+                  </span>
+                )}
+              </h3>
+              <div className={styles.optionsList}>
+                {group.options.map(opt => {
+                  const selected = componentGroupSelections[group.id] === opt.id;
+                  const { value: optName, isFallback: optFb } = fb(opt, 'name');
+                  return (
+                    <button
+                      key={opt.id}
+                      className={`${styles.optionBtn} ${selected ? styles.optionBtnSelected : ''}`}
+                      onClick={() => selectComponentGroup(group.id, opt.id)}
+                    >
+                      <span>{optName}{optFb && <FallbackMark tip={t3('fallback_tooltip')} />}</span>
+                      {opt.priceModifier !== 0 && (
+                        <span className={styles.optionPrice}>+{opt.priceModifier}₴</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
 
         {/* Ingredients with removable checkboxes */}
         {ingredientsList.length > 0 && (
           <div className={styles.section}>
             <h3 className={styles.sectionTitle}>{t3('contents')}</h3>
             <div className={styles.ingredientsList}>
-              {ingredientsList.map(ing => (
-                <div key={ing.id} className={styles.ingredientRow}>
-                  {ing.isRemovable ? (
-                    <label className={styles.ingredientLabel}>
-                      <input
-                        type="checkbox"
-                        className={styles.ingredientCheckbox}
-                        checked={!excludedIngredients.includes(ing.id)}
-                        onChange={() => toggleIngredient(ing.id)}
-                      />
-                      <span className={excludedIngredients.includes(ing.id) ? styles.ingredientExcluded : ''}>
-                        {local(ing, 'name')}
+              {ingredientsList.map(ing => {
+                const { value: ingName, isFallback: ingFb } = fb(ing, 'name');
+                return (
+                  <div key={ing.id} className={styles.ingredientRow}>
+                    {ing.isRemovable ? (
+                      <label className={styles.ingredientLabel}>
+                        <input
+                          type="checkbox"
+                          className={styles.ingredientCheckbox}
+                          checked={!excludedIngredients.includes(ing.id)}
+                          onChange={() => toggleIngredient(ing.id)}
+                        />
+                        <span className={excludedIngredients.includes(ing.id) ? styles.ingredientExcluded : ''}>
+                          {ingName}{ingFb && <FallbackMark tip={t3('fallback_tooltip')} />}
+                        </span>
+                      </label>
+                    ) : (
+                      <span className={styles.ingredientFixed}>
+                        {ingName}{ingFb && <FallbackMark tip={t3('fallback_tooltip')} />}
                       </span>
-                    </label>
-                  ) : (
-                    <span className={styles.ingredientFixed}>{local(ing, 'name')}</span>
-                  )}
-                </div>
-              ))}
+                    )}
+                  </div>
+                );
+              })}
             </div>
             {ingredientsList.some(i => i.isRemovable) && (
               <p className={styles.ingredientHint}>{t3('ingredients_hint')}</p>
@@ -253,6 +309,7 @@ export default function DishDetail() {
             <div className={styles.addonsList}>
               {addons.map(addon => {
                 const checked = selectedAddons.includes(addon.id);
+                const { value: addonName, isFallback: addonFb } = fb(addon, 'name');
                 return (
                   <label key={addon.id} className={`${styles.addonRow} ${checked ? styles.addonRowSelected : ''}`}>
                     <input
@@ -261,7 +318,9 @@ export default function DishDetail() {
                       checked={checked}
                       onChange={() => toggleAddon(addon.id)}
                     />
-                    <span className={styles.addonName}>{local(addon, 'name')}</span>
+                    <span className={styles.addonName}>
+                      {addonName}{addonFb && <FallbackMark tip={t3('fallback_tooltip')} />}
+                    </span>
                     <span className={styles.addonPrice}>
                       {addon.price === 0 ? t3('free') : `+${addon.price}₴`}
                     </span>
@@ -307,14 +366,18 @@ export default function DishDetail() {
       </div>
 
       <div className={styles.footer}>
-        <div className={styles.qty}>
-          <button className={styles.qtyBtn} onClick={() => setQuantity(q => Math.max(1, q - 1))}>−</button>
-          <span className={styles.qtyVal}>{quantity}</span>
-          <button className={styles.qtyBtn} onClick={() => setQuantity(q => q + 1)}>+</button>
-        </div>
+        {!editCartId && (
+          <div className={styles.qty}>
+            <button className={styles.qtyBtn} onClick={() => setQuantity(q => Math.max(1, q - 1))}>−</button>
+            <span className={styles.qtyVal}>{quantity}</span>
+            <button className={styles.qtyBtn} onClick={() => setQuantity(q => q + 1)}>+</button>
+          </div>
+        )}
         <div className={styles.addBtn}>
           <PrimaryButton
-            label={`${t3('add')} · ${unitPrice * quantity}₴`}
+            label={editCartId
+              ? `${t3('save_changes')} · ${unitPrice}₴`
+              : `${t3('add')} · ${unitPrice * quantity}₴`}
             onClick={handleAdd}
             disabled={!canAdd}
           />

@@ -1,7 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { scanQR } from '../api/qr';
-import { createOrder, getOrder, getMyOrders } from '../api/orders';
+import { createOrder, getOrder } from '../api/orders';
 import { useAuth } from './AuthContext';
+import { SUPPORTED_LANGS, SOURCE_LANG, fromApiLang } from '../i18n/langs';
 
 const AppContext = createContext(null);
 
@@ -115,16 +116,22 @@ function isOrderActive(raw) {
     : (raw.items || orderData.items || []);
 
   // Order-level terminal statuses
-  const DONE_ORDER = new Set(['completed', 'void', 'cancelled', 'paid', 'closed', 'voided', 'rejected']);
+  const DONE_ORDER = new Set([
+    'completed', 'void', 'voided', 'cancelled', 'paid', 'closed', 'rejected',
+  ]);
   if (orderData.status && DONE_ORDER.has(orderData.status)) return false;
 
+  // Full-order endpoint (nested shape) always includes an items array.
+  // If it's empty the order has no real work — treat as inactive to prevent
+  // phantom orders from showing up after a restore.
+  if (isNested && items.length === 0) return false;
+
   if (items.length === 0) {
-    // No item detail available (list endpoint) — trust order-level status
+    // List endpoint only — no items embedded; trust order-level status.
     const ACTIVE_ORDER = new Set(['waiting', 'cooking', 'ready']);
     return orderData.status ? ACTIVE_ORDER.has(orderData.status) : false;
   }
 
-  // Item-level terminal status per API: "served"
   const DONE_ITEM = new Set(['served', 'completed', 'cancelled', 'delivered']);
   return items.some(i => !DONE_ITEM.has(i.status));
 }
@@ -159,7 +166,65 @@ export function AppProvider({ children }) {
     () => localStorage.getItem('tableNumber') || ''
   );
   const [restaurantId, setRestaurantId] = useState(() => localStorage.getItem('restaurantId'));
+  // restaurantName holds the source-language (ua) display name.
+  // Additional variants are stored as restaurantName_<langCode>, e.g. restaurantName_en.
   const [restaurantName, setRestaurantName] = useState(() => localStorage.getItem('restaurantName') || '');
+  const [restaurantName_en, setRestaurantName_en] = useState(() => localStorage.getItem('restaurantName_en') || '');
+
+  // ── Restaurant language metadata ──────────────────────────────────────────
+  // Populated whenever the restaurant object is available (QR scan, picker,
+  // or menu load). Stored as i18n codes ('ua', 'en') — not backend API codes.
+  //   restaurantLangs        — enabled language codes; empty = all SUPPORTED_LANGS
+  //   restaurantDefaultLang  — default language i18n code (e.g. 'ua')
+  const [restaurantLangs, setRestaurantLangs] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('restaurantLangs') || '[]'); } catch { return []; }
+  });
+  const [restaurantDefaultLang, setRestaurantDefaultLang] = useState(
+    () => localStorage.getItem('restaurantDefaultLang') || SOURCE_LANG
+  );
+
+  /**
+   * Store restaurant metadata received from the backend.
+   * @param {{
+   *   defaultLanguage?:  string,    backend API code e.g. 'uk'
+   *   enabledLanguages?: string[],  backend API codes e.g. ['uk','en']
+   *   name?:             string,    translated restaurant display name
+   *   nameLang?:         string,    i18n code for `name` (e.g. 'ua', 'en')
+   *                                 defaults to SOURCE_LANG when omitted
+   *   nameEn?:           string,    explicit EN name (convenience shortcut)
+   * }} meta
+   */
+  function setRestaurantMeta({ defaultLanguage, enabledLanguages, name, nameLang, nameEn } = {}) {
+    if (name) {
+      // Store the name in the correct language slot
+      const lang = nameLang || SOURCE_LANG;
+      if (lang === SOURCE_LANG) {
+        setRestaurantName(name);
+        localStorage.setItem('restaurantName', name);
+      } else if (lang === 'en') {
+        setRestaurantName_en(name);
+        localStorage.setItem('restaurantName_en', name);
+      }
+      // For additional future languages, extend here
+    }
+    if (nameEn) {
+      setRestaurantName_en(nameEn);
+      localStorage.setItem('restaurantName_en', nameEn);
+    }
+    if (defaultLanguage) {
+      const i18nCode = fromApiLang(defaultLanguage);
+      setRestaurantDefaultLang(i18nCode);
+      localStorage.setItem('restaurantDefaultLang', i18nCode);
+    }
+    if (Array.isArray(enabledLanguages)) {
+      // Convert API codes → i18n codes, keep only those we have a frontend
+      // definition for (ignore future backend codes we haven't set up yet).
+      const known = new Set(SUPPORTED_LANGS.map(l => l.code));
+      const codes = enabledLanguages.map(fromApiLang).filter(c => known.has(c));
+      setRestaurantLangs(codes);
+      localStorage.setItem('restaurantLangs', JSON.stringify(codes));
+    }
+  }
 
   // ── Persist cart to localStorage on every change ─────────────────────────
   useEffect(() => {
@@ -171,9 +236,9 @@ export function AppProvider({ children }) {
   // Stored as { userId, order } so we can safely ignore an entry that belongs
   // to a different user (e.g. after logout → login as someone else).
   useEffect(() => {
-    if (currentOrder) {
+    if (currentOrder && user?.id) {
       localStorage.setItem('activeOrder', JSON.stringify({
-        userId: user?.id ?? 'guest',
+        userId: user.id,
         order:  currentOrder,
       }));
     } else {
@@ -204,8 +269,10 @@ export function AppProvider({ children }) {
         const cached = localStorage.getItem('activeOrder');
         if (cached) {
           const { userId: savedUserId, order: savedOrder } = JSON.parse(cached);
-          const currentUserId = user?.id ?? 'guest';
-          if (savedUserId === currentUserId) {
+          // Only match when we have a real user id — never share cache between
+          // different users who both happen to have no id ('guest' fallback).
+          const currentUserId = user?.id;
+          if (currentUserId && savedUserId === currentUserId) {
             const DONE_ITEM = ['served', 'completed', 'void', 'cancelled', 'delivered'];
             const stillActive = savedOrder?.items?.some(i => !DONE_ITEM.includes(i.status));
             if (stillActive) {
@@ -221,9 +288,12 @@ export function AppProvider({ children }) {
       }
 
       // ── Strategy 1: fetch by stored orderId ──────────────────────────────
-      if (storedId) {
+      // Only attempt if we also have a restaurantId — without it the URL
+      // becomes `//orders/:id` which can accidentally match unscoped routes.
+      const storedRestaurantId = localStorage.getItem('restaurantId');
+      if (storedId && storedRestaurantId) {
         try {
-          const fetched = await getOrder(storedId);
+          const fetched = await getOrder(storedId, storedRestaurantId);
           if (isOrderActive(fetched)) raw = fetched;
           else localStorage.removeItem('orderId'); // stale — clean up
         } catch {
@@ -231,31 +301,12 @@ export function AppProvider({ children }) {
         }
       }
 
-      // ── Strategy 2: list recent orders, find first active, fetch full ────
-      // GET /user/orders returns Order[] without items → check order.status,
-      // then fetch the full order document to verify item statuses.
-      if (!raw) {
-        try {
-          const list = await getMyOrders({ limit: 10 });
-          const orders = Array.isArray(list) ? list : [];
-          const DONE = new Set(['completed', 'void', 'cancelled', 'paid']);
-          const candidate = orders.find(o => !DONE.has(o.status));
-          if (candidate) {
-            const id = candidate._id || candidate.id;
-            if (id) {
-              try {
-                const fullOrder = await getOrder(id);
-                if (isOrderActive(fullOrder)) {
-                  raw = fullOrder;
-                  localStorage.setItem('orderId', String(id));
-                }
-              } catch { /* ignore */ }
-            }
-          }
-        } catch {
-          // /user/orders not available — give up gracefully
-        }
-      }
+      // Strategy 2 (scan /user/orders) was removed.
+      // It caused "ghost orders" — after clearing browser data the strategy
+      // would re-discover any non-terminal order from history and silently
+      // re-write orderId to localStorage, making the order reappear.
+      // orderId is written to localStorage by submitOrder() at checkout time,
+      // so Strategy 1 is sufficient for all normal re-visit flows.
 
       if (cancelled) return;
 
@@ -284,6 +335,10 @@ export function AppProvider({ children }) {
         tableNumber:  tn,
         restaurantId: rid,          // publicId
         restaurantName: rname = '',
+        // Language meta (may be nested under restaurant object or at top level)
+        restaurant:   restaurantObj,
+        defaultLanguage,
+        enabledLanguages,
       } = data;
       localStorage.setItem('sessionToken',   st);
       localStorage.setItem('tableId',        String(tid));
@@ -295,6 +350,12 @@ export function AppProvider({ children }) {
       setTableNumber(String(tn));
       setRestaurantId(String(rid));
       if (rname) setRestaurantName(rname);
+      // Extract language meta from QR response (may be top-level or in restaurant sub-object)
+      const meta = restaurantObj || {};
+      setRestaurantMeta({
+        defaultLanguage:  defaultLanguage  || meta.defaultLanguage,
+        enabledLanguages: enabledLanguages || meta.enabledLanguages,
+      });
       return data;
     } catch (err) {
       console.error('initSession error:', err);
@@ -307,7 +368,13 @@ export function AppProvider({ children }) {
    * Stores the restaurant's publicId (e.g. "BR5CH3OK") and optional display
    * name; clears any leftover table session so the menu loads in browse mode.
    */
-  function selectRestaurant(id, name = '') {
+  /**
+   * @param {string} id                      Restaurant publicId
+   * @param {string} [name]                  Display name
+   * @param {{ defaultLanguage?: string, enabledLanguages?: string[] }} [meta]
+   *   Language metadata from the restaurant object (uses backend API codes).
+   */
+  function selectRestaurant(id, name = '', meta = {}) {
     if (!id) {
       console.warn('selectRestaurant called with falsy id — ignoring');
       return;
@@ -323,6 +390,8 @@ export function AppProvider({ children }) {
     setTableNumber('');
     setRestaurantId(String(id));
     setRestaurantName(name);
+    // Store language metadata when available (including nameEn if provided)
+    setRestaurantMeta(meta);
     // Clear any cart items that belonged to a previously selected restaurant
     setCart([]);
     setServingGroups([DEFAULT_MAIN_GROUP]);
@@ -377,6 +446,39 @@ export function AppProvider({ children }) {
         comment,
       }];
     });
+  }
+
+  function updateCartItem(cartItemId, dish, options = {}) {
+    const {
+      excludedIngredients      = [],
+      selectedAddons           = [],
+      componentGroupSelections = {},
+      comment                  = '',
+    } = options;
+
+    const addonPrice = (dish.addons || [])
+      .filter(a => selectedAddons.includes(a.id))
+      .reduce((s, a) => s + a.price, 0);
+
+    const groupPrice = Object.entries(componentGroupSelections).reduce((s, [gid, optId]) => {
+      const group = (dish.componentGroups || []).find(g => g.id === gid);
+      if (!group) return s;
+      const opt = group.options.find(o => o.id === optId);
+      return s + (opt ? opt.priceModifier : 0);
+    }, 0);
+
+    const unitPrice = dish.price + addonPrice + groupPrice;
+
+    setCart(prev => prev.map(item =>
+      item.cartItemId !== cartItemId ? item : {
+        ...item,
+        price: unitPrice,
+        excludedIngredients,
+        selectedAddons,
+        componentGroupSelections,
+        comment,
+      }
+    ));
   }
 
   function removeFromCart(cartItemId) {
@@ -532,10 +634,11 @@ export function AppProvider({ children }) {
 
   return (
     <AppContext.Provider value={{
-      cart, addToCart, removeFromCart, updateQuantity, clearCart, moveToGroup,
+      cart, addToCart, updateCartItem, removeFromCart, updateQuantity, clearCart, moveToGroup,
       cartTotal, cartCount,
       tableNumber,
-      sessionToken, tableId, restaurantId, restaurantName,
+      sessionToken, tableId, restaurantId, restaurantName, restaurantName_en,
+      restaurantLangs, restaurantDefaultLang, setRestaurantMeta,
       initSession, selectRestaurant,
       submitOrder,
       currentOrder, setCurrentOrder,

@@ -7,5 +7,7 @@
     "or": "or",
     "google_login": "Sign in with Google",
     "fill_fields": "Please fill in all fields",
+    "invalid_email": "Enter a valid email address",
+    "password_too_short": "Password must be at least 8 characters",
     "login_error": "Login failed. Please check your credentials and try again."
 }

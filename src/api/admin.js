@@ -40,6 +40,19 @@ export async function deleteMenuItem(id, restaurantId = getStoredRestaurantId())
   return res.data?.data;
 }
 
+// ─── Translation ─────────────────────────────────────────────────────────────
+
+/**
+ * Batch-translate an array of strings via the server-side Google Translate proxy.
+ * @param {string[]} texts      Source strings (in SOURCE_LANG, i.e. Ukrainian)
+ * @param {string}   targetLang Target language code ('en', 'pl', …)
+ * @returns {{ translations: string[] }}
+ */
+export async function translateText(texts, targetLang, restaurantId = getStoredRestaurantId()) {
+  const res = await apiClient.post(`/${restaurantId}/admin/translate`, { texts, targetLang });
+  return res.data?.data;
+}
+
 // ─── Analytics ────────────────────────────────────────────────────────────────
 
 export async function getRevenue(from, to, restaurantId = getStoredRestaurantId()) {

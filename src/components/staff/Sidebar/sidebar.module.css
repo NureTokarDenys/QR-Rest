@@ -65,6 +65,19 @@
   gap: 10px;
 }
 
+.userBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.userBtn:hover {
+  background: rgba(255,255,255,0.06);
+}
+
 .avatar {
   width: 32px;
   height: 32px;

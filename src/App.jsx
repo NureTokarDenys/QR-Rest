@@ -1,11 +1,12 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'; // Navigate used by /staff redirect
 import { AppProvider } from './context/AppContext';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { ClientToastProvider } from "./context/ClientToastContext";
 import ProtectedRoute from './components/ProtectedRoute';
 import HttpErrorToast from './components/HttpErrorToast';
+import DevToolbar from './components/DevToolbar';
 import Login from './pages/Login';
 import RestaurantPicker from './pages/client/RestaurantPicker';
 import Forbidden from './pages/Forbidden';
@@ -21,6 +22,7 @@ import OrderHistory from './pages/client/OrderHistory';
 import RestaurantReviews from './pages/client/RestaurantReviews';
 import TableMap from './pages/staff/TableMap';
 import TableDetail from './pages/staff/TableDetail';
+import WaiterOrders from './pages/staff/WaiterOrders';
 import Cooking from './pages/staff/Cooking';
 import OrderDetail from './pages/staff/OrderDetail';
 import MenuManagement from './pages/staff/MenuManagement';
@@ -28,16 +30,20 @@ import DishEdit from './pages/staff/DishEdit';
 import PdfGenerator from './pages/staff/PdfGenerator';
 import Analytics from './pages/staff/Analytics';
 import StaffSettings from './pages/staff/StaffSettings';
+import LandingPage   from './pages/onboarding/Landing';
+import OnboardingPage from './pages/onboarding/Onboarding';
+import CheckEmailPage from './pages/onboarding/CheckEmail';
+import ConfirmPage    from './pages/onboarding/Confirm';
 
 // Helper to wrap a page with ProtectedRoute
 function Guard({ roles, children }) {
   return <ProtectedRoute requiredRoles={roles}>{children}</ProtectedRoute>;
 }
 
-// Smart root redirect:
-//   • session token present  → /menu  (QR-scan flow, restaurant auto-resolved)
+// Smart root redirect (restored now that / is no longer the landing page):
+//   • session token present   → /menu  (QR-scan flow, restaurant auto-resolved)
 //   • restaurantId in storage → /menu  (restaurant-picker flow, already chosen)
-//   • nothing               → /restaurants  (let client pick a restaurant)
+//   • nothing                 → /restaurants  (let client pick a restaurant)
 function RootRedirect() {
   const hasSession    = !!localStorage.getItem('sessionToken');
   const hasRestaurant = !!localStorage.getItem('restaurantId');
@@ -53,8 +59,20 @@ export default function App() {
           <ClientToastProvider>
             {/* Global HTTP error overlay — catches all unhandled 4xx / 5xx */}
             <HttpErrorToast />
+            {/* Dev-only floating toolbar — stripped from production builds */}
+            <DevToolbar />
             <Routes>
+              {/* Smart root redirect */}
               <Route path="/" element={<RootRedirect />} />
+
+              {/* Landing / marketing page */}
+              <Route path="/landing" element={<LandingPage />} />
+
+              {/* Onboarding — restaurant owner registration flow */}
+              <Route path="/onboarding"             element={<OnboardingPage />} />
+              <Route path="/onboarding/check-email" element={<CheckEmailPage />} />
+              <Route path="/onboarding/confirm"     element={<ConfirmPage />} />
+
               <Route path="/login" element={<Login />} />
               <Route path="/auth/callback" element={<OAuthCallback />} />
               <Route path="/forbidden" element={<Forbidden />} />
@@ -82,6 +100,9 @@ export default function App() {
               } />
               <Route path="/staff/table/:id" element={
                 <Guard roles={['admin', 'waiter']}><TableDetail /></Guard>
+              } />
+              <Route path="/staff/orders" element={
+                <Guard roles={['admin', 'waiter']}><WaiterOrders /></Guard>
               } />
               <Route path="/staff/cooking" element={
                 <Guard roles={['admin', 'cook']}><Cooking /></Guard>

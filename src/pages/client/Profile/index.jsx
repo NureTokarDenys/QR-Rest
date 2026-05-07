@@ -9,10 +9,12 @@ import SecondaryButton from '../../../components/SecondaryButton';
 import InputField from '../../../components/InputField';
 import { useTheme } from '../../../context/ThemeContext';
 import { useAuth } from '../../../context/AuthContext';
+import { useApp } from '../../../context/AppContext';
 import { initiateGoogleOAuth } from '../../../api/auth';
 import ConfirmDialog from '../../../components/ConfirmDialog';
 import styles from './profile.module.css';
 import { useTranslation } from 'react-i18next';
+import { SUPPORTED_LANGS } from '../../../i18n/langs';
 
 import { MdPerson }        from 'react-icons/md';
 import { MdEmail }         from 'react-icons/md';
@@ -39,6 +41,7 @@ export default function Profile() {
   const { t }                   = useTranslation('profile');
   const navigate                = useNavigate();
   const { user, isAuthenticated, updateProfile, changePassword, logout } = useAuth();
+  const { restaurantLangs }     = useApp();
 
   // ── Confirm dialog ────────────────────────────────
   // dialog: null | 'logout' | 'clearCache'
@@ -66,10 +69,13 @@ export default function Profile() {
   const [sheetError, setSheetError] = useState('');
   const [saving, setSaving]     = useState(false);
 
-  const langOptions = [
-    { value: 'ua', label: t('ukrainian'), icon: 'UA' },
-    { value: 'en', label: t('english'),   icon: 'EN' },
-  ];
+  // Show only the languages the restaurant has enabled.
+  // If restaurantLangs is empty the restaurant hasn't configured anything yet
+  // — fall back to all languages we have frontend support for.
+  const activeLangs = restaurantLangs.length > 0 ? restaurantLangs : SUPPORTED_LANGS.map(l => l.code);
+  const langOptions = SUPPORTED_LANGS
+    .filter(l => activeLangs.includes(l.code))
+    .map(l => ({ value: l.code, label: `${l.flag} ${l.label}`, icon: l.code.toUpperCase() }));
 
   // ── Sheet helpers ─────────────────────────────────
 

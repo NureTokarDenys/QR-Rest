@@ -38,7 +38,7 @@ function normaliseTable(t) {
 
 export default function TableMap() {
   const { t, i18n } = useTranslation('tableMap');
-  const lang = i18n.language === 'en' ? 'en' : 'ua';
+  const lang = i18n.language;
   const [tables, setTables] = useState([]);
 
   useEffect(() => {

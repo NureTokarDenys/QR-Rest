@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useApp } from '../context/AppContext';
 import { getMenu } from '../api/menu';
 
@@ -13,9 +14,17 @@ import { getMenu } from '../api/menu';
  *   • Picker flow   — selectRestaurant() does the same
  *
  * If restaurantId is not yet known the hook returns an empty list.
+ *
+ * The backend now returns translated content automatically via the
+ * Accept-Language header set by the API client interceptor.
+ *
+ * If the menu response includes a restaurant object with language metadata
+ * (defaultLanguage / enabledLanguages), it is forwarded to AppContext so the
+ * client language picker reflects the restaurant's configured languages.
  */
 export function useMenu() {
-  const { restaurantId } = useApp();
+  const { restaurantId, setRestaurantMeta } = useApp();
+  const { i18n } = useTranslation();
 
   const [categories, setCategories] = useState([]);
   const [loading, setLoading]       = useState(true);
@@ -34,7 +43,27 @@ export function useMenu() {
 
     getMenu(restaurantId)
       .then(data => {
-        if (!cancelled) setCategories(Array.isArray(data) ? data : []);
+        if (cancelled) return;
+
+        // The backend may return either:
+        //   A) an array of categories  (current shape)
+        //   B) { categories: [...], restaurant: { name, defaultLanguage, enabledLanguages } }
+        if (Array.isArray(data)) {
+          setCategories(data);
+        } else if (data && Array.isArray(data.categories)) {
+          setCategories(data.categories);
+          // Propagate restaurant metadata (translated name + language config)
+          if (data.restaurant) {
+            setRestaurantMeta({
+              name:             data.restaurant.name,
+              nameLang:         i18n.language,   // tell context which lang slot to update
+              defaultLanguage:  data.restaurant.defaultLanguage,
+              enabledLanguages: data.restaurant.enabledLanguages,
+            });
+          }
+        } else {
+          setCategories([]);
+        }
       })
       .catch(err => {
         if (!cancelled) {
@@ -47,7 +76,7 @@ export function useMenu() {
       });
 
     return () => { cancelled = true; };
-  }, [restaurantId]);
+  }, [restaurantId, i18n.language]); // re-fetch when language changes so backend returns fresh translations
 
   return { categories, loading, error };
 }

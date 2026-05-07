@@ -12,5 +12,10 @@
     "main_group": "Main group",
     "move_to": "Move to",
     "empty_group": "Group is empty",
-    "back_to_menu": "Back to menu"
+    "back_to_menu": "Back to menu",
+    "details_show": "Details",
+    "details_hide": "Hide",
+    "details_ingredients": "Ingredients",
+    "details_addons": "Add-ons",
+    "details_options": "Options"
 }

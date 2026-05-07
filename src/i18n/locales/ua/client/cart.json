@@ -13,5 +13,10 @@
     "main_group": "Основна група",
     "move_to": "Перенести до",
     "empty_group": "Група порожня",
-    "back_to_menu": "До меню"
+    "back_to_menu": "До меню",
+    "details_show": "Деталі",
+    "details_hide": "Сховати",
+    "details_ingredients": "Інгредієнти",
+    "details_addons": "Доповнення",
+    "details_options": "Опції"
 }

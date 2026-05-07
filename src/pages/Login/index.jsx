@@ -9,58 +9,78 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { initiateGoogleOAuth } from '../../api/auth';
 
+/** Maps a user role to the correct landing page after login. */
+function staffHome(role) {
+  if (role === 'cook')   return '/staff/cooking';
+  if (role === 'waiter') return '/staff/map';
+  if (role === 'admin')  return '/staff/map';
+  return '/menu';
+}
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MIN_PASS  = 8;
+
 export default function Login() {
   const { i18n } = useTranslation();
   const { t } = useTranslation('login');
   const navigate = useNavigate();
-  const { login, loginAsGuest, isAuthenticated, isStaff, user } = useAuth();
+  const { login, loginAsGuest, isAuthenticated, user } = useAuth();
 
   // If the user already has a valid session, skip the login screen.
   useEffect(() => {
     if (isAuthenticated && user) {
-      if (isStaff) navigate('/staff/map', { replace: true });
-      else navigate('/menu', { replace: true });
+      navigate(staffHome(user.role), { replace: true });
     }
-  }, [isAuthenticated, user, isStaff, navigate]);
+  }, [isAuthenticated, user, navigate]);
 
-  const [email, setEmail] = useState('');
+  const [email,    setEmail]    = useState('');
   const [password, setPassword] = useState('');
-  // Store error as { key, serverMsg } so t(key) re-evaluates on locale change.
-  // serverMsg holds a raw API message that isn't translatable.
-  const [errorKey, setErrorKey] = useState('');
-  const [serverMsg, setServerMsg] = useState('');
-  const [loading, setLoading] = useState(false);
 
-  // Derive the displayed error string at render time so locale switches work
-  const error = errorKey === 'server' ? serverMsg : errorKey ? t(errorKey) : '';
+  // Per-field validation errors (shown after blur or submit attempt)
+  const [emailError,    setEmailError]    = useState('');
+  const [passwordError, setPasswordError] = useState('');
+
+  // Server / general error
+  const [serverError, setServerError] = useState('');
+  const [loading,     setLoading]     = useState(false);
+
+  // ── Validators ─────────────────────────────────────────────────────────────
+
+  function validateEmail(val) {
+    if (!val)              return t('fill_fields');
+    if (!EMAIL_RE.test(val)) return t('invalid_email');
+    return '';
+  }
+
+  function validatePassword(val) {
+    if (!val)               return t('fill_fields');
+    if (val.length < MIN_PASS) return t('password_too_short');
+    return '';
+  }
+
+  /** Run all validators; sets field errors and returns true if form is valid. */
+  function validateAll() {
+    const eErr = validateEmail(email);
+    const pErr = validatePassword(password);
+    setEmailError(eErr);
+    setPasswordError(pErr);
+    return !eErr && !pErr;
+  }
+
+  // ── Handlers ───────────────────────────────────────────────────────────────
 
   async function handleLogin() {
-    if (!email || !password) {
-      setErrorKey('fill_fields');
-      setServerMsg('');
-      return;
-    }
-    setErrorKey('');
-    setServerMsg('');
+    setServerError('');
+    if (!validateAll()) return;
+
     setLoading(true);
     try {
       const user = await login(email, password);
-      if (user && ['admin', 'waiter', 'cook'].includes(user.role)) {
-        navigate('/staff/map');
-      } else {
-        navigate('/menu');
-      }
+      navigate(staffHome(user?.role));
     } catch (err) {
       console.error('Login error:', err);
       const apiMsg = err?.response?.data?.message;
-      if (apiMsg) {
-        // Raw server message — not translatable, display as-is
-        setErrorKey('server');
-        setServerMsg(apiMsg);
-      } else {
-        setErrorKey('login_error');
-        setServerMsg('');
-      }
+      setServerError(apiMsg || t('login_error'));
     } finally {
       setLoading(false);
     }
@@ -84,18 +104,24 @@ export default function Login() {
             placeholder="email@example.com"
             type="email"
             value={email}
-            onChange={e => setEmail(e.target.value)}
+            onChange={e => { setEmail(e.target.value); setEmailError(''); setServerError(''); }}
+            onBlur={() => setEmailError(validateEmail(email))}
             onKeyDown={handleKeyDown}
+            error={emailError}
+            autoComplete="email"
           />
           <InputField
             label={t('password')}
             placeholder="••••••••"
             type="password"
             value={password}
-            onChange={e => setPassword(e.target.value)}
+            onChange={e => { setPassword(e.target.value); setPasswordError(''); setServerError(''); }}
+            onBlur={() => setPasswordError(validatePassword(password))}
             onKeyDown={handleKeyDown}
+            error={passwordError}
+            autoComplete="current-password"
           />
-          {error && <p className={styles.errorMsg}>{error}</p>}
+          {serverError && <p className={styles.errorMsg}>{serverError}</p>}
         </div>
 
         <div className={styles.actions}>
@@ -128,7 +154,6 @@ export default function Login() {
           >
             UA
           </button>
-
           <button
             className={`${styles.langBtn} ${i18n.language === 'en' ? styles.langActive : ''}`}
             onClick={() => i18n.changeLanguage('en')}

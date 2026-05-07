@@ -4,6 +4,8 @@
   "cancel": "Cancel",
   "save": "Save",
   "mainInfo": "MAIN INFORMATION",
+  "name": "Name",
+  "desc": "Description",
   "nameUa": "Name (UA)",
   "nameEn": "Name (EN)",
   "descUa": "Description (UA)",

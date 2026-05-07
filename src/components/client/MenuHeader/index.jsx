@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../../context/AppContext';
 import { getRestaurantReviews } from '../../../api/reviews';
+import { getRestaurants } from '../../../api/restaurants';
 import { useTranslation } from 'react-i18next';
+import { useLocalField, useLang } from '../../../i18n/useLang';
 import styles from './menuHeader.module.css';
 
 /**
@@ -18,9 +20,29 @@ export default function MenuHeader() {
   const navigate = useNavigate();
   const { t } = useTranslation('menu');
   const { t: tR } = useTranslation('restaurantReviews');
-  const { restaurantId, restaurantName, tableNumber } = useApp();
+  const local = useLocalField();
+  const lang = useLang();
+  const { restaurantId, restaurantName, restaurantName_en, tableNumber, setRestaurantMeta } = useApp();
 
   const [summary, setSummary] = useState(null); // { averageRating, totalCount }
+
+  // Re-fetch the restaurant's translated name whenever the language changes.
+  // The axios interceptor already sends Accept-Language, so the restaurants
+  // endpoint returns the resolved name for the active language.
+  useEffect(() => {
+    if (!restaurantId) return;
+    let cancelled = false;
+    getRestaurants()
+      .then(list => {
+        if (cancelled) return;
+        const r = list.find(item =>
+          (item.publicId || item._id || item.id) === restaurantId
+        );
+        if (r?.name) setRestaurantMeta({ name: r.name, nameLang: lang });
+      })
+      .catch(() => {}); // non-critical — silently ignore
+    return () => { cancelled = true; };
+  }, [restaurantId, lang]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!restaurantId) return;
@@ -33,9 +55,15 @@ export default function MenuHeader() {
     return () => { cancelled = true; };
   }, [restaurantId]);
 
+  // Pick the localized restaurant name (falls back to source-lang name)
+  const localRestaurantName = local(
+    { name: restaurantName, name_en: restaurantName_en },
+    'name'
+  ) || restaurantName;
+
   const contextLabel = tableNumber
     ? t('table', { number: tableNumber })
-    : restaurantName || null;
+    : localRestaurantName || null;
 
   const showRating = summary && summary.totalCount > 0;
 

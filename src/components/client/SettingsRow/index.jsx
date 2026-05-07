@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useId, useCallback } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
 import styles from './settingsRow.module.css';
 
 import { MdLightMode } from "react-icons/md";
@@ -172,15 +173,17 @@ export function SettingsRowDropdown({ icon, label, options, value, onChange }) {
 }
 
 export function ThemeSettingsRow({ icon, theme, onThemeChange }) {
+  const { t } = useTranslation('profile');
+
   const THEME_OPTIONS = [
-    { value: 'light',  label: 'Світла',   icon: <MdLightMode /> },
-    { value: 'dark',   label: 'Темна',    icon: <MdDarkMode /> },
+    { value: 'light', label: t('theme_light'), icon: <MdLightMode /> },
+    { value: 'dark',  label: t('theme_dark'),  icon: <MdDarkMode /> },
   ];
 
   return (
     <SettingsRowDropdown
       icon={icon}
-      label="Тема"
+      label={t('theme')}
       options={THEME_OPTIONS}
       value={theme}
       onChange={onThemeChange}

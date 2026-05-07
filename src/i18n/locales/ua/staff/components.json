@@ -38,11 +38,14 @@
   "uploadFormats": "Підтримуються JPG, PNG, WEBP (до 5МБ)",
   
   "nav_tableMap": "Карта залу",
+  "nav_orders": "Замовлення",
   "nav_cooking": "Приготування",
   "nav_menu": "Меню",
   "nav_analytics": "Аналітика",
   "nav_settings": "Налаштування",
-  
+  "nav_profile": "Профіль",
+
   "role_admin": "Адміністратор",
-  "role_waiter": "Офіціант"
+  "role_waiter": "Офіціант",
+  "role_cook": "Кухар"
 }

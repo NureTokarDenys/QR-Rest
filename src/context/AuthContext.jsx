@@ -96,6 +96,12 @@ export function AuthProvider({ children }) {
     localStorage.setItem('accessToken', at);
     if (rt) localStorage.setItem('refreshToken', rt);
     localStorage.setItem('user', JSON.stringify(u));
+    // Staff users carry their restaurantId in the user object so the API
+    // client can build scoped URLs like /:restaurantId/admin/tables without
+    // relying on the QR-scan flow to have written restaurantId first.
+    if (u?.restaurantId) {
+      localStorage.setItem('restaurantId', u.restaurantId);
+    }
     setAccessToken(at);
     setUser(u);
   }
@@ -105,6 +111,7 @@ export function AuthProvider({ children }) {
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
     localStorage.removeItem('orderId');   // prevent next user from inheriting this session's order
+    localStorage.removeItem('restaurantId');
     setAccessToken(null);
     setUser(null);
   }

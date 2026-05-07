@@ -1,0 +1,11 @@
+{
+  "title": "Choose a restaurant",
+  "subtitle": "Select from the list below or scan the QR code at your table",
+  "search_placeholder": "Search restaurants…",
+  "loading": "Loading restaurants…",
+  "no_api_title": "Restaurant listing not available",
+  "no_api_sub": "Scan the QR code at your table to open the menu directly.",
+  "not_found_query": "No restaurants match your search.",
+  "not_found_empty": "No restaurants found.",
+  "searching": "Searching…"
+}

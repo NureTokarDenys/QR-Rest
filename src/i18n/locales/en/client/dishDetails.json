@@ -11,5 +11,7 @@
     "comment_placeholder": "Cooking preferences...",
     "choose_required": "Choose",
     "chosen": "chosen",
-    "anonymous": "Anonymous"
+    "anonymous": "Anonymous",
+    "save_changes": "Save changes",
+    "fallback_tooltip": "Translation not set by the owner — showing original"
 }

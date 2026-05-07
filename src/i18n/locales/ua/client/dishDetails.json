@@ -12,5 +12,7 @@
     "comment_placeholder": "Побажання щодо приготування...",
     "choose_required": "Оберіть",
     "chosen": "обрано",
-    "anonymous": "Анонім"
+    "anonymous": "Анонім",
+    "save_changes": "Зберегти зміни",
+    "fallback_tooltip": "Переклад не встановлено власником — показано оригінал"
 }

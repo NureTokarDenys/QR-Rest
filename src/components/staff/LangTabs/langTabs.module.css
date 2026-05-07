@@ -1,0 +1,83 @@
+/* ── Container ─────────────────────────────────────────────────────────────── */
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* ── Tab pill strip ─────────────────────────────────────────────────────────── */
+.tabs {
+  display: flex;
+  gap: 2px;
+  background: var(--bg-color);
+  border-radius: 10px;
+  padding: 3px;
+  border: 1px solid var(--separator-color);
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 14px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--secondary-text);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  background: var(--surface-color);
+  color: var(--primary-text);
+}
+
+.active {
+  background: var(--surface-color);
+  color: var(--primary-text);
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+.flag {
+  font-size: 15px;
+  line-height: 1;
+}
+
+/* ── Translate button ───────────────────────────────────────────────────────── */
+.translateBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--accent-color);
+  background: transparent;
+  color: var(--accent-color);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, opacity 0.15s;
+  white-space: nowrap;
+}
+
+.translateBtn:hover:not(:disabled) {
+  background: var(--accent-color);
+  color: #ffffff;
+}
+
+.translateBtn:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.translateIcon {
+  font-size: 15px;
+  flex-shrink: 0;
+}

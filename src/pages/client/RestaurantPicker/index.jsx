@@ -1,6 +1,8 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useApp } from '../../../context/AppContext';
+import { useLocalField, useLang } from '../../../i18n/useLang';
 import { getRestaurants } from '../../../api/restaurants';
 import SearchBar from '../../../components/SearchBar';
 import styles from './restaurantPicker.module.css';
@@ -8,8 +10,9 @@ import { MdQrCodeScanner, MdStorefront, MdLocationOn } from 'react-icons/md';
 
 // ─── Restaurant card ──────────────────────────────────────────────────────────
 
-function RestaurantCard({ restaurant, onSelect }) {
-  const initials = (restaurant.name || '?')
+function RestaurantCard({ restaurant, onSelect, local }) {
+  const displayName = local(restaurant, 'name') || restaurant.name || '?';
+  const initials = displayName
     .split(' ')
     .map(w => w[0])
     .join('')
@@ -20,12 +23,12 @@ function RestaurantCard({ restaurant, onSelect }) {
     <button className={styles.card} onClick={() => onSelect(restaurant)}>
       <div className={styles.cardLogo}>
         {restaurant.logoUrl
-          ? <img src={restaurant.logoUrl} alt={restaurant.name} className={styles.cardLogoImg} />
+          ? <img src={restaurant.logoUrl} alt={displayName} className={styles.cardLogoImg} />
           : <span className={styles.cardLogoInitials}>{initials}</span>
         }
       </div>
       <div className={styles.cardBody}>
-        <p className={styles.cardName}>{restaurant.name}</p>
+        <p className={styles.cardName}>{displayName}</p>
         {restaurant.cuisine && (
           <p className={styles.cardCuisine}>{restaurant.cuisine}</p>
         )}
@@ -45,16 +48,18 @@ function RestaurantCard({ restaurant, onSelect }) {
 
 export default function RestaurantPicker() {
   const navigate = useNavigate();
+  const { t } = useTranslation('restaurantPicker');
+  const local = useLocalField();
+  const lang = useLang(); // triggers re-fetch when language changes
   const { selectRestaurant } = useApp();
 
-  const [query, setQuery]           = useState('');
+  const [query, setQuery]             = useState('');
   const [restaurants, setRestaurants] = useState([]);
-  const [loading, setLoading]       = useState(true);
+  const [loading, setLoading]         = useState(true);
   const [apiAvailable, setApiAvailable] = useState(true);
 
-  // Fetch restaurant list on mount.
-  // If the backend hasn't implemented GET /restaurants yet the page falls back
-  // to a QR-scan prompt — see the remark in src/api/restaurants.js.
+  // Fetch restaurant list on mount and whenever the language changes so the
+  // backend returns names translated into the current language.
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
@@ -70,17 +75,15 @@ export default function RestaurantPicker() {
       })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, []);
+  }, [lang]); // re-fetch when language changes
 
-  // Client-side filter on the name/address while the user types.
-  // A live API search is triggered automatically when the user pauses — the
-  // backend can extend GET /restaurants?q=<query> for server-side full-text.
+  // Client-side / server-side search debounce
   const [searchLoading, setSearchLoading] = useState(false);
 
   useEffect(() => {
     if (!apiAvailable) return;
     if (!query.trim()) {
-      // Reset to full list
+      // Reset to full list (driven by the primary effect above)
       getRestaurants()
         .then(data => setRestaurants(Array.isArray(data) ? data : []))
         .catch(() => {});
@@ -97,9 +100,12 @@ export default function RestaurantPicker() {
   }, [query, apiAvailable]);
 
   function handleSelect(restaurant) {
-    // publicId is the 8-char alphanumeric used to prefix all restaurant-scoped URLs
     const id = restaurant.publicId || restaurant._id || restaurant.id;
-    selectRestaurant(id, restaurant.name);
+    selectRestaurant(id, restaurant.name, {
+      nameEn:           restaurant.name_en,
+      defaultLanguage:  restaurant.defaultLanguage,
+      enabledLanguages: restaurant.enabledLanguages,
+    });
     navigate('/menu');
   }
 
@@ -117,51 +123,48 @@ export default function RestaurantPicker() {
 
       <div className={styles.content}>
         <div className={styles.hero}>
-          <h1 className={styles.heroTitle}>Choose a restaurant</h1>
-          <p  className={styles.heroSub}>
-            Select from the list below or scan the QR code at your table
-          </p>
+          <h1 className={styles.heroTitle}>{t('title')}</h1>
+          <p  className={styles.heroSub}>{t('subtitle')}</p>
         </div>
 
         {/* Search bar */}
         <SearchBar
-          placeholder="Search restaurants…"
+          placeholder={t('search_placeholder')}
           value={query}
           onChange={e => setQuery(e.target.value)}
         />
 
         {/* States */}
         {loading && (
-          <p className={styles.stateMsg}>Loading restaurants…</p>
+          <p className={styles.stateMsg}>{t('loading')}</p>
         )}
 
         {!loading && !apiAvailable && (
-          /* API not yet implemented — guide the user to QR scan */
           <div className={styles.noApiBox}>
             <MdQrCodeScanner className={styles.noApiIcon} />
-            <p className={styles.noApiTitle}>Restaurant listing not available</p>
-            <p className={styles.noApiSub}>
-              Scan the QR code at your table to open the menu directly.
-            </p>
+            <p className={styles.noApiTitle}>{t('no_api_title')}</p>
+            <p className={styles.noApiSub}>{t('no_api_sub')}</p>
           </div>
         )}
 
         {!loading && apiAvailable && restaurants.length === 0 && (
           <p className={styles.stateMsg}>
-            {query.trim() ? 'No restaurants match your search.' : 'No restaurants found.'}
+            {query.trim() ? t('not_found_query') : t('not_found_empty')}
           </p>
         )}
 
         {!loading && apiAvailable && restaurants.length > 0 && (
           <div className={styles.list}>
-            {searchLoading && <p className={styles.searching}>Searching…</p>}
+            {searchLoading && <p className={styles.searching}>{t('searching')}</p>}
             {restaurants.map(r => (
               <RestaurantCard
                 key={r.publicId || r._id || r.id}
                 restaurant={r}
                 onSelect={handleSelect}
+                local={local}
               />
             ))}
+             <p className={styles.stateMsg}>{JSON.stringify(restaurants)}</p>
           </div>
         )}
       </div>

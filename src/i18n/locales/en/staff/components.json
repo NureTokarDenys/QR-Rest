@@ -37,11 +37,14 @@
   "uploadFormats": "Supports JPG, PNG, WEBP (up to 5MB)",
   
   "nav_tableMap": "Table Map",
+  "nav_orders": "Orders",
   "nav_cooking": "Cooking",
   "nav_menu": "Menu",
   "nav_analytics": "Analytics",
   "nav_settings": "Settings",
-  
+  "nav_profile": "Profile",
+
   "role_admin": "Administrator",
-  "role_waiter": "Waiter"
+  "role_waiter": "Waiter",
+  "role_cook": "Cook"
 }

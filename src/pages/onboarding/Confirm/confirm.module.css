@@ -1,0 +1,125 @@
+.page {
+  min-height: 100vh;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.09);
+  padding: 44px 36px;
+  width: 100%;
+  max-width: 440px;
+  text-align: center;
+}
+
+.logoWrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 32px;
+}
+
+/* ── State wrapper ─────────────────────────────────────────────────────────── */
+.stateWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 28px;
+}
+
+/* ── Spinner ───────────────────────────────────────────────────────────────── */
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.spinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #e2e8f0;
+  border-top-color: #1d7afc;
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+  margin-bottom: 8px;
+}
+
+/* ── State icon ────────────────────────────────────────────────────────────── */
+.stateIcon {
+  font-size: 64px;
+  margin-bottom: 4px;
+}
+
+.iconSuccess { color: #22c55e; }
+.iconError   { color: #ef4444; }
+.iconWarning { color: #f59e0b; }
+
+/* ── Typography ────────────────────────────────────────────────────────────── */
+.stateTitle {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.stateMsg {
+  font-size: 15px;
+  line-height: 1.65;
+  color: #475569;
+  margin: 0;
+  max-width: 340px;
+}
+
+.stateSub {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #64748b;
+  margin: 0;
+  max-width: 340px;
+}
+
+/* ── Button ────────────────────────────────────────────────────────────────── */
+.btnPrimary {
+  display: inline-block;
+  margin-top: 8px;
+  text-decoration: none;
+  background: #1d7afc;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 13px 28px;
+  border-radius: 12px;
+  transition: background 0.15s;
+}
+
+.btnPrimary:hover { background: #1567e0; }
+
+/* ── Footer links ──────────────────────────────────────────────────────────── */
+.footerLinks {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 16px;
+}
+
+.footerLink {
+  text-decoration: none;
+  font-size: 13px;
+  color: #94a3b8;
+  transition: color 0.15s;
+}
+
+.footerLink:hover { color: #1d7afc; }
+
+.footerDot {
+  color: #cbd5e1;
+  font-size: 12px;
+}
+
+@media (max-width: 480px) {
+  .card { padding: 32px 20px; }
+  .stateIcon { font-size: 52px; }
+}

@@ -1,0 +1,97 @@
+/* ── Wrapper ──────────────────────────────────────────────────────────────── */
+.wrap {
+  position: relative;
+  display: inline;
+  white-space: nowrap; /* keep * glued to the last word */
+}
+
+/* ── The asterisk ─────────────────────────────────────────────────────────── */
+.mark {
+  display: inline-block;
+  margin-left: 1px;
+  font-size: 0.75em;
+  font-weight: 700;
+  line-height: 1;
+  vertical-align: super;
+  color: var(--color-warning, #d97706);
+  cursor: help;
+  user-select: none;
+  /* desktop tooltip via CSS — no JS needed */
+  position: relative;
+}
+
+/* ── Desktop hover tooltip ────────────────────────────────────────────────── */
+.mark::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  background: var(--color-tooltip-bg, #1f2937);
+  color: var(--color-tooltip-text, #f9fafb);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.4;
+  padding: 5px 9px;
+  border-radius: 6px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  z-index: 9999;
+  /* prevent the tooltip from wrapping too wide */
+  max-width: 220px;
+  white-space: normal;
+  text-align: center;
+}
+
+.mark:hover::after,
+.mark:focus::after {
+  opacity: 1;
+}
+
+/* small arrow */
+.mark::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 1px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--color-tooltip-bg, #1f2937);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  z-index: 9999;
+}
+
+.mark:hover::before,
+.mark:focus::before {
+  opacity: 1;
+}
+
+/* ── Mobile tap popover ───────────────────────────────────────────────────── */
+.popover {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-tooltip-bg, #1f2937);
+  color: var(--color-tooltip-text, #f9fafb);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.4;
+  padding: 6px 10px;
+  border-radius: 6px;
+  max-width: 200px;
+  white-space: normal;
+  text-align: center;
+  z-index: 9999;
+  pointer-events: none;
+  animation: fbFadeIn 0.12s ease;
+}
+
+@keyframes fbFadeIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(4px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0);   }
+}
