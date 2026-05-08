@@ -24,15 +24,26 @@ function mapStatus(apiStatus) {
   return s; // free, bill
 }
 
+function mapDishes(items = []) {
+  return items.map(i => {
+    const mi = typeof i.menuItemId === 'object' ? i.menuItemId : null;
+    return {
+      name:    mi?.name    || i.name    || '—',
+      name_en: mi?.name_en || mi?.name  || i.name || '—',
+      status:  i.dishStatus,
+    };
+  });
+}
+
 // Normalize API table to shape expected by TableMapItem
 function normaliseTable(t) {
+  const rawOrders = t.currentOrders ?? (t.currentOrder ? [t.currentOrder] : []);
   return {
-    id: t.number ?? t._id,
+    id:     t.number ?? t._id,
+    name:   t.name || t.label || `Стіл ${t.number}`,
     status: mapStatus(t.status),
-    seats: t.capacity ?? t.seats ?? 4,
-    dishes: (t.currentOrder?.items || []).map(i =>
-      (typeof i.menuItemId === 'object' ? i.menuItemId?.name : null) || i.name || '—'
-    ),
+    seats:  t.capacity ?? t.seats ?? 4,
+    orders: rawOrders.map(o => ({ id: o._id, dishes: mapDishes(o.items) })),
   };
 }
 
@@ -47,7 +58,7 @@ export default function TableMap() {
       try {
         const data = await getTables();
         if (!cancelled && Array.isArray(data) && data.length > 0) {
-          setTables(data.map(normaliseTable));
+          setTables(data.map(normaliseTable).sort((a, b) => a.id - b.id));
         }
       } catch (err) {
         console.error('getTables error:', err);
@@ -80,9 +91,6 @@ export default function TableMap() {
                 <TableMapItem table={table} />
               </div>
             ))}
-          </div>
-          <div className={styles.kitchenBtn}>
-            <span className={styles.kitchenLabel}>{t('kitchen')}</span>
           </div>
         </div>
       </div>

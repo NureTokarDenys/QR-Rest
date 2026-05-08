@@ -9,6 +9,7 @@ import HttpErrorToast from './components/HttpErrorToast';
 import DevToolbar from './components/DevToolbar';
 import Login from './pages/Login';
 import RestaurantPicker from './pages/client/RestaurantPicker';
+import QrLanding from './pages/client/QrLanding';
 import Forbidden from './pages/Forbidden';
 import OAuthCallback from './pages/OAuthCallback';
 import Menu from './pages/client/Menu';
@@ -76,6 +77,9 @@ export default function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/auth/callback" element={<OAuthCallback />} />
               <Route path="/forbidden" element={<Forbidden />} />
+
+              {/* QR scan landing — calls initSession then redirects to /menu */}
+              <Route path="/qr/:shortCode" element={<QrLanding />} />
 
               {/* Restaurant picker — direct access without QR scan */}
               <Route path="/restaurants" element={<RestaurantPicker />} />

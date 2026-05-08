@@ -3,8 +3,8 @@
   border: 1px solid var(--separator-color);
   border-radius: 10px;
   padding: 8px 10px;
-  min-width: 150px;
-  max-width: 180px;
+  width: 100%;
+  box-sizing: border-box;
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 }
 
@@ -44,10 +44,3 @@
   white-space: nowrap;
 }
 
-@media (max-width: 768px) {
-  .box {
-    min-width: unset;
-    max-width: 100%;
-    width: 100%;
-  }
-}

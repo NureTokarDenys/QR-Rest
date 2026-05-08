@@ -6,6 +6,7 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  align-items: stretch;
 }
 
 .title {
@@ -14,44 +15,81 @@
   color: var(--primary-text);
 }
 
-.qrPlaceholder {
-  width: 120px;
-  height: 120px;
-  border: 1px solid var(--border);
+/* ── Canvas wrapper ── */
+.canvasWrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 184px;
+}
+
+.canvasWrap canvas {
+  border-radius: 8px;
+  display: block;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.placeholder {
+  width: 180px;
+  height: 180px;
+  background: var(--bg-color);
+  border: 1px dashed var(--separator-color);
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff;
-  margin: 0 auto;
-}
-
-.qrGrid {
-  width: 90px;
-  height: 90px;
-  background: repeating-linear-gradient(
-    0deg, #111 0 4px, transparent 4px 8px
-  ),
-  repeating-linear-gradient(
-    90deg, #111 0 4px, transparent 4px 8px
-  );
-  border-radius: 2px;
-}
-
-.url {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--secondary-text);
+}
+
+/* ── Short code / URL ── */
+.url {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--secondary-text);
+  text-align: center;
+  letter-spacing: 2px;
+  font-family: monospace;
+}
+
+.error {
+  font-size: 12px;
+  color: #dc2626;
   text-align: center;
 }
 
-@media (max-width: 768px) {
-  .qrPlaceholder {
-    width: 100px;
-    height: 100px;
-  }
-
-  .qrGrid {
-    width: 76px;
-    height: 76px;
-  }
+/* ── Buttons ── */
+.btnPrimary {
+  width: 100%;
+  padding: 9px 14px;
+  border-radius: 10px;
+  border: none;
+  background: #1d7afc;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.12s;
 }
+
+.btnPrimary:hover:not(:disabled) { background: #1565e0; }
+.btnPrimary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.btnSecondary {
+  width: 100%;
+  padding: 9px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--separator-color);
+  background: none;
+  color: var(--primary-text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.btnSecondary:hover:not(:disabled) { background: var(--bg-color); }
+.btnSecondary:disabled { opacity: 0.45; cursor: not-allowed; }

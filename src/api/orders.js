@@ -24,7 +24,36 @@ export async function voidOrder(orderId, reason, restaurantId = getStoredRestaur
   return res.data?.data;
 }
 
+export async function addOrderItems(orderId, items, restaurantId = getStoredRestaurantId()) {
+  const res = await apiClient.post(`/${restaurantId}/orders/${orderId}/items`, { items });
+  return res.data?.data;
+}
+
+export async function updateOrderItem(orderId, itemId, data, restaurantId = getStoredRestaurantId()) {
+  const res = await apiClient.patch(`/${restaurantId}/orders/${orderId}/items/${itemId}`, data);
+  return res.data?.data;
+}
+
+export async function deleteOrderItem(orderId, itemId, restaurantId = getStoredRestaurantId()) {
+  await apiClient.delete(`/${restaurantId}/orders/${orderId}/items/${itemId}`);
+}
+
+export async function getTableOrders(tableId, restaurantId = getStoredRestaurantId()) {
+  const res = await apiClient.get(`/${restaurantId}/waiter/orders/by-table/${tableId}`);
+  return res.data?.data ?? [];
+}
+
 export async function waiterCall(orderId, restaurantId = getStoredRestaurantId()) {
   const res = await apiClient.post(`/${restaurantId}/orders/${orderId}/waiter-call`);
+  return res.data?.data;
+}
+
+export async function getWaiterCalls(params = {}, restaurantId = getStoredRestaurantId()) {
+  const res = await apiClient.get(`/${restaurantId}/waiter/calls`, { params });
+  return res.data?.data ?? [];
+}
+
+export async function confirmWaiterCall(callId, restaurantId = getStoredRestaurantId()) {
+  const res = await apiClient.patch(`/${restaurantId}/waiter/calls/${callId}/confirm`);
   return res.data?.data;
 }

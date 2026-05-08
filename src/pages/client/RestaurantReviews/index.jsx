@@ -7,6 +7,7 @@ import Footer from '../../../components/client/Footer';
 import { getRestaurantReviews } from '../../../api/reviews';
 import { useTranslation } from 'react-i18next';
 import styles from './restaurantReviews.module.css';
+import { useLocalField } from '../../../i18n/useLang';
 
 // ─── Star summary bar ─────────────────────────────────────────────────────────
 
@@ -28,7 +29,8 @@ function StarBar({ star, count, total }) {
 export default function RestaurantReviews() {
   const navigate = useNavigate();
   const { t } = useTranslation('restaurantReviews');
-  const { restaurantId, restaurantName } = useApp();
+  const { restaurantId, restaurantName, restaurantName_en } = useApp();
+  const local = useLocalField();
 
   const [reviews, setReviews]       = useState([]);
   const [summary, setSummary]       = useState(null);  // { averageRating, totalCount }
@@ -37,6 +39,7 @@ export default function RestaurantReviews() {
   const [hasMore, setHasMore]       = useState(false);
   const [loading, setLoading]       = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+
 
   const load = useCallback(async (pageNum, replace = false) => {
     if (!restaurantId) return;
@@ -81,8 +84,10 @@ export default function RestaurantReviews() {
   }
 
   // ── Render ──────────────────────────────────────────────────────────────────
-
-  const title = restaurantName ? `${restaurantName} — Reviews` : 'Restaurant Reviews';
+  const localRestaurantName = local(
+    { name: restaurantName, name_en: restaurantName_en },
+    'name'
+  ) || restaurantName;
 
   if (!restaurantId) {
     return (
@@ -97,7 +102,7 @@ export default function RestaurantReviews() {
   return (
     <div className={styles.page}>
       <Header
-        title={restaurantName ? t('title_for', { name: restaurantName }) : t('title')}
+        title={restaurantName ? t('title_for', { name: localRestaurantName }) : t('title')}
         showBack
       />
 

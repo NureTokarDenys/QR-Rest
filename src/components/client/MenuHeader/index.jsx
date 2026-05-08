@@ -18,7 +18,7 @@ import styles from './menuHeader.module.css';
  */
 export default function MenuHeader() {
   const navigate = useNavigate();
-  const { t } = useTranslation('menu');
+  const { t } = useTranslation('menu'); 
   const { t: tR } = useTranslation('restaurantReviews');
   const local = useLocalField();
   const lang = useLang();

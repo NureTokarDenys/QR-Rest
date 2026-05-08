@@ -164,7 +164,6 @@ export default function RestaurantPicker() {
                 local={local}
               />
             ))}
-             <p className={styles.stateMsg}>{JSON.stringify(restaurants)}</p>
           </div>
         )}
       </div>

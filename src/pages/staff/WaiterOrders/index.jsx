@@ -45,15 +45,15 @@ export default function WaiterOrders() {
       const tables = await getTables();
       if (!Array.isArray(tables)) { setOrders([]); return; }
 
-      // Keep only tables that have an active order
-      const occupied = tables.filter(
-        t => t.currentOrder?._id || t.currentOrderId
-      );
+      // Flatten tables → one entry per active order (a table can have multiple)
+      const occupied = tables.flatMap(table => {
+        const orders = table.currentOrders ?? (table.currentOrder ? [table.currentOrder] : []);
+        return orders.map(o => ({ table, orderId: o._id }));
+      });
 
       // Fetch each order's items in parallel
       const results = await Promise.allSettled(
-        occupied.map(async table => {
-          const orderId = table.currentOrder?._id || table.currentOrderId;
+        occupied.map(async ({ table, orderId }) => {
           const data    = await getOrder(orderId);
           const items   = (data?.items || []).map(i => ({
             id:     i._id || i.id,

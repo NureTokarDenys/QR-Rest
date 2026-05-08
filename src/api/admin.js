@@ -1,5 +1,12 @@
 import apiClient, { getStoredRestaurantId } from './client';
 
+// ─── Restaurant ───────────────────────────────────────────────────────────────
+
+export async function getRestaurant(restaurantId = getStoredRestaurantId()) {
+  const res = await apiClient.get(`/${restaurantId}/admin/restaurant`);
+  return res.data?.data;
+}
+
 // ─── Tables ───────────────────────────────────────────────────────────────────
 
 export async function getTables(restaurantId = getStoredRestaurantId()) {
@@ -11,6 +18,7 @@ export async function createTable(data, restaurantId = getStoredRestaurantId()) 
   const res = await apiClient.post(`/${restaurantId}/admin/tables`, data);
   return res.data?.data;
 }
+
 
 // ─── Menu management ──────────────────────────────────────────────────────────
 
