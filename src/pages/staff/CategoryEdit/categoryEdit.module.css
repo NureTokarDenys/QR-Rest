@@ -1,0 +1,149 @@
+.headerActions {
+  display: flex;
+  gap: 8px;
+}
+
+.layout {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 560px;
+}
+
+.section {
+  background: var(--surface-color);
+  border: 1px solid var(--separator-color);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sectionTitle {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--secondary-text);
+  margin: 0;
+}
+
+.langBar {
+  margin-bottom: 4px;
+}
+
+.fieldWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.srcHint {
+  font-size: 12px;
+  color: var(--secondary-text);
+  font-style: italic;
+  padding-left: 2px;
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sortField {
+  max-width: 160px;
+}
+
+/* Color preview */
+.colorPreviewRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.colorPreview {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--separator-color);
+  flex-shrink: 0;
+}
+
+.colorHex {
+  font-size: 13px;
+  font-family: monospace;
+  color: var(--secondary-text);
+}
+
+.clearBtn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-size: 12px;
+  color: var(--secondary-text);
+  cursor: pointer;
+}
+
+.clearBtn:hover {
+  background: var(--bg-color);
+}
+
+/* Palette */
+.palette {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 7px;
+}
+
+.swatch {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.1s;
+}
+
+.swatch:hover {
+  transform: scale(1.12);
+}
+
+.swatchActive {
+  border-color: var(--primary-text);
+  box-shadow: 0 0 0 3px var(--surface-color) inset;
+}
+
+/* Custom color */
+.customRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-top: 4px;
+  border-top: 1px solid var(--separator-color);
+}
+
+.customInput {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--separator-color);
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 2px;
+  background: none;
+  flex-shrink: 0;
+}
+
+.customLabel {
+  font-size: 13px;
+  color: var(--secondary-text);
+}
+
+@media (max-width: 768px) {
+  .palette {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}

@@ -220,6 +220,117 @@
   text-decoration: underline;
 }
 
+/* ── Search Picker ──────────────────────────────────────────────────────────── */
+.searchPicker {
+  position: relative;
+}
+
+.searchInputRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 6px 10px;
+  background: var(--bg-color);
+}
+
+.searchIcon {
+  color: var(--secondary-text);
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.searchInput {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  color: var(--primary-text);
+  outline: none;
+}
+
+.clearSearchBtn {
+  background: none;
+  border: none;
+  color: var(--secondary-text);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px;
+  display: flex;
+}
+
+.searchDropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--surface-color);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  z-index: 100;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.searchOption {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--primary-text);
+  cursor: pointer;
+}
+
+.searchOption:hover {
+  background: var(--bg-color);
+}
+
+.unavailableBadge {
+  font-size: 11px;
+  background: #fef2f2;
+  color: #dc2626;
+  border-radius: 4px;
+  padding: 1px 5px;
+  margin-left: auto;
+}
+
+.createOption {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  border-top: 1px solid var(--separator-color);
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-color);
+  cursor: pointer;
+}
+
+.createOption:hover { background: var(--bg-color); }
+
+.noResults {
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--secondary-text);
+}
+
+.ingName {
+  font-size: 13px;
+  color: var(--primary-text);
+  padding: 4px 0;
+}
+
 .cancelBtn {
   color: var(--primary-text);
   border: 1px solid var(--separator-color);

@@ -1,0 +1,164 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 860px;
+}
+
+/* ── Tabs ── */
+.tabBar {
+  display: flex;
+  background: var(--bg-color);
+  border-radius: 10px;
+  padding: 3px;
+  gap: 2px;
+  align-self: flex-start;
+}
+
+.tab {
+  background: none;
+  border: none;
+  padding: 7px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--secondary-text);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.tabActive {
+  background: var(--surface-color);
+  color: var(--primary-text);
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* ── Filter ── */
+.filterRow {
+  display: flex;
+  gap: 12px;
+}
+
+.filterDropdown {
+  min-width: 240px;
+}
+
+/* ── Review list ── */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.empty {
+  text-align: center;
+  padding: 48px;
+  color: var(--secondary-text);
+  font-size: 15px;
+}
+
+/* ── Review card ── */
+.card {
+  background: var(--surface-color);
+  border: 1px solid var(--separator-color);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cardTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cardLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cardRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.author {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary-text);
+}
+
+.dishTag {
+  display: inline-block;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--bg-color);
+  color: var(--secondary-text);
+  border: 1px solid var(--separator-color);
+}
+
+.stars {
+  display: flex;
+  gap: 1px;
+}
+
+.starFilled {
+  color: var(--rating-text, #f59e0b);
+  font-size: 16px;
+}
+
+.starEmpty {
+  color: var(--border, #d1d5db);
+  font-size: 16px;
+}
+
+.date {
+  font-size: 12px;
+  color: var(--secondary-text);
+}
+
+.comment {
+  font-size: 14px;
+  color: var(--secondary-text);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ── Pagination ── */
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  justify-content: center;
+  padding: 8px 0;
+}
+
+.pageBtn {
+  background: none;
+  border: 1px solid var(--separator-color);
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--accent-color);
+  font-weight: 600;
+}
+
+.pageBtn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.pageInfo {
+  font-size: 13px;
+  color: var(--secondary-text);
+}

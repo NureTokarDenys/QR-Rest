@@ -1,0 +1,45 @@
+{
+  "title": "Персонал",
+  "addStaff": "Додати співробітника",
+
+  "name": "Ім'я",
+  "email": "Email",
+  "role": "Роль",
+  "status": "Статус",
+  "actions": "Дії",
+  "noStaff": "Співробітників не знайдено",
+
+  "active": "Активний",
+  "inactive": "Неактивний",
+
+  "role_admin": "Адміністратор",
+  "role_waiter": "Офіціант",
+  "role_cook": "Кухар",
+  "role_waiter_cook": "Офіціант і кухар",
+
+  "deactivate": "Деактивувати",
+  "activate": "Активувати",
+  "resetPassword": "Скинути пароль",
+
+  "addTitle": "Новий співробітник",
+  "namePlaceholder": "Ім'я та прізвище",
+  "emailPlaceholder": "email@example.com",
+  "create": "Створити",
+  "creating": "Створення…",
+
+  "tempPasswordTitle": "Обліковий запис створено",
+  "tempPasswordText": "Тимчасовий пароль для входу. Збережіть його — він більше не буде показаний:",
+  "close": "Закрити",
+
+  "resetPasswordTitle": "Новий тимчасовий пароль",
+  "resetPasswordText": "Пароль скинуто. Передайте цей пароль співробітнику:",
+
+  "confirmDeactivate": "Деактивувати цього співробітника?",
+  "confirmActivate": "Активувати цього співробітника?",
+  "confirmResetPassword": "Скинути пароль цього співробітника?",
+
+  "roleUpdated": "Роль оновлено",
+  "errorCreate": "Не вдалося створити співробітника",
+  "errorLoad": "Не вдалося завантажити персонал",
+  "cancel": "Скасувати"
+}

@@ -1,0 +1,12 @@
+{
+  "titleAdd": "New Category",
+  "titleEdit": "Edit Category",
+  "basicInfo": "Basic Info",
+  "name": "Name",
+  "sortOrder": "Sort Order",
+  "colorSection": "Category Color",
+  "customColor": "Custom color",
+  "clearColor": "Clear",
+  "cancel": "Cancel",
+  "save": "Save"
+}

@@ -15,7 +15,7 @@ export function AuthProvider({ children }) {
   });
 
   const isAuthenticated = Boolean(accessToken && user);
-  const isStaff = Boolean(user && ['admin', 'waiter', 'cook'].includes(user.role));
+  const isStaff = Boolean(user && ['admin', 'waiter', 'cook', 'waiter_cook'].includes(user.role));
 
   // ── On mount: if a token exists, refresh user data from server so stale
   //    cached profile data is always replaced with the latest.

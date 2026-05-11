@@ -1,0 +1,265 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.addBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--accent-color);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.addBtn:hover {
+  opacity: 0.9;
+}
+
+.empty {
+  text-align: center;
+  padding: 48px;
+  color: var(--secondary-text);
+  font-size: 15px;
+}
+
+/* ── Table ── */
+.tableWrap {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid var(--separator-color);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface-color);
+}
+
+.th {
+  padding: 10px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--secondary-text);
+  text-align: left;
+  border-bottom: 1px solid var(--separator-color);
+  background: var(--bg-color);
+}
+
+.td {
+  padding: 12px 14px;
+  font-size: 14px;
+  color: var(--primary-text);
+  border-bottom: 1px solid var(--separator-color);
+  vertical-align: middle;
+}
+
+.row:last-child .td {
+  border-bottom: none;
+}
+
+.row:hover .td {
+  background: var(--bg-color);
+}
+
+.rowInactive .td {
+  opacity: 0.55;
+}
+
+.userCell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--accent-color);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.userName {
+  font-weight: 500;
+}
+
+.email {
+  color: var(--secondary-text);
+  font-size: 13px;
+}
+
+.roleDropdown {
+  min-width: 160px;
+}
+
+.statusBadge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.statusActive {
+  background: var(--success-bg, #e6f9ef);
+  color: var(--success-text, #1a7a4a);
+}
+
+.statusInactive {
+  background: var(--bg-color);
+  color: var(--secondary-text);
+  border: 1px solid var(--separator-color);
+}
+
+.actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.actionBtn {
+  border: none;
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.deactivateBtn {
+  background: #fef2f2;
+  color: #c0392b;
+}
+
+.deactivateBtn:hover {
+  background: #fce4e4;
+}
+
+.activateBtn {
+  background: var(--success-bg, #e6f9ef);
+  color: var(--success-text, #1a7a4a);
+}
+
+.activateBtn:hover {
+  opacity: 0.85;
+}
+
+.resetBtn {
+  background: var(--bg-color);
+  color: var(--secondary-text);
+  border: 1px solid var(--separator-color);
+}
+
+.resetBtn:hover {
+  background: var(--separator-color);
+}
+
+/* ── Modal ── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+.modal {
+  background: var(--surface-color);
+  border-radius: 16px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2);
+  width: min(460px, calc(100vw - 32px));
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--separator-color);
+}
+
+.modalTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--primary-text);
+}
+
+.modalClose {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: var(--secondary-text);
+}
+
+.modalBody {
+  padding: 18px 20px;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 14px 20px 18px;
+  border-top: 1px solid var(--separator-color);
+}
+
+.addForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.addErr {
+  font-size: 13px;
+  color: var(--danger-color, #c0392b);
+  margin: 0;
+}
+
+/* ── Password display ── */
+.pwdText {
+  font-size: 14px;
+  color: var(--secondary-text);
+  margin: 0 0 12px;
+  line-height: 1.5;
+}
+
+.pwdBox {
+  font-family: 'Courier New', monospace;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--primary-text);
+  background: var(--bg-color);
+  border: 1.5px solid var(--separator-color);
+  border-radius: 10px;
+  padding: 14px 16px;
+  text-align: center;
+  user-select: all;
+}
+
+@media (max-width: 768px) {
+  .actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

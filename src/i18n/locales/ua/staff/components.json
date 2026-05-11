@@ -17,9 +17,18 @@
   "status_ready": "Готово",
   "status_served": "Подано",
 
-  "kanban_btn_waiting": "Прийняти",
+  "kanban_btn_waiting": "Почати готувати",
   "kanban_btn_cooking": "Готово",
   "kanban_btn_ready": "Подати",
+
+  "more_group": "ще група подачі",
+  "more_groups": "ще групи подачі",
+
+  "kanban_btn_blocked": "Чекаємо групу {{n}}",
+  "blocked_by_group": "Спочатку має готуватися група {{n}}",
+
+  "timer_created_title": "Час від створення групи",
+  "timer_status_title": "Час від останньої зміни статусу",
 
   "kanban_col_waiting": "НОВІ",
   "kanban_col_cooking": "ГОТУЮТЬСЯ",
@@ -47,5 +56,14 @@
 
   "role_admin": "Адміністратор",
   "role_waiter": "Офіціант",
-  "role_cook": "Кухар"
+  "role_cook": "Кухар",
+  "role_waiter_cook": "Офіціант і кухар",
+
+  "pickColor": "Вибрати колір",
+  "customColor": "Власний",
+
+  "nav_extras": "Компоненти",
+  "nav_staff": "Персонал",
+  "nav_reviews": "Відгуки",
+  "nav_restaurant": "Налаштування"
 }

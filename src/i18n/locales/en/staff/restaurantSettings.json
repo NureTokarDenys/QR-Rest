@@ -1,0 +1,42 @@
+{
+  "title": "Restaurant Settings",
+  "save": "Save",
+  "saving": "Saving…",
+  "cancel": "Cancel",
+  "saved": "Saved",
+
+  "basicInfo": "Basic Information",
+  "name": "Name",
+  "namePlaceholder": "Restaurant name",
+  "slug": "URL slug",
+  "slugPlaceholder": "my-restaurant",
+  "slugHint": "Used in URLs. Lowercase letters, numbers and hyphens only.",
+  "address": "Address",
+  "addressPlaceholder": "1 Main St, Kyiv",
+  "cuisine": "Cuisine",
+  "cuisinePlaceholder": "Ukrainian, European…",
+  "createdAt": "Created",
+
+  "logo": "Logo",
+  "logoUploadHint": "Drag photo here or click to select",
+  "logoFormats": "JPG, PNG, WEBP (up to 5 MB)",
+  "logoUploading": "Uploading…",
+  "removeLogo": "Remove logo",
+
+  "languages": "Languages",
+  "defaultLanguage": "Default content language",
+  "defaultLanguageHint": "The language the admin writes content in. Other languages are auto-translated.",
+  "enabledLanguages": "Translation languages",
+  "enabledLanguagesHint": "Content is automatically translated into the selected languages. If none selected — all supported languages are used.",
+
+  "lang_uk": "Ukrainian",
+  "lang_en": "English",
+  "lang_pl": "Polish",
+  "lang_de": "German",
+  "lang_fr": "French",
+  "lang_cs": "Czech",
+  "lang_sk": "Slovak",
+
+  "srcHintPrefix": "Source",
+  "fallback_tooltip": "Displayed in original language"
+}

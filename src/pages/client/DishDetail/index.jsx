@@ -21,6 +21,7 @@ function normaliseDish(raw) {
     name: raw.name,
     name_en: raw.name_en || raw.name,
     price: raw.basePrice !== undefined ? raw.basePrice : raw.price,
+    weight: raw.weight || null,
     image: raw.imageUrl || raw.image,
     description: raw.description,
     description_en: raw.description_en || raw.description,
@@ -225,6 +226,10 @@ export default function DishDetail() {
             <span className={styles.ratingVal}>{ratingSummary.averageRating.toFixed(1)}</span>
             <span className={styles.reviewCount}>· {ratingSummary.totalCount} {t3('review', { count: ratingSummary.totalCount })}</span>
           </div>
+        )}
+
+        {dish.weight && (
+          <span className={styles.weightBadge}>{dish.weight}</span>
         )}
 
         <p className={styles.description}>

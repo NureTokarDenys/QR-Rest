@@ -1,0 +1,313 @@
+.layout {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  height: calc(100dvh - 56px - 52px);
+}
+
+/* Tab bar */
+.tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--separator-color);
+  flex-shrink: 0;
+}
+
+.tab {
+  background: none;
+  border: none;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--secondary-text);
+  cursor: pointer;
+  position: relative;
+  transition: color 0.15s;
+}
+
+.tab:hover { color: var(--primary-text); }
+
+.tabActive {
+  color: #1d7afc;
+  font-weight: 600;
+}
+
+.tabActive::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #1d7afc;
+  border-radius: 2px 2px 0 0;
+}
+
+/* Content area */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 0;
+}
+
+/* Table */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.thead th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--secondary-text);
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--separator-color);
+}
+
+.table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--separator-color);
+  color: var(--primary-text);
+  vertical-align: middle;
+}
+
+.table tr:last-child td { border-bottom: none; }
+
+.editRow td { background: var(--bg-color); }
+
+.noData {
+  text-align: center;
+  color: var(--secondary-text);
+  padding: 32px 12px;
+  font-size: 14px;
+}
+
+/* Dish badge */
+.dishBadge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--bg-color);
+  color: var(--secondary-text);
+  border-radius: 5px;
+  padding: 2px 7px;
+  white-space: nowrap;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Availability toggle button */
+.availBtn {
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: 5px;
+  padding: 2px 8px;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+
+.availOn  { background: #dcfce7; color: #16a34a; }
+.availOff { background: #fef2f2; color: #dc2626; }
+.availBtn:hover { opacity: 0.75; }
+
+/* Unavailable row/card highlight */
+.unavailRow td { opacity: 0.55; }
+.unavailCard    { opacity: 0.6; border-color: #fca5a5; }
+
+/* Usage badge */
+.usageBadge {
+  display: inline-block;
+  font-size: 11px;
+  background: var(--bg-color);
+  color: var(--secondary-text);
+  border-radius: 5px;
+  padding: 2px 7px;
+}
+
+.unusedBadge {
+  display: inline-block;
+  font-size: 11px;
+  background: var(--bg-color);
+  color: #9ca3af;
+  border-radius: 5px;
+  padding: 2px 7px;
+  font-style: italic;
+}
+
+/* Status badge */
+.badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  background: #eff6ff;
+  color: #1d7afc;
+  border-radius: 5px;
+  padding: 2px 7px;
+}
+
+/* Action buttons */
+.actions {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.iconBtn {
+  background: none;
+  border: none;
+  padding: 5px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--secondary-text);
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.1s, color 0.1s;
+}
+
+.iconBtn:hover { background: var(--bg-color); color: var(--primary-text); }
+.danger:hover  { background: #fee2e2; color: #dc2626; }
+
+/* Inline edit inputs */
+.inlineInput {
+  border: 1px solid #1d7afc;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 14px;
+  color: var(--primary-text);
+  background: var(--surface-color);
+  outline: none;
+  width: 100%;
+}
+
+.inlineInput:focus { box-shadow: 0 0 0 2px #bfdbfe; }
+
+.inlineSelect {
+  border: 1px solid #1d7afc;
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 14px;
+  color: var(--primary-text);
+  background: var(--surface-color);
+  cursor: pointer;
+  outline: none;
+  max-width: 220px;
+}
+
+.checkLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--secondary-text);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* Add row */
+.addBtn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  color: var(--accent-color);
+  cursor: pointer;
+  margin: 10px 12px 0;
+}
+
+.addRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--bg-color);
+  border-top: 1px solid var(--separator-color);
+  flex-wrap: wrap;
+}
+
+/* Component Groups */
+.groupList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 2px;
+}
+
+.groupCard {
+  background: var(--surface-color);
+  border: 1px solid var(--separator-color);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.groupHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  flex-wrap: wrap;
+}
+
+.groupName {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary-text);
+  flex: 1;
+}
+
+.optsBadge {
+  font-size: 11px;
+  color: var(--secondary-text);
+  background: var(--bg-color);
+  border-radius: 5px;
+  padding: 2px 7px;
+}
+
+.groupActions {
+  display: flex;
+  gap: 2px;
+  margin-left: auto;
+}
+
+.optionsList {
+  border-top: 1px solid var(--separator-color);
+  padding: 8px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.optionRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--primary-text);
+}
+
+.optPrice {
+  font-size: 12px;
+  color: var(--secondary-text);
+}
+
+@media (max-width: 768px) {
+  .layout {
+    height: auto;
+  }
+  .tabs {
+    overflow-x: auto;
+  }
+}

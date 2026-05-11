@@ -1,0 +1,42 @@
+{
+  "title": "Налаштування ресторану",
+  "save": "Зберегти",
+  "saving": "Збереження…",
+  "cancel": "Скасувати",
+  "saved": "Збережено",
+
+  "basicInfo": "Основна інформація",
+  "name": "Назва",
+  "namePlaceholder": "Назва ресторану",
+  "slug": "Посилання (slug)",
+  "slugPlaceholder": "my-restaurant",
+  "slugHint": "Використовується в URL. Тільки малі літери, цифри та дефіси.",
+  "address": "Адреса",
+  "addressPlaceholder": "вул. Головна, 1, Київ",
+  "cuisine": "Кухня",
+  "cuisinePlaceholder": "Українська, Європейська…",
+  "createdAt": "Дата створення",
+
+  "logo": "Логотип",
+  "logoUploadHint": "Перетягніть фото або натисніть, щоб вибрати",
+  "logoFormats": "JPG, PNG, WEBP (до 5 МБ)",
+  "logoUploading": "Завантаження…",
+  "removeLogo": "Видалити логотип",
+
+  "languages": "Мови",
+  "defaultLanguage": "Основна мова контенту",
+  "defaultLanguageHint": "Мова, якою адмін вводить текст. Інші мови перекладаються автоматично.",
+  "enabledLanguages": "Мови перекладу",
+  "enabledLanguagesHint": "Контент автоматично перекладається на обрані мови. Якщо нічого не обрано — на всі підтримувані.",
+
+  "lang_uk": "Українська",
+  "lang_en": "English",
+  "lang_pl": "Polski",
+  "lang_de": "Deutsch",
+  "lang_fr": "Français",
+  "lang_cs": "Čeština",
+  "lang_sk": "Slovenčina",
+
+  "srcHintPrefix": "Джерело",
+  "fallback_tooltip": "Поле відображається мовою оригіналу"
+}

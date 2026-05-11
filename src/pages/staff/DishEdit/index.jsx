@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import StaffShell from '../../../components/staff/StaffShell';
@@ -10,17 +10,21 @@ import { Dropdown } from '../../../components/Dropdown';
 import PrimaryButton from '../../../components/PrimaryButton';
 import SecondaryButton from '../../../components/SecondaryButton';
 import LangTabs from '../../../components/staff/LangTabs';
-import { getCategories, createMenuItem, updateMenuItem, translateText } from '../../../api/admin';
-import { getDishDetail } from '../../../api/menu';
+import {
+  getCategories, translateText,
+  getAdminMenuItem, createMenuItem, updateMenuItem,
+  searchIngredients, searchAddons, searchComponentGroups,
+} from '../../../api/admin';
 import { SUPPORTED_LANGS, SOURCE_LANG, fieldFor, emptyI18n } from '../../../i18n/langs';
 import { useLocalField } from '../../../i18n/useLang';
-import { MdAdd, MdDelete } from 'react-icons/md';
+import { MdAdd, MdDelete, MdSearch, MdClose } from 'react-icons/md';
 import styles from './dishEdit.module.css';
 
-// ── Factory helpers ───────────────────────────────────────────────────────────
+// ── Factories ─────────────────────────────────────────────────────────────────
 const EMPTY_FORM = {
   ...emptyI18n('name', 'description'),
   price:           '',
+  weight:          '',
   category:        '',
   images:          [],
   available:       true,
@@ -29,38 +33,91 @@ const EMPTY_FORM = {
   componentGroups: [],
 };
 
-function newIngredient() {
-  return { id: `ing-${Date.now()}-${Math.random()}`, ...emptyI18n('name'), isRemovable: false };
+function newIngredientEmbed(name = '') {
+  return { _id: null, tempId: `ing-${Date.now()}-${Math.random()}`, name, name_en: '', isRemovable: true, isAvailable: true, sourceId: null };
 }
-function newAddon() {
-  return { id: `ao-${Date.now()}-${Math.random()}`, ...emptyI18n('name'), price: 0 };
+function newAddonEmbed(name = '', price = 0) {
+  return { _id: null, tempId: `ao-${Date.now()}-${Math.random()}`, name, name_en: '', price, isAvailable: true, sourceId: null };
 }
-function newComponentGroup() {
-  return { id: `cg-${Date.now()}-${Math.random()}`, ...emptyI18n('name'), isRequired: true, options: [] };
+function newCgEmbed(name = '') {
+  return { _id: null, tempId: `cg-${Date.now()}-${Math.random()}`, name, name_en: '', isRequired: false, isAvailable: true, sourceId: null, options: [] };
 }
-function newGroupOption() {
-  return { id: `cgo-${Date.now()}-${Math.random()}`, ...emptyI18n('name'), priceModifier: 0 };
+function newCgOption() {
+  return { id: `cgo-${Date.now()}-${Math.random()}`, name: '', name_en: '', priceModifier: 0, isDefault: false, sourceId: null };
 }
 
-// Normalize an object from the API: fill every expected lang field ─────────────
-function normI18n(obj, ...bases) {
-  const out = {};
-  bases.forEach(base => {
-    SUPPORTED_LANGS.forEach(l => {
-      const key = fieldFor(base, l.code);
-      out[key] = obj?.[key] ?? '';
-    });
-  });
-  return out;
+// ── SearchPicker ──────────────────────────────────────────────────────────────
+function SearchPicker({ placeholder, results, onSearch, onSelect, onCreate, createLabel }) {
+  const [query, setQuery] = useState('');
+  const [open, setOpen]   = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    function handler(e) { if (ref.current && !ref.current.contains(e.target)) setOpen(false); }
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  function handleInput(e) {
+    const v = e.target.value;
+    setQuery(v);
+    onSearch(v);
+    setOpen(true);
+  }
+
+  function handleSelect(item) {
+    onSelect(item);
+    setQuery('');
+    setOpen(false);
+  }
+
+  function handleCreate() {
+    onCreate(query.trim());
+    setQuery('');
+    setOpen(false);
+  }
+
+  return (
+    <div className={styles.searchPicker} ref={ref}>
+      <div className={styles.searchInputRow}>
+        <MdSearch className={styles.searchIcon} />
+        <input
+          className={styles.searchInput}
+          placeholder={placeholder}
+          value={query}
+          onChange={handleInput}
+          onFocus={() => { onSearch(query); setOpen(true); }}
+        />
+        {query && <button className={styles.clearSearchBtn} onClick={() => { setQuery(''); setOpen(false); }}><MdClose /></button>}
+      </div>
+      {open && (
+        <div className={styles.searchDropdown}>
+          {results.map(r => (
+            <button key={r._id} className={styles.searchOption} onMouseDown={() => handleSelect(r)}>
+              {r.name}
+            </button>
+          ))}
+          {query.trim() && (
+            <button className={styles.createOption} onMouseDown={handleCreate}>
+              <MdAdd /> {createLabel}: &ldquo;{query.trim()}&rdquo;
+            </button>
+          )}
+          {!results.length && !query.trim() && (
+            <div className={styles.noResults}>—</div>
+          )}
+        </div>
+      )}
+    </div>
+  );
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function DishEdit() {
-  const { id }     = useParams();
-  const navigate   = useNavigate();
-  const local      = useLocalField();
-  const { t }      = useTranslation('dishEdit');
-  const isNew      = !id || id === 'new';
+  const { id }   = useParams();
+  const navigate = useNavigate();
+  const local    = useLocalField();
+  const { t }    = useTranslation('dishEdit');
+  const isNew    = !id || id === 'new';
 
   const [form,        setForm]        = useState(EMPTY_FORM);
   const [categories,  setCategories]  = useState([]);
@@ -68,139 +125,178 @@ export default function DishEdit() {
   const [activeLang,  setActiveLang]  = useState(SOURCE_LANG);
   const [translating, setTranslating] = useState(false);
 
-  // Convenience: current-language field key + source-language hint value
-  const lf       = base => fieldFor(base, activeLang);
-  const srcHint  = (base, obj = form) =>
-    activeLang !== SOURCE_LANG ? obj[fieldFor(base, SOURCE_LANG)] : null;
-  const srcLang  = SUPPORTED_LANGS.find(l => l.code === SOURCE_LANG);
+  // Global template pools for pickers
+  const [ingPool, setIngPool] = useState([]);
+  const [addPool, setAddPool] = useState([]);
+  const [cgPool,  setCgPool]  = useState([]);
 
-  // ── Data loading ────────────────────────────────────────────────────────────
+  const lf      = base => fieldFor(base, activeLang);
+  const srcHint = (base, obj = form) =>
+    activeLang !== SOURCE_LANG ? obj[fieldFor(base, SOURCE_LANG)] : null;
+  const srcLang = SUPPORTED_LANGS.find(l => l.code === SOURCE_LANG);
+
+  // ── Data loading ─────────────────────────────────────────────────────────────
   useEffect(() => {
     getCategories()
       .then(data => {
         if (Array.isArray(data) && data.length > 0) {
-          setCategories(data.map(c => ({
-            id: c._id || c.id,
-            ...normI18n(c, 'name'),
-          })));
+          setCategories(data.map(c => ({ id: c._id || c.id, name: c.name, name_en: c.name_en || '', color: c.color })));
         }
       })
       .catch(err => console.error('getCategories error:', err));
+
+    Promise.all([searchIngredients(''), searchAddons(''), searchComponentGroups('')])
+      .then(([ings, ads, cgs]) => { setIngPool(ings); setAddPool(ads); setCgPool(cgs); })
+      .catch(err => console.error('load pools error:', err));
   }, []);
 
   useEffect(() => {
     if (isNew) return;
-    getDishDetail(id)
+    getAdminMenuItem(id)
       .then(raw => {
         if (!raw) return;
         setForm({
-          ...normI18n(raw, 'name', 'description'),
-          price:    raw.basePrice ?? raw.price ?? '',
-          category: raw.categoryId?._id || raw.categoryId || raw.category || '',
-          images:   raw.imageUrl ? [raw.imageUrl] : raw.image ? [raw.image] : [],
-          available: raw.isAvailable ?? raw.available ?? true,
-          ingredientsList: (raw.ingredients || raw.ingredientsList || []).map(i => ({
-            id: i._id || i.id || `ing-${Math.random()}`,
-            ...normI18n(i, 'name'),
+          name:        raw.name || '',
+          name_en:     raw.translations?.en?.name?.value || '',
+          description: raw.description || '',
+          description_en: raw.translations?.en?.description?.value || '',
+          price:    raw.basePrice ?? '',
+          weight:   raw.weight ?? '',
+          category: raw.categoryId?._id || raw.categoryId || '',
+          images:   raw.imageUrl ? [raw.imageUrl] : [],
+          available: raw.isAvailable ?? true,
+          ingredientsList: (raw.ingredients || []).map(i => ({
+            _id: i._id,
+            tempId: null,
+            name: i.name || '',
+            name_en: i.name_en || '',
             isRemovable: i.isRemovable ?? true,
+            isAvailable: i.isAvailable ?? true,
+            sourceId: i.sourceId || null,
           })),
           addons: (raw.addons || []).map(a => ({
-            id: a._id || a.id || `ao-${Math.random()}`,
-            ...normI18n(a, 'name'),
+            _id: a._id,
+            tempId: null,
+            name: a.name || '',
+            name_en: a.name_en || '',
             price: a.price ?? 0,
+            isAvailable: a.isAvailable ?? true,
+            sourceId: a.sourceId || null,
           })),
           componentGroups: (raw.componentGroups || []).map(g => ({
-            id: g._id || g.id || `cg-${Math.random()}`,
-            ...normI18n(g, 'name'),
-            isRequired: g.isRequired ?? true,
+            _id: g._id,
+            tempId: null,
+            name: g.name || '',
+            name_en: g.name_en || '',
+            isRequired: g.isRequired ?? false,
+            isAvailable: g.isAvailable ?? true,
+            sourceId: g.sourceId || null,
             options: (g.options || []).map(o => ({
-              id: o._id || o.id || `cgo-${Math.random()}`,
-              ...normI18n(o, 'name'),
+              id: o._id || `cgo-${Math.random()}`,
+              name: o.name || '',
+              name_en: o.name_en || '',
               priceModifier: o.priceModifier ?? 0,
+              isDefault: o.isDefault ?? false,
+              sourceId: o.sourceId || null,
             })),
           })),
         });
       })
-      .catch(err => console.error('getDishDetail error:', err));
+      .catch(err => console.error('getAdminMenuItem error:', err));
   }, [id, isNew]);
 
-  // ── Auto-translate (batch, source → activeLang) ──────────────────────────────
+  // ── Auto-translate ────────────────────────────────────────────────────────────
   async function handleAutoTranslate() {
     if (activeLang === SOURCE_LANG) return;
     setTranslating(true);
     try {
-      // Build a flat ordered array of source strings
       const texts = [
         form[fieldFor('name',        SOURCE_LANG)],
         form[fieldFor('description', SOURCE_LANG)],
-        ...form.ingredientsList.map(i  => i[fieldFor('name', SOURCE_LANG)]),
-        ...form.addons.map(a           => a[fieldFor('name', SOURCE_LANG)]),
         ...form.componentGroups.flatMap(g => [
-          g[fieldFor('name', SOURCE_LANG)],
-          ...g.options.map(o => o[fieldFor('name', SOURCE_LANG)]),
+          g.name,
+          ...g.options.map(o => o.name),
         ]),
       ];
-
       const result = await translateText(texts, activeLang);
-      const tr     = result?.translations ?? [];
-      const tf     = base => fieldFor(base, activeLang);
+      const tr = result?.translations ?? [];
 
       setForm(prev => {
         let idx = 0;
         const nameT  = tr[idx++] ?? '';
         const descT  = tr[idx++] ?? '';
-        const ingTs  = prev.ingredientsList.map(() => tr[idx++] ?? '');
-        const addonTs = prev.addons.map(() => tr[idx++] ?? '');
         const groupTs = prev.componentGroups.map(g => ({
           name: tr[idx++] ?? '',
           optTs: g.options.map(() => tr[idx++] ?? ''),
         }));
-
+        const tf = base => fieldFor(base, activeLang);
         return {
           ...prev,
           [tf('name')]:        nameT,
           [tf('description')]: descT,
-          ingredientsList: prev.ingredientsList.map((ing, i) => ({
-            ...ing, [tf('name')]: ingTs[i],
-          })),
-          addons: prev.addons.map((a, i) => ({
-            ...a, [tf('name')]: addonTs[i],
-          })),
           componentGroups: prev.componentGroups.map((g, gi) => ({
             ...g,
-            [tf('name')]: groupTs[gi].name,
+            name_en: activeLang === 'en' ? groupTs[gi].name : g.name_en,
             options: g.options.map((o, oi) => ({
-              ...o, [tf('name')]: groupTs[gi].optTs[oi],
+              ...o,
+              name_en: activeLang === 'en' ? groupTs[gi].optTs[oi] : o.name_en,
             })),
           })),
         };
       });
     } catch (err) {
       console.error('Translate error:', err);
-      alert('Помилка перекладу. Перевірте з\'єднання та спробуйте ще раз.');
+      alert('Помилка перекладу.');
     } finally {
       setTranslating(false);
     }
   }
 
-  // ── Save ────────────────────────────────────────────────────────────────────
+  // ── Save ──────────────────────────────────────────────────────────────────────
   async function handleSave() {
     setSaving(true);
     try {
-      // Build payload; dynamically include all lang variants of name/description
       const payload = {
-        basePrice:       Number(form.price),
-        categoryId:      form.category,
-        isAvailable:     form.available,
-        ingredients:     form.ingredientsList,
-        addons:          form.addons,
-        componentGroups: form.componentGroups,
+        name:        form.name,
+        description: form.description,
+        price:       Number(form.price),
+        categoryId:  form.category,
+        isAvailable: form.available,
+        weight:      form.weight || null,
+        // Embedded arrays sent directly — no global creation
+        ingredients: form.ingredientsList.map(i => ({
+          ...(i._id ? { _id: i._id } : {}),
+          name:        i.name,
+          name_en:     i.name_en || '',
+          isRemovable: i.isRemovable,
+          isAvailable: i.isAvailable,
+          sourceId:    i.sourceId || null,
+        })),
+        addons: form.addons.map(a => ({
+          ...(a._id ? { _id: a._id } : {}),
+          name:        a.name,
+          name_en:     a.name_en || '',
+          price:       a.price,
+          isAvailable: a.isAvailable,
+          sourceId:    a.sourceId || null,
+        })),
+        componentGroups: form.componentGroups.map(g => ({
+          ...(g._id ? { _id: g._id } : {}),
+          name:        g.name,
+          name_en:     g.name_en || '',
+          isRequired:  g.isRequired,
+          isAvailable: g.isAvailable,
+          sourceId:    g.sourceId || null,
+          options: g.options.map(o => ({
+            ...(o.id && !o.id.startsWith('cgo-') ? { _id: o.id } : {}),
+            name:          o.name,
+            name_en:       o.name_en || '',
+            priceModifier: o.priceModifier || 0,
+            isDefault:     o.isDefault || false,
+            sourceId:      o.sourceId || null,
+          })),
+        })),
       };
-      SUPPORTED_LANGS.forEach(l => {
-        payload[fieldFor('name',        l.code)] = form[fieldFor('name',        l.code)] || '';
-        payload[fieldFor('description', l.code)] = form[fieldFor('description', l.code)] || '';
-      });
-
       if (isNew) await createMenuItem(payload);
       else       await updateMenuItem(id, payload);
       navigate('/staff/menu');
@@ -212,46 +308,135 @@ export default function DishEdit() {
     }
   }
 
-  // ── Form helpers ────────────────────────────────────────────────────────────
-  function set(field, val) {
-    setForm(prev => ({ ...prev, [field]: val }));
+  // ── Form helpers ──────────────────────────────────────────────────────────────
+  function set(field, val) { setForm(prev => ({ ...prev, [field]: val })); }
+
+  // Ingredient picker — copies template data into embedded subdoc
+  const [ingSearch, setIngSearch] = useState([]);
+  function handleIngSearch(q) {
+    const lower = q.toLowerCase();
+    const ids = new Set(form.ingredientsList.map(i => String(i.sourceId || i._id)));
+    setIngSearch(ingPool.filter(i => i.name.toLowerCase().includes(lower) && !ids.has(String(i._id))));
+  }
+  function addExistingIng(item) {
+    const ids = new Set(form.ingredientsList.map(i => String(i.sourceId || i._id)));
+    if (ids.has(String(item._id))) return;
+    set('ingredientsList', [...form.ingredientsList, {
+      _id: null, tempId: `ing-${Date.now()}-${Math.random()}`,
+      name: item.name,
+      name_en: item.translations?.en?.name?.value || '',
+      isRemovable: item.isRemovable ?? true,
+      isAvailable: true,
+      sourceId: item._id,
+    }]);
+  }
+  function addNewIng(name) {
+    if (!name) return;
+    set('ingredientsList', [...form.ingredientsList, newIngredientEmbed(name)]);
+  }
+  function removeIng(key) {
+    set('ingredientsList', form.ingredientsList.filter(i => (i._id || i.tempId) !== key));
+  }
+  function updateIngField(key, field, val) {
+    set('ingredientsList', form.ingredientsList.map(i => (i._id || i.tempId) === key ? { ...i, [field]: val } : i));
   }
 
-  // Ingredients
-  const addIngredient = () => set('ingredientsList', [...form.ingredientsList, newIngredient()]);
-  const updateIngredient = (iid, field, val) =>
-    set('ingredientsList', form.ingredientsList.map(i => i.id === iid ? { ...i, [field]: val } : i));
-  const removeIngredient = iid =>
-    set('ingredientsList', form.ingredientsList.filter(i => i.id !== iid));
+  // Addon picker — copies template data into embedded subdoc
+  const [aoSearch, setAoSearch] = useState([]);
+  function handleAoSearch(q) {
+    const lower = q.toLowerCase();
+    const ids = new Set(form.addons.map(a => String(a.sourceId || a._id)));
+    setAoSearch(addPool.filter(a => a.name.toLowerCase().includes(lower) && !ids.has(String(a._id))));
+  }
+  function addExistingAo(item) {
+    const ids = new Set(form.addons.map(a => String(a.sourceId || a._id)));
+    if (ids.has(String(item._id))) return;
+    set('addons', [...form.addons, {
+      _id: null, tempId: `ao-${Date.now()}-${Math.random()}`,
+      name: item.name,
+      name_en: item.translations?.en?.name?.value || '',
+      price: item.price ?? 0,
+      isAvailable: true,
+      sourceId: item._id,
+    }]);
+  }
+  function addNewAo(name) {
+    if (!name) return;
+    set('addons', [...form.addons, newAddonEmbed(name)]);
+  }
+  function removeAo(key) {
+    set('addons', form.addons.filter(a => (a._id || a.tempId) !== key));
+  }
+  function updateAoField(key, field, val) {
+    set('addons', form.addons.map(a => (a._id || a.tempId) === key ? { ...a, [field]: val } : a));
+  }
 
-  // Add-ons
-  const addAddon = () => set('addons', [...form.addons, newAddon()]);
-  const updateAddon = (aid, field, val) =>
-    set('addons', form.addons.map(a => a.id === aid ? { ...a, [field]: val } : a));
-  const removeAddon = aid =>
-    set('addons', form.addons.filter(a => a.id !== aid));
-
-  // Component groups
-  const addGroup = () => set('componentGroups', [...form.componentGroups, newComponentGroup()]);
-  const updateGroup = (gid, field, val) =>
-    set('componentGroups', form.componentGroups.map(g => g.id === gid ? { ...g, [field]: val } : g));
-  const removeGroup = gid =>
-    set('componentGroups', form.componentGroups.filter(g => g.id !== gid));
-  const addGroupOption = gid =>
+  // ComponentGroup picker — copies template data (deep embed of options)
+  const [cgSearch, setCgSearch] = useState([]);
+  function handleCgSearch(q) {
+    const lower = q.toLowerCase();
+    const ids = new Set(form.componentGroups.map(g => String(g.sourceId || g._id)));
+    setCgSearch(cgPool.filter(g => g.name.toLowerCase().includes(lower) && !ids.has(String(g._id))));
+  }
+  function addExistingCg(item) {
+    const ids = new Set(form.componentGroups.map(g => String(g.sourceId || g._id)));
+    if (ids.has(String(item._id))) return;
+    set('componentGroups', [...form.componentGroups, {
+      _id: null, tempId: `cg-${Date.now()}-${Math.random()}`,
+      name: item.name,
+      name_en: item.translations?.en?.name?.value || '',
+      isRequired: item.isRequired ?? false,
+      isAvailable: true,
+      sourceId: item._id,
+      options: (item.options || []).map(o => ({
+        id: `cgo-${Date.now()}-${Math.random()}`,
+        name: o.name || '',
+        name_en: o.translations?.en?.name?.value || '',
+        priceModifier: o.priceModifier ?? 0,
+        isDefault: o.isDefault ?? false,
+        sourceId: o._id || null,
+      })),
+    }]);
+  }
+  function addNewCg(name) {
+    if (!name) return;
+    const ng = newCgEmbed(name);
+    set('componentGroups', [...form.componentGroups, ng]);
+  }
+  function removeCg(key) {
+    set('componentGroups', form.componentGroups.filter(g => (g._id || g.tempId) !== key));
+  }
+  function updateCgField(key, field, val) {
+    set('componentGroups', form.componentGroups.map(g => (g._id || g.tempId) === key ? { ...g, [field]: val } : g));
+  }
+  function addCgOption(key) {
     set('componentGroups', form.componentGroups.map(g =>
-      g.id === gid ? { ...g, options: [...g.options, newGroupOption()] } : g));
-  const updateGroupOption = (gid, oid, field, val) =>
+      (g._id || g.tempId) === key ? { ...g, options: [...g.options, newCgOption()] } : g));
+  }
+  function updateCgOption(key, oid, field, val) {
     set('componentGroups', form.componentGroups.map(g =>
-      g.id === gid
+      (g._id || g.tempId) === key
         ? { ...g, options: g.options.map(o => o.id === oid ? { ...o, [field]: val } : o) }
         : g));
-  const removeGroupOption = (gid, oid) =>
+  }
+  function removeCgOption(key, oid) {
     set('componentGroups', form.componentGroups.map(g =>
-      g.id === gid ? { ...g, options: g.options.filter(o => o.id !== oid) } : g));
+      (g._id || g.tempId) === key ? { ...g, options: g.options.filter(o => o.id !== oid) } : g));
+  }
 
-  const catOptions = categories.map(c => ({ value: c.id, label: local(c, 'name') }));
+  const catOptions = categories.map(c => ({
+    value: c.id,
+    label: local(c, 'name'),
+    icon: c.color
+      ? <span style={{ width: 10, height: 10, borderRadius: '50%', background: c.color, display: 'inline-block', flexShrink: 0 }} />
+      : null,
+  }));
 
-  // ── Render ──────────────────────────────────────────────────────────────────
+  // Which name field to show for the active lang
+  const nameLangField  = activeLang === SOURCE_LANG ? 'name'        : 'name_en';
+  const descLangField  = activeLang === SOURCE_LANG ? 'description' : 'description_en';
+
+  // ── Render ────────────────────────────────────────────────────────────────────
   return (
     <StaffShell
       title={isNew ? t('titleAdd') : t('titleEdit')}
@@ -259,14 +444,14 @@ export default function DishEdit() {
       rightActions={
         <div className={styles.headerActions}>
           <SecondaryButton label={t('cancel')} onClick={() => navigate('/staff/menu')} className={styles.cancelBtn} />
-          <PrimaryButton   label={saving ? '…' : t('save')}  onClick={handleSave} disabled={saving} className={styles.saveBtn} />
+          <PrimaryButton   label={saving ? '…' : t('save')} onClick={handleSave} disabled={saving} className={styles.saveBtn} />
         </div>
       }
     >
       <div className={styles.layout}>
         <div className={styles.formCol}>
 
-          {/* ── Language bar (sticky, affects all sections) ── */}
+          {/* ── Language bar ── */}
           <div className={styles.langBar}>
             <LangTabs
               langs={SUPPORTED_LANGS}
@@ -281,20 +466,18 @@ export default function DishEdit() {
           <div className={styles.section}>
             <p className={styles.sectionTitle}>{t('mainInfo')}</p>
             <div className={styles.basicGrid}>
-              {/* Name */}
               <div className={styles.fieldWrap}>
                 <InputField
                   label={t('name')}
                   placeholder="—"
-                  value={form[lf('name')]}
-                  onChange={e => set(lf('name'), e.target.value)}
+                  value={form[nameLangField]}
+                  onChange={e => set(nameLangField, e.target.value)}
                 />
-                {srcHint('name') && (
-                  <span className={styles.srcHint}>{srcLang.flag} {srcHint('name')}</span>
+                {activeLang !== SOURCE_LANG && form.name && (
+                  <span className={styles.srcHint}>{srcLang.flag} {form.name}</span>
                 )}
               </div>
 
-              {/* Price */}
               <InputField
                 label={t('price')}
                 placeholder={t('pricePlaceholder')}
@@ -303,7 +486,13 @@ export default function DishEdit() {
                 onChange={e => set('price', e.target.value)}
               />
 
-              {/* Category */}
+              <InputField
+                label={t('weight')}
+                placeholder={t('weightPlaceholder')}
+                value={form.weight}
+                onChange={e => set('weight', e.target.value)}
+              />
+
               <Dropdown
                 label={t('category')}
                 options={catOptions}
@@ -312,17 +501,16 @@ export default function DishEdit() {
                 placeholder={t('selectCategory')}
               />
 
-              {/* Description — full row */}
               <div className={`${styles.fieldWrap} ${styles.spanFull}`}>
                 <TextareaField
                   label={t('desc')}
                   placeholder="—"
-                  value={form[lf('description')]}
-                  onChange={e => set(lf('description'), e.target.value)}
+                  value={form[descLangField]}
+                  onChange={e => set(descLangField, e.target.value)}
                 />
-                {srcHint('description') && (
+                {activeLang !== SOURCE_LANG && form.description && (
                   <span className={`${styles.srcHint} ${styles.srcHintBlock}`}>
-                    {srcLang.flag} {srcHint('description')}
+                    {srcLang.flag} {form.description}
                   </span>
                 )}
               </div>
@@ -333,153 +521,161 @@ export default function DishEdit() {
           <div className={styles.section}>
             <div className={styles.sectionHeader}>
               <p className={styles.sectionTitle}>{t('ingredientsSection')}</p>
-              <button className={styles.addRowBtn} onClick={addIngredient}>
-                <MdAdd /> {t('addIngredient')}
-              </button>
             </div>
+            <SearchPicker
+              placeholder={t('searchIngredients')}
+              results={ingSearch}
+              onSearch={handleIngSearch}
+              onSelect={addExistingIng}
+              onCreate={addNewIng}
+              createLabel={t('createNew')}
+            />
             {form.ingredientsList.length === 0 && (
               <p className={styles.emptyHint}>{t('noIngredients')}</p>
             )}
-            {form.ingredientsList.map(ing => (
-              <div key={ing.id} className={styles.listRow}>
-                <div className={`${styles.fieldWrap} ${styles.rowName}`}>
-                  <InputField
-                    label={t('name')}
-                    placeholder="—"
-                    value={ing[lf('name')]}
-                    onChange={e => updateIngredient(ing.id, lf('name'), e.target.value)}
-                  />
-                  {srcHint('name', ing) && (
-                    <span className={styles.srcHint}>{srcLang.flag} {srcHint('name', ing)}</span>
-                  )}
+            {form.ingredientsList.map(ing => {
+              const key = ing._id || ing.tempId;
+              const displayName = activeLang === 'en' && ing.name_en ? ing.name_en : ing.name;
+              return (
+                <div key={key} className={styles.listRow}>
+                  <span className={`${styles.rowName} ${styles.ingName}`}>{displayName}</span>
+                  <label className={styles.checkLabel}>
+                    <input
+                      type="checkbox"
+                      checked={ing.isRemovable}
+                      onChange={e => updateIngField(key, 'isRemovable', e.target.checked)}
+                    />
+                    {t('removable')}
+                  </label>
+                  <button className={styles.deleteRowBtn} onClick={() => removeIng(key)}>
+                    <MdDelete />
+                  </button>
                 </div>
-                <label className={styles.checkLabel}>
-                  <input
-                    type="checkbox"
-                    checked={ing.isRemovable}
-                    onChange={e => updateIngredient(ing.id, 'isRemovable', e.target.checked)}
-                  />
-                  {t('removable')}
-                </label>
-                <button className={styles.deleteRowBtn} onClick={() => removeIngredient(ing.id)}>
-                  <MdDelete />
-                </button>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* ── Add-ons ── */}
           <div className={styles.section}>
             <div className={styles.sectionHeader}>
               <p className={styles.sectionTitle}>{t('addonsSection')}</p>
-              <button className={styles.addRowBtn} onClick={addAddon}>
-                <MdAdd /> {t('addAddon')}
-              </button>
             </div>
+            <SearchPicker
+              placeholder={t('searchAddons')}
+              results={aoSearch}
+              onSearch={handleAoSearch}
+              onSelect={addExistingAo}
+              onCreate={addNewAo}
+              createLabel={t('createNew')}
+            />
             {form.addons.length === 0 && (
               <p className={styles.emptyHint}>{t('noAddons')}</p>
             )}
-            {form.addons.map(ao => (
-              <div key={ao.id} className={styles.listRow}>
-                <div className={`${styles.fieldWrap} ${styles.rowName}`}>
-                  <InputField
-                    label={t('name')}
-                    placeholder="—"
-                    value={ao[lf('name')]}
-                    onChange={e => updateAddon(ao.id, lf('name'), e.target.value)}
-                  />
-                  {srcHint('name', ao) && (
-                    <span className={styles.srcHint}>{srcLang.flag} {srcHint('name', ao)}</span>
-                  )}
+            {form.addons.map(ao => {
+              const key = ao._id || ao.tempId;
+              const displayName = activeLang === 'en' && ao.name_en ? ao.name_en : ao.name;
+              return (
+                <div key={key} className={styles.listRow}>
+                  <span className={`${styles.rowName} ${styles.ingName}`}>{displayName}</span>
+                  <div className={styles.addonPrice}>
+                    <InputField
+                      label={t('addonPrice')}
+                      type="number"
+                      placeholder="0"
+                      value={ao.price}
+                      onChange={e => updateAoField(key, 'price', Number(e.target.value))}
+                    />
+                  </div>
+                  <button className={styles.deleteRowBtn} onClick={() => removeAo(key)}>
+                    <MdDelete />
+                  </button>
                 </div>
-                <div className={styles.addonPrice}>
-                  <InputField
-                    label={t('addonPrice')}
-                    type="number"
-                    placeholder="0"
-                    value={ao.price}
-                    onChange={e => updateAddon(ao.id, 'price', Number(e.target.value))}
-                  />
-                </div>
-                <button className={styles.deleteRowBtn} onClick={() => removeAddon(ao.id)}>
-                  <MdDelete />
-                </button>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* ── Component groups ── */}
           <div className={styles.section}>
             <div className={styles.sectionHeader}>
               <p className={styles.sectionTitle}>{t('componentGroupsSection')}</p>
-              <button className={styles.addRowBtn} onClick={addGroup}>
+              <button className={styles.addRowBtn} onClick={() => addNewCg('')}>
                 <MdAdd /> {t('addGroup')}
               </button>
             </div>
+            <SearchPicker
+              placeholder={t('searchComponentGroups')}
+              results={cgSearch}
+              onSearch={handleCgSearch}
+              onSelect={addExistingCg}
+              onCreate={addNewCg}
+              createLabel={t('createNew')}
+            />
             {form.componentGroups.length === 0 && (
               <p className={styles.emptyHint}>{t('noGroups')}</p>
             )}
-            {form.componentGroups.map(group => (
-              <div key={group.id} className={styles.groupBlock}>
-                {/* Group header */}
-                <div className={styles.groupBlockHeader}>
-                  <div className={`${styles.fieldWrap} ${styles.rowName}`}>
-                    <InputField
-                      label={t('name')}
-                      placeholder="—"
-                      value={group[lf('name')]}
-                      onChange={e => updateGroup(group.id, lf('name'), e.target.value)}
-                    />
-                    {srcHint('name', group) && (
-                      <span className={styles.srcHint}>{srcLang.flag} {srcHint('name', group)}</span>
-                    )}
-                  </div>
-                  <label className={styles.checkLabel}>
-                    <input
-                      type="checkbox"
-                      checked={group.isRequired}
-                      onChange={e => updateGroup(group.id, 'isRequired', e.target.checked)}
-                    />
-                    {t('required')}
-                  </label>
-                  <button className={styles.deleteRowBtn} onClick={() => removeGroup(group.id)}>
-                    <MdDelete />
-                  </button>
-                </div>
-
-                {/* Group options */}
-                <div className={styles.groupOptions}>
-                  {group.options.map(opt => (
-                    <div key={opt.id} className={styles.optionRow}>
-                      <div className={styles.fieldWrap}>
-                        <InputField
-                          label={t('name')}
-                          placeholder="—"
-                          value={opt[lf('name')]}
-                          onChange={e => updateGroupOption(group.id, opt.id, lf('name'), e.target.value)}
-                        />
-                        {srcHint('name', opt) && (
-                          <span className={styles.srcHint}>{srcLang.flag} {srcHint('name', opt)}</span>
-                        )}
-                      </div>
+            {form.componentGroups.map(group => {
+              const key = group._id || group.tempId;
+              const groupDisplayName = activeLang === 'en' && group.name_en ? group.name_en : group.name;
+              return (
+                <div key={key} className={styles.groupBlock}>
+                  <div className={styles.groupBlockHeader}>
+                    <div className={`${styles.fieldWrap} ${styles.rowName}`}>
                       <InputField
-                        label={t('priceModifier')}
-                        type="number"
-                        placeholder="0"
-                        value={opt.priceModifier}
-                        onChange={e => updateGroupOption(group.id, opt.id, 'priceModifier', Number(e.target.value))}
+                        label={t('name')}
+                        placeholder="—"
+                        value={activeLang === 'en' ? group.name_en : group.name}
+                        onChange={e => updateCgField(key, activeLang === 'en' ? 'name_en' : 'name', e.target.value)}
                       />
-                      <button className={styles.deleteRowBtn} onClick={() => removeGroupOption(group.id, opt.id)}>
-                        <MdDelete />
-                      </button>
+                      {activeLang !== SOURCE_LANG && group.name && (
+                        <span className={styles.srcHint}>{srcLang.flag} {group.name}</span>
+                      )}
                     </div>
-                  ))}
-                  <button className={styles.addOptionBtn} onClick={() => addGroupOption(group.id)}>
-                    <MdAdd /> {t('addOption')}
-                  </button>
+                    <label className={styles.checkLabel}>
+                      <input
+                        type="checkbox"
+                        checked={group.isRequired}
+                        onChange={e => updateCgField(key, 'isRequired', e.target.checked)}
+                      />
+                      {t('required')}
+                    </label>
+                    <button className={styles.deleteRowBtn} onClick={() => removeCg(key)}>
+                      <MdDelete />
+                    </button>
+                  </div>
+
+                  <div className={styles.groupOptions}>
+                    {group.options.map(opt => (
+                      <div key={opt.id} className={styles.optionRow}>
+                        <div className={styles.fieldWrap}>
+                          <InputField
+                            label={t('name')}
+                            placeholder="—"
+                            value={activeLang === 'en' ? (opt.name_en || '') : opt.name}
+                            onChange={e => updateCgOption(key, opt.id, activeLang === 'en' ? 'name_en' : 'name', e.target.value)}
+                          />
+                          {activeLang !== SOURCE_LANG && opt.name && (
+                            <span className={styles.srcHint}>{srcLang.flag} {opt.name}</span>
+                          )}
+                        </div>
+                        <InputField
+                          label={t('priceModifier')}
+                          type="number"
+                          placeholder="0"
+                          value={opt.priceModifier}
+                          onChange={e => updateCgOption(key, opt.id, 'priceModifier', Number(e.target.value))}
+                        />
+                        <button className={styles.deleteRowBtn} onClick={() => removeCgOption(key, opt.id)}>
+                          <MdDelete />
+                        </button>
+                      </div>
+                    ))}
+                    <button className={styles.addOptionBtn} onClick={() => addCgOption(key)}>
+                      <MdAdd /> {t('addOption')}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* ── Photos ── */}
@@ -489,7 +685,6 @@ export default function DishEdit() {
           </div>
         </div>
 
-        {/* ── Preview column ── */}
         <div className={styles.previewCol}>
           <DishPreview dish={form} available={form.available} />
         </div>

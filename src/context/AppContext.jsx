@@ -548,11 +548,21 @@ export function AppProvider({ children }) {
   // ─── submit order ─────────────────────────────────────────────────────────
   //
   // Payload shape required by POST /orders:
-  //   { tableId, sessionToken, servingGroups: [{ name?, sortOrder, items: [{
-  //       menuItemId, quantity, excludedIngredients, addOns: [{ addOnId, quantity }]
-  //   }] }] }
+  //   {
+  //     tableId,
+  //     sessionToken,
+  //     servingGroups: [{ name, sortOrder }],
+  //     items: [{
+  //       menuItemId,
+  //       qty,
+  //       servingGroupId, // matches servingGroups[].name
+  //       excludedIngredients,
+  //       addons: [{ addOnId, quantity }],
+  //       componentGroupChoices: [{ groupId, optionId }],
+  //       comment,
+  //     }]
+  //   }
   //
-  // Items are nested INSIDE serving groups — not a separate top-level array.
   // After success the function normalises the response, sets currentOrder, and
   // persists orderId to localStorage — so the FAB appears immediately.
 
@@ -560,55 +570,48 @@ export function AppProvider({ children }) {
     const currentTableId      = tableId      || localStorage.getItem('tableId');
     const currentSessionToken = sessionToken || localStorage.getItem('sessionToken');
 
-    // Group cart items by their servingGroupId
-    const groupItemsMap = new Map();
-    for (const g of servingGroups) {
-      groupItemsMap.set(g.id, { meta: g, items: [] });
-    }
-    for (const item of cart) {
-      const gid = item.groupId || DEFAULT_GROUP_ID;
-      if (!groupItemsMap.has(gid)) {
-        groupItemsMap.set(gid, {
-          meta: { id: gid, name: 'Основна група', name_en: 'Main group' },
-          items: [],
-        });
-      }
-      groupItemsMap.get(gid).items.push(item);
-    }
-
-    // Build the API servingGroups array — skip empty groups
+    // Build named serving groups (default/main group is implicit on backend)
+    const servingGroupNameById = {};
     const apiServingGroups = [];
     let sortOrder = 1;
-    for (const [gid, { meta, items: groupItems }] of groupItemsMap) {
-      if (groupItems.length === 0) continue;
-      const sg = {
-        sortOrder: sortOrder++,
-        items: groupItems.map(item => ({
-          menuItemId: item.id,
-          quantity:   item.quantity,
-          excludedIngredients: (item.excludedIngredients || []).map(i =>
-            typeof i === 'object' ? i.id : i
-          ),
-          addOns: (item.selectedAddons || []).map(a => ({
-            addOnId:  typeof a === 'object' ? a.id : a,
-            quantity: 1,
-          })),
-        })),
-      };
-      // Named serving groups get a name; the default "main" group does not.
-      // Generic (auto-named) groups use a stable English fallback for storage.
-      if (gid !== DEFAULT_GROUP_ID) {
-        sg.name = meta.isGeneric
-          ? `Serving group ${meta.genericIndex}`
-          : (meta.name || `Serving group ${meta.genericIndex || 1}`);
-      }
-      apiServingGroups.push(sg);
+    for (const g of servingGroups) {
+      if (!g || g.id === DEFAULT_GROUP_ID) continue;
+      const name = g.isGeneric
+        ? `Serving group ${g.genericIndex}`
+        : (g.name || `Serving group ${g.genericIndex || sortOrder}`);
+      servingGroupNameById[g.id] = name;
+      apiServingGroups.push({ name, sortOrder: sortOrder++ });
     }
+
+    // Flatten cart items for the new order API
+    const apiItems = cart.map(item => {
+      const groupChoices = Object.entries(item.componentGroupSelections || {}).map(([groupId, optionId]) => ({
+        groupId,
+        optionId,
+      }));
+      return {
+        menuItemId: item.id,
+        qty: item.quantity,
+        servingGroupId: item.groupId && item.groupId !== DEFAULT_GROUP_ID
+          ? servingGroupNameById[item.groupId]
+          : undefined,
+        excludedIngredients: (item.excludedIngredients || []).map(i =>
+          typeof i === 'object' ? i.id : i
+        ),
+        addons: (item.selectedAddons || []).map(a => ({
+          addOnId:  typeof a === 'object' ? a.id : a,
+          quantity: 1,
+        })),
+        componentGroupChoices: groupChoices,
+        comment: item.comment || '',
+      };
+    });
 
     const payload = {
       tableId:      currentTableId,
       sessionToken: currentSessionToken,
       servingGroups: apiServingGroups,
+      items: apiItems,
     };
 
     try {

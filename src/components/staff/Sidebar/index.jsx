@@ -5,27 +5,35 @@ import Logo from '../../Logo';
 import { useAuth } from '../../../context/AuthContext';
 import styles from './sidebar.module.css';
 
-import { MdMap, MdLocalFireDepartment, MdRestaurant, MdBarChart, MdSettings, MdReceiptLong } from "react-icons/md";
+import {
+  MdMap, MdLocalFireDepartment, MdRestaurant, MdBarChart, MdSettings,
+  MdReceiptLong, MdTune, MdPeople, MdRateReview, MdStorefront,
+} from 'react-icons/md';
 
 const ALL_NAV = {
-  map:       { path: '/staff/map',       icon: <MdMap />,               labelKey: 'nav_tableMap' },
-  orders:    { path: '/staff/orders',    icon: <MdReceiptLong />,        labelKey: 'nav_orders' },
-  cooking:   { path: '/staff/cooking',   icon: <MdLocalFireDepartment />, labelKey: 'nav_cooking' },
-  menu:      { path: '/staff/menu',      icon: <MdRestaurant />,        labelKey: 'nav_menu' },
-  analytics: { path: '/staff/analytics', icon: <MdBarChart />,          labelKey: 'nav_analytics' },
-  settings:  { path: '/staff/settings',  icon: <MdSettings />,          labelKey: 'nav_settings' },
+  map:        { path: '/staff/map',                 icon: <MdMap />,                labelKey: 'nav_tableMap' },
+  orders:     { path: '/staff/orders',              icon: <MdReceiptLong />,         labelKey: 'nav_orders' },
+  cooking:    { path: '/staff/cooking',             icon: <MdLocalFireDepartment />, labelKey: 'nav_cooking' },
+  menu:       { path: '/staff/menu',                icon: <MdRestaurant />,          labelKey: 'nav_menu' },
+  extras:     { path: '/staff/extras',              icon: <MdTune />,                labelKey: 'nav_extras' },
+  analytics:  { path: '/staff/analytics',           icon: <MdBarChart />,            labelKey: 'nav_analytics' },
+  staff:      { path: '/staff/staff',               icon: <MdPeople />,              labelKey: 'nav_staff' },
+  reviews:    { path: '/staff/reviews',             icon: <MdRateReview />,          labelKey: 'nav_reviews' },
+  restaurant: { path: '/staff/restaurant-settings', icon: <MdStorefront />,          labelKey: 'nav_restaurant' },
 };
 
 const NAV_BY_ROLE = {
-  admin:  ['map', 'orders', 'cooking', 'menu', 'analytics', 'settings'],
-  waiter: ['map', 'orders'],
-  cook:   ['cooking'],
+  admin:       ['map', 'orders', 'cooking', 'menu', 'extras', 'analytics', 'staff', 'reviews', 'restaurant'],
+  waiter:      ['map', 'orders'],
+  cook:        ['cooking'],
+  waiter_cook: ['map', 'orders', 'cooking'],
 };
 
 function getRoleName(role, t) {
-  if (role === 'admin')  return t('role_admin');
-  if (role === 'waiter') return t('role_waiter');
-  if (role === 'cook')   return t('role_cook');
+  if (role === 'admin')       return t('role_admin');
+  if (role === 'waiter')      return t('role_waiter');
+  if (role === 'cook')        return t('role_cook');
+  if (role === 'waiter_cook') return t('role_waiter_cook');
   return role ?? '';
 }
 
@@ -41,7 +49,7 @@ export default function Sidebar({ isOpen = false, onClose = () => {} }) {
     : '?';
   const roleName = getRoleName(role, t);
 
-  const navKeys = NAV_BY_ROLE[role] ?? NAV_BY_ROLE.waiter;
+  const navKeys  = NAV_BY_ROLE[role] ?? NAV_BY_ROLE.waiter;
   const navItems = navKeys.map(k => ALL_NAV[k]);
 
   function goTo(path) {

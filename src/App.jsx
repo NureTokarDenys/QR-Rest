@@ -27,10 +27,15 @@ import WaiterOrders from './pages/staff/WaiterOrders';
 import Cooking from './pages/staff/Cooking';
 import OrderDetail from './pages/staff/OrderDetail';
 import MenuManagement from './pages/staff/MenuManagement';
+import CategoryEdit from './pages/staff/CategoryEdit';
 import DishEdit from './pages/staff/DishEdit';
+import ExtrasManagement from './pages/staff/ExtrasManagement';
 import PdfGenerator from './pages/staff/PdfGenerator';
 import Analytics from './pages/staff/Analytics';
 import StaffSettings from './pages/staff/StaffSettings';
+import RestaurantSettings from './pages/staff/RestaurantSettings';
+import StaffManagement from './pages/staff/StaffManagement';
+import ReviewsManagement from './pages/staff/ReviewsManagement';
 import LandingPage   from './pages/onboarding/Landing';
 import OnboardingPage from './pages/onboarding/Onboarding';
 import CheckEmailPage from './pages/onboarding/CheckEmail';
@@ -100,22 +105,28 @@ export default function App() {
               <Route path="/staff" element={<Navigate to="/staff/map" replace />} />
 
               <Route path="/staff/map" element={
-                <Guard roles={['admin', 'waiter']}><TableMap /></Guard>
+                <Guard roles={['admin', 'waiter', 'waiter_cook']}><TableMap /></Guard>
               } />
               <Route path="/staff/table/:id" element={
-                <Guard roles={['admin', 'waiter']}><TableDetail /></Guard>
+                <Guard roles={['admin', 'waiter', 'waiter_cook']}><TableDetail /></Guard>
               } />
               <Route path="/staff/orders" element={
-                <Guard roles={['admin', 'waiter']}><WaiterOrders /></Guard>
+                <Guard roles={['admin', 'waiter', 'waiter_cook']}><WaiterOrders /></Guard>
               } />
               <Route path="/staff/cooking" element={
-                <Guard roles={['admin', 'cook']}><Cooking /></Guard>
+                <Guard roles={['admin', 'cook', 'waiter_cook']}><Cooking /></Guard>
               } />
               <Route path="/staff/order/:id" element={
-                <Guard roles={['admin', 'waiter', 'cook']}><OrderDetail /></Guard>
+                <Guard roles={['admin', 'waiter', 'cook', 'waiter_cook']}><OrderDetail /></Guard>
               } />
               <Route path="/staff/menu" element={
                 <Guard roles={['admin']}><MenuManagement /></Guard>
+              } />
+              <Route path="/staff/menu/category/new" element={
+                <Guard roles={['admin']}><CategoryEdit /></Guard>
+              } />
+              <Route path="/staff/menu/category/:id" element={
+                <Guard roles={['admin']}><CategoryEdit /></Guard>
               } />
               <Route path="/staff/menu/dish/new" element={
                 <Guard roles={['admin']}><DishEdit /></Guard>
@@ -126,11 +137,23 @@ export default function App() {
               <Route path="/staff/menu/pdf" element={
                 <Guard roles={['admin']}><PdfGenerator /></Guard>
               } />
+              <Route path="/staff/extras" element={
+                <Guard roles={['admin']}><ExtrasManagement /></Guard>
+              } />
               <Route path="/staff/analytics" element={
                 <Guard roles={['admin']}><Analytics /></Guard>
               } />
               <Route path="/staff/settings" element={
                 <Guard roles={['admin', 'waiter', 'cook']}><StaffSettings /></Guard>
+              } />
+              <Route path="/staff/restaurant-settings" element={
+                <Guard roles={['admin']}><RestaurantSettings /></Guard>
+              } />
+              <Route path="/staff/staff" element={
+                <Guard roles={['admin']}><StaffManagement /></Guard>
+              } />
+              <Route path="/staff/reviews" element={
+                <Guard roles={['admin']}><ReviewsManagement /></Guard>
               } />
             </Routes>
           </ClientToastProvider>

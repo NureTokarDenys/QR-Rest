@@ -16,5 +16,10 @@
   "waiting": "Очікує",
   "order_view": "По замовленнях",
   "table_view": "По столах",
-  "mark_ready": "Позначити готовими"
+  "mark_ready": "Позначити готовими",
+  "blocked_advance": "Спочатку має просунутися попередня група",
+  "confirm_backward_title": "Повернути статус?",
+  "confirm_backward_sub": "Це поверне групу з «{{from}}» до «{{to}}». Ви впевнені?",
+  "cancel": "Скасувати",
+  "confirm": "Повернути"
 }

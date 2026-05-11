@@ -1,0 +1,19 @@
+{
+  "title": "Reviews",
+  "tabRestaurant": "Restaurant",
+  "tabDish": "Dishes",
+
+  "filterByDish": "Filter by dish",
+  "allDishes": "All dishes",
+
+  "noReviews": "No reviews yet",
+  "loading": "Loading…",
+
+  "anonymous": "Anonymous",
+  "dish": "Dish",
+  "date": "Date",
+
+  "page": "Page {{page}} of {{pages}}",
+  "prevPage": "← Previous",
+  "nextPage": "Next →"
+}

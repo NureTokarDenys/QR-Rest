@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { SOURCE_LANG, fieldFor } from '../../../i18n/langs';
 import StaffShell from '../../../components/staff/StaffShell';
 import MenuCategoryList from '../../../components/staff/MenuCategoryList';
 import MenuDishRow from '../../../components/staff/MenuDishRow';
@@ -31,13 +30,13 @@ function normaliseApiCategory(cat) {
     name_en: cat.name_en || cat.name,
     count: cat.itemCount ?? (cat.items?.length) ?? 0,
     image: cat.image || null,
+    color: cat.color || null,
   };
 }
 
 export default function MenuManagement() {
   const navigate = useNavigate();
   const { t } = useTranslation('menuManagement');
-  const { i18n } = useTranslation();
   const [selectedCat, setSelectedCat] = useState('all');
   const [query, setQuery] = useState('');
   const [dishes, setDishes] = useState([]);
@@ -84,10 +83,6 @@ export default function MenuManagement() {
     }
   }
 
-  function handleRename(id, newName) {
-    const field = fieldFor('name', i18n.language);
-    setCats(prev => prev.map(c => c.id === id ? { ...c, [field]: newName } : c));
-  }
 
   return (
     <StaffShell
@@ -104,8 +99,7 @@ export default function MenuManagement() {
           categories={cats}
           selected={selectedCat}
           onSelect={setSelectedCat}
-          onAdd={() => {}}
-          onRename={handleRename}
+          onAdd={() => navigate('/staff/menu/category/new')}
         />
 
         <div className={styles.right}>

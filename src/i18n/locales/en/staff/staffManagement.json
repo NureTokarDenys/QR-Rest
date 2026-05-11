@@ -1,0 +1,45 @@
+{
+  "title": "Staff",
+  "addStaff": "Add Staff",
+
+  "name": "Name",
+  "email": "Email",
+  "role": "Role",
+  "status": "Status",
+  "actions": "Actions",
+  "noStaff": "No staff members found",
+
+  "active": "Active",
+  "inactive": "Inactive",
+
+  "role_admin": "Administrator",
+  "role_waiter": "Waiter",
+  "role_cook": "Cook",
+  "role_waiter_cook": "Waiter & Cook",
+
+  "deactivate": "Deactivate",
+  "activate": "Activate",
+  "resetPassword": "Reset Password",
+
+  "addTitle": "New Staff Member",
+  "namePlaceholder": "Full name",
+  "emailPlaceholder": "email@example.com",
+  "create": "Create",
+  "creating": "Creating…",
+
+  "tempPasswordTitle": "Account Created",
+  "tempPasswordText": "Temporary login password. Save it — it won't be shown again:",
+  "close": "Close",
+
+  "resetPasswordTitle": "New Temporary Password",
+  "resetPasswordText": "Password has been reset. Share this password with the staff member:",
+
+  "confirmDeactivate": "Deactivate this staff member?",
+  "confirmActivate": "Activate this staff member?",
+  "confirmResetPassword": "Reset this staff member's password?",
+
+  "roleUpdated": "Role updated",
+  "errorCreate": "Failed to create staff member",
+  "errorLoad": "Failed to load staff",
+  "cancel": "Cancel"
+}

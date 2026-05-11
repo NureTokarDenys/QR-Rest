@@ -27,6 +27,11 @@ import uaPdfGenerator from './locales/ua/staff/pdfGenerator.json';
 import uaAnalytics from './locales/ua/staff/analytics.json';
 import uaStaffSettings from './locales/ua/staff/staffSettings.json';
 import uaComponents from './locales/ua/staff/components.json';
+import uaCategoryEdit from './locales/ua/staff/categoryEdit.json';
+import uaExtrasManagement from './locales/ua/staff/extrasManagement.json';
+import uaRestaurantSettings from './locales/ua/staff/restaurantSettings.json';
+import uaStaffManagement from './locales/ua/staff/staffManagement.json';
+import uaReviewsManagement from './locales/ua/staff/reviewsManagement.json';
 
 import enMenu from './locales/en/client/menu.json';
 import enCategory from './locales/en/client/category.json';
@@ -54,6 +59,11 @@ import enPdfGenerator from './locales/en/staff/pdfGenerator.json';
 import enAnalytics from './locales/en/staff/analytics.json';
 import enStaffSettings from './locales/en/staff/staffSettings.json';
 import enComponents from './locales/en/staff/components.json';
+import enCategoryEdit from './locales/en/staff/categoryEdit.json';
+import enExtrasManagement from './locales/en/staff/extrasManagement.json';
+import enRestaurantSettings from './locales/en/staff/restaurantSettings.json';
+import enStaffManagement from './locales/en/staff/staffManagement.json';
+import enReviewsManagement from './locales/en/staff/reviewsManagement.json';
 
 i18n.use(initReactI18next).init({
   resources: {
@@ -70,6 +80,10 @@ i18n.use(initReactI18next).init({
       dishEdit: uaDishEdit, pdfGenerator: uaPdfGenerator,
       analytics: uaAnalytics, staffSettings: uaStaffSettings,
       components: uaComponents,
+      categoryEdit: uaCategoryEdit, extrasManagement: uaExtrasManagement,
+      restaurantSettings: uaRestaurantSettings,
+      staffManagement: uaStaffManagement,
+      reviewsManagement: uaReviewsManagement,
     },
     en: {
       menu: enMenu, category: enCategory, footer: enFooter,
@@ -84,6 +98,10 @@ i18n.use(initReactI18next).init({
       dishEdit: enDishEdit, pdfGenerator: enPdfGenerator,
       analytics: enAnalytics, staffSettings: enStaffSettings,
       components: enComponents,
+      categoryEdit: enCategoryEdit, extrasManagement: enExtrasManagement,
+      restaurantSettings: enRestaurantSettings,
+      staffManagement: enStaffManagement,
+      reviewsManagement: enReviewsManagement,
     },
   },
   lng: localStorage.getItem('lang') ?? 'ua',

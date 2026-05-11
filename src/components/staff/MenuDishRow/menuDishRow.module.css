@@ -48,12 +48,14 @@
 }
 
 .catBadge {
-  font-size: 16px;
-  background: var(--accent-color);
-  color: var(--primary-text);
+  display: inline-block;
+  font-size: 13px;
+  background: var(--bg-color);
+  color: var(--secondary-text);
+  border: 1px solid var(--separator-color);
   border-radius: 6px;
   padding: 3px 8px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .actions {

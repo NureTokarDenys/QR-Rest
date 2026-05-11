@@ -16,5 +16,10 @@
   "waiting": "Waiting",
   "order_view": "By orders",
   "table_view": "By tables",
-  "mark_ready": "Mark ready"
+  "mark_ready": "Mark ready",
+  "blocked_advance": "A preceding group must progress first",
+  "confirm_backward_title": "Revert status?",
+  "confirm_backward_sub": "This will move the group back from {{from}} to {{to}}. Are you sure?",
+  "cancel": "Cancel",
+  "confirm": "Revert"
 }

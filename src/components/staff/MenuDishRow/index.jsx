@@ -20,7 +20,16 @@ export default function MenuDishRow({ dish, dish_category, onToggle, onDelete })
         </div>
       </td>
       <td className={styles.cell}>
-        <span className={styles.catBadge}>{local(dish_category, 'name')}</span>
+        <span
+          className={styles.catBadge}
+          style={dish_category?.color ? {
+            background: `${dish_category.color}22`,
+            color:       dish_category.color,
+            border:      `1px solid ${dish_category.color}55`,
+          } : undefined}
+        >
+          {local(dish_category, 'name')}
+        </span>
       </td>
       <td className={`${styles.cell} ${styles.price}`}>
         {dish.price} {t('currency_symbol', '₴')}

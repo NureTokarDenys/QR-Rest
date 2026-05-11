@@ -16,9 +16,18 @@
   "status_ready": "Ready",
   "status_served": "Served",
 
-  "kanban_btn_waiting": "Accept",
+  "kanban_btn_waiting": "Start cooking",
   "kanban_btn_cooking": "Done",
   "kanban_btn_ready": "Serve",
+
+  "more_group": "more serving group",
+  "more_groups": "more serving groups",
+
+  "kanban_btn_blocked": "Waiting for group {{n}}",
+  "blocked_by_group": "Group #{{n}} must progress first",
+
+  "timer_created_title": "Time since group was created",
+  "timer_status_title": "Time since last status change",
 
   "kanban_col_waiting": "NEW",
   "kanban_col_cooking": "COOKING",
@@ -46,5 +55,14 @@
 
   "role_admin": "Administrator",
   "role_waiter": "Waiter",
-  "role_cook": "Cook"
+  "role_cook": "Cook",
+  "role_waiter_cook": "Waiter & Cook",
+
+  "pickColor": "Pick color",
+  "customColor": "Custom",
+
+  "nav_extras": "Extras",
+  "nav_staff": "Staff",
+  "nav_reviews": "Reviews",
+  "nav_restaurant": "Settings"
 }

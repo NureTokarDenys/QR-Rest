@@ -1,0 +1,19 @@
+{
+  "title": "Відгуки",
+  "tabRestaurant": "Ресторан",
+  "tabDish": "Страви",
+
+  "filterByDish": "Фільтр за стравою",
+  "allDishes": "Усі страви",
+
+  "noReviews": "Відгуків поки немає",
+  "loading": "Завантаження…",
+
+  "anonymous": "Анонім",
+  "dish": "Страва",
+  "date": "Дата",
+
+  "page": "Сторінка {{page}} з {{pages}}",
+  "prevPage": "← Попередня",
+  "nextPage": "Наступна →"
+}
