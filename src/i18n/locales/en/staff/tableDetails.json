@@ -40,11 +40,12 @@
   "deleteItemConfirm": "Remove this item from the order?",
   "orders": "Orders",
   "payCash": "Pay cash",
-  "voidOrder": "Void order",
+  "voidOrder": "Cancel order",
   "markWalkout": "Walk-out (left without paying)",
-  "voidReasonPlaceholder": "Reason for voiding (min. 10 chars)...",
+  "voidReasonPlaceholder": "Reason for cancellation (min. 10 chars)...",
+  "voidReasonTooShort": "Enter at least 10 characters",
   "minChars": "min chars",
-  "confirmVoid": "Confirm void",
+  "confirmVoid": "Confirm cancellation",
   "cancel": "Cancel",
   "orderClosed": "Order closed",
   "walkoutReason": "Customer left without paying (walk-out)",
@@ -59,5 +60,8 @@
   "timeAgoLess1": "<1 min",
   "timeAgoMinAgo": "{{n}} min ago",
   "timeAgoHourAgo": "{{n}} h ago",
-  "timeAgoDayAgo": "{{n}} d ago"
+  "timeAgoDayAgo": "{{n}} d ago",
+  "openScanWindow": "Open scan window",
+  "scanWindowOpen": "Scan window is open — guests may scan",
+  "scanWindowExpired": "Scan window closed"
 }

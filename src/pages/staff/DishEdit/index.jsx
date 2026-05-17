@@ -445,7 +445,7 @@ export default function DishEdit() {
         <div className={styles.headerActions}>
           <SecondaryButton label={t('cancel')} onClick={() => navigate('/staff/menu')} className={styles.cancelBtn} />
           <PrimaryButton   label={saving ? '…' : t('save')} onClick={handleSave} disabled={saving} className={styles.saveBtn} />
-        </div>
+        </div> 
       }
     >
       <div className={styles.layout}>

@@ -9,5 +9,8 @@
     "fill_fields": "Please fill in all fields",
     "invalid_email": "Enter a valid email address",
     "password_too_short": "Password must be at least 8 characters",
-    "login_error": "Login failed. Please check your credentials and try again."
+    "login_error": "Login failed. Please check your credentials and try again.",
+    "forgot_password": "Forgot password?",
+    "no_account": "Don't have an account?",
+    "create_one": "Create one"
 }

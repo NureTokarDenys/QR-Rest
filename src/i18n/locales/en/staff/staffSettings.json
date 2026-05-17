@@ -28,5 +28,29 @@
   "changePasswordBtn": "Change password",
   
   "notificationsPanel": "Notifications",
-  "shiftPanel": "Current Shift"
+  "shiftPanel": "Current Shift",
+
+  "saveName": "Save name",
+  "nameSaved": "Name updated successfully.",
+  "nameError": "Failed to update name.",
+  "minNameLength": "Name must be at least 2 characters.",
+
+  "editEmail": "Change Email",
+  "emailChangeDesc": "We'll send a confirmation link to your new email address. Your email will only be updated after you click that link.",
+  "emailChangeContinue": "Continue",
+  "emailNewLabel": "New email address",
+  "emailSendConfirmation": "Send confirmation",
+  "emailChangeSentTitle": "Check your inbox",
+  "emailChangeSentBody": "A confirmation link has been sent to {{email}}. Click it to activate your new email address.",
+  "emailTaken": "This email is already in use.",
+  "emailInvalid": "Please enter a valid email address.",
+
+  "resetPasswordInfo": "We'll send a password reset link to your email address. The link is valid for 1 hour.",
+  "sendResetLink": "Send reset link",
+  "resetSentTitle": "Check your inbox",
+  "resetSentBody": "A password reset link has been sent to your email. Follow the instructions in the email.",
+  "resetSendError": "Failed to send reset link. Please try again.",
+
+  "back": "Back",
+  "cancel": "Cancel"
 }

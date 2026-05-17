@@ -14,11 +14,6 @@ import { MdStorefront } from 'react-icons/md';
 const BACKEND_LANGUAGES = [
   { code: 'uk', name: 'Українська' },
   { code: 'en', name: 'English' },
-  { code: 'pl', name: 'Polski' },
-  { code: 'de', name: 'Deutsch' },
-  { code: 'fr', name: 'Français' },
-  { code: 'cs', name: 'Čeština' },
-  { code: 'sk', name: 'Slovenčina' },
 ];
 
 const EMPTY_FIELDS = emptyI18n('name', 'address', 'cuisine');
@@ -33,6 +28,9 @@ export default function RestaurantSettings() {
   const [defaultLang, setDefaultLang] = useState('uk');
   const [enabledLangs,setEnabledLangs]= useState([]);
   const [logoUrl,     setLogoUrl]     = useState('');
+  const [pendingLogoFile, setPendingLogoFile] = useState(null);
+  const [pendingLogoPreview, setPendingLogoPreview] = useState('');
+  const [hasLogoChanged, setHasLogoChanged] = useState(false);
   const [logoUploading,setLogoUploading] = useState(false);
   const [createdAt,   setCreatedAt]   = useState('');
   const [saving,      setSaving]      = useState(false);
@@ -63,13 +61,20 @@ export default function RestaurantSettings() {
         });
         setFields(loaded);
         setSlug(r.slug || '');
-        setDefaultLang(r.defaultLanguage || 'uk');
-        setEnabledLangs(r.enabledLanguages || []);
+        const allowed = new Set(BACKEND_LANGUAGES.map(l => l.code));
+        setDefaultLang(allowed.has(r.defaultLanguage) ? r.defaultLanguage : 'uk');
+        setEnabledLangs((r.enabledLanguages || []).filter(code => allowed.has(code)));
         setLogoUrl(r.logoUrl || '');
         setCreatedAt(r.createdAt ? new Date(r.createdAt).toLocaleDateString() : '');
       })
       .catch(err => console.error('RestaurantSettings load error:', err));
   }, []);
+
+  useEffect(() => {
+    return () => {
+      if (pendingLogoPreview) URL.revokeObjectURL(pendingLogoPreview);
+    };
+  }, [pendingLogoPreview]);
 
   async function handleAutoTranslate() {
     if (activeLang === SOURCE_LANG) return;
@@ -96,22 +101,32 @@ export default function RestaurantSettings() {
   async function handleLogoSelect(e) {
     const file = e.target.files?.[0];
     if (!file) return;
-    setLogoUploading(true);
-    try {
-      const data = await uploadRestaurantLogo(file);
-      setLogoUrl(data.logoUrl);
-    } catch (err) {
-      console.error('Logo upload error:', err);
-    } finally {
-      setLogoUploading(false);
-      if (fileRef.current) fileRef.current.value = '';
-    }
+    if (pendingLogoPreview) URL.revokeObjectURL(pendingLogoPreview);
+    const preview = URL.createObjectURL(file);
+    setPendingLogoFile(file);
+    setPendingLogoPreview(preview);
+    setHasLogoChanged(true);
+    if (fileRef.current) fileRef.current.value = '';
+  }
+
+  function handleCancelLogoChanges() {
+    if (pendingLogoPreview) URL.revokeObjectURL(pendingLogoPreview);
+    setPendingLogoFile(null);
+    setPendingLogoPreview('');
+    setHasLogoChanged(false);
   }
 
   async function handleSave() {
     setSaving(true);
     setSavedOk(false);
     try {
+      if (pendingLogoFile) {
+        setLogoUploading(true);
+        const data = await uploadRestaurantLogo(pendingLogoFile);
+        if (data?.logoUrl) {
+          setLogoUrl(data.logoUrl);
+        }
+      }
       const payload = {
         name:    fields[lf('name')],
         address: fields[lf('address')],
@@ -122,12 +137,17 @@ export default function RestaurantSettings() {
         enabledLanguages: enabledLangs,
       };
       await updateRestaurant(payload);
+      if (pendingLogoPreview) URL.revokeObjectURL(pendingLogoPreview);
+      setPendingLogoFile(null);
+      setPendingLogoPreview('');
+      setHasLogoChanged(false);
       setSavedOk(true);
       setTimeout(() => setSavedOk(false), 3000);
     } catch (err) {
       console.error('RestaurantSettings save error:', err);
     } finally {
       setSaving(false);
+      setLogoUploading(false);
     }
   }
 
@@ -138,6 +158,7 @@ export default function RestaurantSettings() {
   }
 
   const defaultLangOptions = BACKEND_LANGUAGES.map(l => ({ value: l.code, label: l.name }));
+  const displayedLogo = pendingLogoPreview || logoUrl;
 
   return (
     <StaffShell
@@ -148,6 +169,7 @@ export default function RestaurantSettings() {
             label={saving ? t('saving') : savedOk ? `✓ ${t('saved')}` : t('save')}
             onClick={handleSave}
             disabled={saving}
+            className={styles.saveBtn}
           />
         </div>
       }
@@ -225,10 +247,17 @@ export default function RestaurantSettings() {
         <div className={styles.section}>
           <p className={styles.sectionTitle}>{t('logo')}</p>
           <div className={styles.logoRow}>
-            {logoUrl ? (
+            {displayedLogo ? (
               <div className={styles.logoPreviewWrap}>
-                <img src={logoUrl} alt="logo" className={styles.logoPreview} />
-                <button className={styles.removeLogoBtn} onClick={() => setLogoUrl('')}>
+                <img src={displayedLogo} alt="logo" className={styles.logoPreview} />
+                <button
+                  className={styles.removeLogoBtn}
+                  onClick={() => {
+                    handleCancelLogoChanges();
+                    setLogoUrl('');
+                    setHasLogoChanged(true);
+                  }}
+                >
                   {t('removeLogo')}
                 </button>
               </div>
@@ -239,7 +268,7 @@ export default function RestaurantSettings() {
               >
                 <span className={styles.logoDropzoneIcon}>🖼️</span>
                 <span className={styles.logoDropzoneText}>
-                  {logoUploading ? t('logoUploading') : t('logoUploadHint')}
+                  {pendingLogoFile ? t('logoReadyToSave') : t('logoUploadHint')}
                 </span>
                 <span className={styles.logoDropzoneHint}>{t('logoFormats')}</span>
               </div>
@@ -251,16 +280,26 @@ export default function RestaurantSettings() {
               style={{ display: 'none' }}
               onChange={handleLogoSelect}
             />
-            {logoUrl && (
+            <div className={styles.logoButtons}>
               <button
                 className={styles.changeLogoBtn}
                 onClick={() => fileRef.current?.click()}
-                disabled={logoUploading}
+                disabled={saving || logoUploading}
               >
-                {logoUploading ? t('logoUploading') : '↑ Upload new'}
+                {pendingLogoFile ? t('replaceLogo') : t('uploadNewLogo')}
               </button>
-            )}
+              {hasLogoChanged && (
+                <button
+                  className={styles.cancelLogoBtn}
+                  onClick={handleCancelLogoChanges}
+                  disabled={saving || logoUploading}
+                >
+                  {t('cancel')}
+                </button>
+              )}
+            </div>
           </div>
+          {pendingLogoFile && <p className={styles.fieldHint}>{t('logoWillUploadOnSave')}</p>}
         </div>
 
         {/* ── Language settings ── */}

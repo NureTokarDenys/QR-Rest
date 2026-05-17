@@ -38,6 +38,22 @@
 .cooking { background: var(--order-status-cooking-bg); color: var(--order-status-cooking-text); }
 .ready   { background: var(--order-status-ready-bg);   color: var(--order-status-ready-text);   }
 .served  { background: var(--badge-done-bg);            color: var(--badge-done-text);            }
+.payment { background: #eff6ff; color: #1d7afc; }
+.void    { background: #fef2f2; color: #dc2626; }
+
+.restaurant {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--secondary-text);
+}
+
+.restaurantIcon {
+  font-size: 15px;
+  flex-shrink: 0;
+}
 
 .date {
   font-size: 13px;

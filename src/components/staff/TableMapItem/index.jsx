@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import TableDishList from '../TableDishList';
@@ -23,14 +23,11 @@ const BORDER_COLORS = {
 export default function TableMapItem({ table }) {
   const navigate = useNavigate();
   const { t } = useTranslation('tableMap');
-  const [expanded, setExpanded] = useState(false);
 
   const colorClass  = STATUS_COLORS[table.status] || styles.free;
   const borderColor = BORDER_COLORS[table.status]  || BORDER_COLORS.free;
 
-  const ordersWithDishes = (table.orders || []).filter(o => o.dishes?.length > 0);
-  const visibleOrders    = expanded ? ordersWithDishes : ordersWithDishes.slice(0, 1);
-  const extraCount       = ordersWithDishes.length - 1;
+  const order = table.orders?.[0] ?? null;
 
   return (
     <div
@@ -48,17 +45,8 @@ export default function TableMapItem({ table }) {
         <span className={styles.tableNum}>№{table.id}</span>
       </div>
 
-      {visibleOrders.map((order, idx) => (
-        <TableDishList key={order.id || idx} dishes={order.dishes} />
-      ))}
-
-      {!expanded && extraCount > 0 && (
-        <button
-          className={styles.showMore}
-          onClick={e => { e.stopPropagation(); setExpanded(true); }}
-        >
-          + {t('moreOrders', { count: extraCount })}
-        </button>
+      {order && order.dishes?.length > 0 && (
+        <TableDishList dishes={order.dishes} />
       )}
     </div>
   );

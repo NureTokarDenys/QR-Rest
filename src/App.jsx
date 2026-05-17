@@ -1,13 +1,17 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'; // Navigate used by /staff redirect
-import { AppProvider } from './context/AppContext';
+import { AppProvider, useApp } from './context/AppContext';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { ClientToastProvider } from "./context/ClientToastContext";
 import ProtectedRoute from './components/ProtectedRoute';
 import HttpErrorToast from './components/HttpErrorToast';
+import NotificationToast from './components/client/NotificationToast';
 import DevToolbar from './components/DevToolbar';
 import Login from './pages/Login';
+import ForgotPassword from './pages/client/ForgotPassword';
+import Register from './pages/client/Register';
+import ConfirmEmailChange from './pages/client/ConfirmEmailChange';
 import RestaurantPicker from './pages/client/RestaurantPicker';
 import QrLanding from './pages/client/QrLanding';
 import Forbidden from './pages/Forbidden';
@@ -46,13 +50,18 @@ function Guard({ roles, children }) {
   return <ProtectedRoute requiredRoles={roles}>{children}</ProtectedRoute>;
 }
 
-// Smart root redirect (restored now that / is no longer the landing page):
+// Smart root redirect:
+//   • Waits for the async order-restore to finish so a freshly-logged-in client
+//     whose restaurant is resolved from their active order is sent to /menu
+//     instead of /restaurants.
 //   • session token present   → /menu  (QR-scan flow, restaurant auto-resolved)
-//   • restaurantId in storage → /menu  (restaurant-picker flow, already chosen)
+//   • restaurantId in storage → /menu  (restaurant-picker flow or restored order)
 //   • nothing                 → /restaurants  (let client pick a restaurant)
 function RootRedirect() {
+  const { restoringOrder, restaurantId: ctxRestaurantId } = useApp();
+  if (restoringOrder) return null; // wait for restore before deciding
   const hasSession    = !!localStorage.getItem('sessionToken');
-  const hasRestaurant = !!localStorage.getItem('restaurantId');
+  const hasRestaurant = !!localStorage.getItem('restaurantId') || !!ctxRestaurantId;
   return <Navigate to={hasSession || hasRestaurant ? '/menu' : '/restaurants'} replace />;
 }
 
@@ -65,6 +74,8 @@ export default function App() {
           <ClientToastProvider>
             {/* Global HTTP error overlay — catches all unhandled 4xx / 5xx */}
             <HttpErrorToast />
+            {/* Persistent notification banner for guest order events */}
+            <NotificationToast />
             {/* Dev-only floating toolbar — stripped from production builds */}
             <DevToolbar />
             <Routes>
@@ -79,7 +90,10 @@ export default function App() {
               <Route path="/onboarding/check-email" element={<CheckEmailPage />} />
               <Route path="/onboarding/confirm"     element={<ConfirmPage />} />
 
-              <Route path="/login" element={<Login />} />
+              <Route path="/login"           element={<Login />} />
+              <Route path="/forgot-password"       element={<ForgotPassword />} />
+              <Route path="/register"              element={<Register />} />
+              <Route path="/confirm-email-change"  element={<ConfirmEmailChange />} />
               <Route path="/auth/callback" element={<OAuthCallback />} />
               <Route path="/forbidden" element={<Forbidden />} />
 
@@ -120,7 +134,7 @@ export default function App() {
                 <Guard roles={['admin', 'waiter', 'cook', 'waiter_cook']}><OrderDetail /></Guard>
               } />
               <Route path="/staff/menu" element={
-                <Guard roles={['admin']}><MenuManagement /></Guard>
+                <Guard roles={['admin', 'cook', 'waiter_cook']}><MenuManagement /></Guard>
               } />
               <Route path="/staff/menu/category/new" element={
                 <Guard roles={['admin']}><CategoryEdit /></Guard>
@@ -138,7 +152,7 @@ export default function App() {
                 <Guard roles={['admin']}><PdfGenerator /></Guard>
               } />
               <Route path="/staff/extras" element={
-                <Guard roles={['admin']}><ExtrasManagement /></Guard>
+                <Guard roles={['admin', 'cook', 'waiter_cook']}><ExtrasManagement /></Guard>
               } />
               <Route path="/staff/analytics" element={
                 <Guard roles={['admin']}><Analytics /></Guard>

@@ -21,6 +21,10 @@
   "logoUploadHint": "Перетягніть фото або натисніть, щоб вибрати",
   "logoFormats": "JPG, PNG, WEBP (до 5 МБ)",
   "logoUploading": "Завантаження…",
+  "uploadNewLogo": "Завантажити новий",
+  "replaceLogo": "Замінити логотип",
+  "logoReadyToSave": "Логотип готовий до збереження",
+  "logoWillUploadOnSave": "Новий логотип буде завантажено тільки після натискання \"Зберегти\".",
   "removeLogo": "Видалити логотип",
 
   "languages": "Мови",

@@ -18,8 +18,5 @@
   "avgCheck": "Середній чек",
   "accept": "Прийняти",
   "waiterCalled": "виклик офіціанта",
-  "newOrder": "Нове замовлення",
-  "moreOrders_one": "ще {{count}} замовлення",
-  "moreOrders_few": "ще {{count}} замовлення",
-  "moreOrders_many": "ще {{count}} замовлень"
+  "newOrder": "Нове замовлення"
 }

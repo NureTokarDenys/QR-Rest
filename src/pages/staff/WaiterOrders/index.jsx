@@ -2,11 +2,13 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import StaffShell from '../../../components/staff/StaffShell';
+import WsStatusBanner from '../../../components/WsStatusBanner';
 import { getTables } from '../../../api/admin';
-import { getOrder } from '../../../api/orders';
+import { getOrder, voidOrder } from '../../../api/orders';
+import { useWebSocket } from '../../../hooks/useWebSocket';
 import styles from './waiterOrders.module.css';
 
-import { MdTableRestaurant, MdAccessTime, MdPerson, MdRefresh } from 'react-icons/md';
+import { MdTableRestaurant, MdAccessTime, MdPerson, MdPayments, MdRefresh } from 'react-icons/md';
 
 const STATUS_ORDER = { waiting: 0, cooking: 1, ready: 2, served: 3 };
 
@@ -38,6 +40,11 @@ export default function WaiterOrders() {
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState('');
 
+  const [voidingOrderId, setVoidingOrderId] = useState(null);
+  const [voidReason, setVoidReason]         = useState('');
+  const [voidSaving, setVoidSaving]         = useState(false);
+  const [voidError, setVoidError]           = useState('');
+
   const loadOrders = useCallback(async () => {
     setLoading(true);
     setError('');
@@ -45,11 +52,10 @@ export default function WaiterOrders() {
       const tables = await getTables();
       if (!Array.isArray(tables)) { setOrders([]); return; }
 
-      // Flatten tables → one entry per active order (a table can have multiple)
-      const occupied = tables.flatMap(table => {
-        const orders = table.currentOrders ?? (table.currentOrder ? [table.currentOrder] : []);
-        return orders.map(o => ({ table, orderId: o._id }));
-      });
+      // One active order per table
+      const occupied = tables
+        .filter(table => table.currentOrder)
+        .map(table => ({ table, orderId: table.currentOrder._id }));
 
       // Fetch each order's items in parallel
       const results = await Promise.allSettled(
@@ -67,7 +73,8 @@ export default function WaiterOrders() {
             orderId,
             tableNum:    table.number ?? table._id,
             tableName:   table.name || `Стіл ${table.number}`,
-            waiterCall:  table.status === 'waiter_call',
+            waiterCall:     false,
+            waiterCallCash: false,
             createdAt:   data?.order?.createdAt || data?.createdAt || null,
             items,
             total,
@@ -80,8 +87,11 @@ export default function WaiterOrders() {
         .filter(r => r.status === 'fulfilled')
         .map(r => r.value)
         .sort((a, b) => {
-          // waiter calls first, then by order status (ready first), then by time
-          if (a.waiterCall !== b.waiterCall) return a.waiterCall ? -1 : 1;
+          const aAlert = a.waiterCallCash || a.waiterCall;
+          const bAlert = b.waiterCallCash || b.waiterCall;
+          if (aAlert !== bAlert) return aAlert ? -1 : 1;
+          // cash payment requests before general calls
+          if (a.waiterCallCash !== b.waiterCallCash) return a.waiterCallCash ? -1 : 1;
           return STATUS_ORDER[a.status] - STATUS_ORDER[b.status];
         });
 
@@ -94,11 +104,57 @@ export default function WaiterOrders() {
     }
   }, []);
 
+  // ── WebSocket ──────────────────────────────────────────────────────────────
+  // Reload the full order list whenever a relevant event arrives on the
+  // waiter room (ORDER_NEW, ORDER_UPDATED, WAITER_CALL, TABLE_STATUS_UPDATED).
+  const handleWsMessage = useCallback((msg) => {
+    const relevant = new Set([
+      'ORDER_NEW', 'ORDER_UPDATED', 'ORDER_VOID', 'ORDER_CANCELLED',
+      'WAITER_CALL', 'WAITER_CALL_CASH', 'WAITER_CALL_CONFIRMED',
+      'TABLE_STATUS_UPDATED', 'PAYMENT_COMPLETED',
+    ]);
+    if (relevant.has(msg.event)) loadOrders();
+  }, [loadOrders]);
+
+  const { status: wsStatus } = useWebSocket({ onMessage: handleWsMessage });
+
   useEffect(() => {
     loadOrders();
-    const interval = setInterval(loadOrders, 30_000);
+    // Fallback poll — catches anything missed during a WS gap
+    const interval = setInterval(loadOrders, 60_000);
     return () => clearInterval(interval);
   }, [loadOrders]);
+
+  function openVoid(orderId) {
+    setVoidingOrderId(orderId);
+    setVoidReason('');
+    setVoidError('');
+  }
+
+  function cancelVoid() {
+    setVoidingOrderId(null);
+    setVoidReason('');
+    setVoidError('');
+  }
+
+  async function handleVoidOrder(orderId) {
+    if (voidReason.trim().length < 10) {
+      setVoidError(t('voidReasonTooShort'));
+      return;
+    }
+    setVoidSaving(true);
+    setVoidError('');
+    try {
+      await voidOrder(orderId, voidReason.trim());
+      cancelVoid();
+      loadOrders();
+    } catch (err) {
+      console.error('voidOrder error:', err);
+      setVoidError(err?.response?.data?.message || t('voidReasonTooShort'));
+    } finally {
+      setVoidSaving(false);
+    }
+  }
 
   function statusLabel(s) {
     if (s === 'ready')   return t('status_ready');
@@ -109,6 +165,7 @@ export default function WaiterOrders() {
 
   return (
     <StaffShell title={t('nav_orders')}>
+      <WsStatusBanner status={wsStatus} />
       <div className={styles.page}>
         <div className={styles.header}>
           <span className={styles.count}>
@@ -130,10 +187,13 @@ export default function WaiterOrders() {
 
         <div className={styles.grid}>
           {orders.map(order => (
-            <button
+            <div
               key={order.orderId}
-              className={`${styles.card} ${order.waiterCall ? styles.cardAlert : ''}`}
+              className={`${styles.card} ${order.waiterCallCash ? styles.cardAlertCash : order.waiterCall ? styles.cardAlert : ''}`}
               onClick={() => navigate(`/staff/table/${order.tableNum}`)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={e => e.key === 'Enter' && navigate(`/staff/table/${order.tableNum}`)}
             >
               <div className={styles.cardTop}>
                 <span className={styles.tableLabel}>
@@ -145,7 +205,12 @@ export default function WaiterOrders() {
                 </span>
               </div>
 
-              {order.waiterCall && (
+              {order.waiterCallCash && (
+                <div className={`${styles.waiterAlert} ${styles.waiterAlertCash}`}>
+                  <MdPayments /> {t('waiterCalledCash')}
+                </div>
+              )}
+              {order.waiterCall && !order.waiterCallCash && (
                 <div className={styles.waiterAlert}>
                   <MdPerson /> {t('waiterCalled')}
                 </div>
@@ -170,7 +235,43 @@ export default function WaiterOrders() {
                 </span>
                 <span className={styles.total}>{order.total} ₴</span>
               </div>
-            </button>
+
+              {/* ── Actions ── */}
+              <div className={styles.cardActions} onClick={e => e.stopPropagation()}>
+                <button
+                  className={`${styles.cardActionBtn} ${styles.cardVoidBtn}`}
+                  onClick={() => voidingOrderId === order.orderId ? cancelVoid() : openVoid(order.orderId)}
+                >
+                  {t('voidOrder')}
+                </button>
+              </div>
+
+              {voidingOrderId === order.orderId && (
+                <div className={styles.voidForm} onClick={e => e.stopPropagation()}>
+                  <textarea
+                    className={styles.voidReasonInput}
+                    value={voidReason}
+                    onChange={e => { setVoidReason(e.target.value); setVoidError(''); }}
+                    placeholder={t('voidReasonPlaceholder')}
+                    rows={2}
+                    autoFocus
+                  />
+                  {voidError && <span className={styles.voidErrorText}>{voidError}</span>}
+                  <div className={styles.voidFormActions}>
+                    <button
+                      className={styles.voidConfirmBtn}
+                      onClick={() => handleVoidOrder(order.orderId)}
+                      disabled={voidSaving}
+                    >
+                      {voidSaving ? '…' : t('confirmVoid')}
+                    </button>
+                    <button className={styles.voidCancelBtn} onClick={cancelVoid}>
+                      {t('cancel')}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           ))}
         </div>
       </div>

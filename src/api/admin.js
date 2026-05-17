@@ -112,8 +112,9 @@ export async function updateIngredient(id, data, restaurantId = getStoredRestaur
   return res.data?.data;
 }
 
-export async function deleteIngredient(id, restaurantId = getStoredRestaurantId()) {
-  await apiClient.delete(`/${restaurantId}/admin/menu/ingredients/${id}`);
+export async function deleteIngredient(id, options = {}, restaurantId = getStoredRestaurantId()) {
+  const params = options.force ? { force: true } : {};
+  await apiClient.delete(`/${restaurantId}/admin/menu/ingredients/${id}`, { params });
 }
 
 export async function setIngredientAvailability(id, isAvailable, restaurantId = getStoredRestaurantId()) {
@@ -138,8 +139,9 @@ export async function updateAddon(id, data, restaurantId = getStoredRestaurantId
   return res.data?.data;
 }
 
-export async function deleteAddon(id, restaurantId = getStoredRestaurantId()) {
-  await apiClient.delete(`/${restaurantId}/admin/menu/addons/${id}`);
+export async function deleteAddon(id, options = {}, restaurantId = getStoredRestaurantId()) {
+  const params = options.force ? { force: true } : {};
+  await apiClient.delete(`/${restaurantId}/admin/menu/addons/${id}`, { params });
 }
 
 export async function setAddonAvailability(id, isAvailable, restaurantId = getStoredRestaurantId()) {
@@ -164,13 +166,18 @@ export async function updateComponentGroup(id, data, restaurantId = getStoredRes
   return res.data?.data;
 }
 
-export async function deleteComponentGroup(id, restaurantId = getStoredRestaurantId()) {
-  await apiClient.delete(`/${restaurantId}/admin/menu/componentgroups/${id}`);
+export async function deleteComponentGroup(id, options = {}, restaurantId = getStoredRestaurantId()) {
+  const params = options.force ? { force: true } : {};
+  await apiClient.delete(`/${restaurantId}/admin/menu/componentgroups/${id}`, { params });
 }
 
 export async function setComponentGroupAvailability(id, isAvailable, restaurantId = getStoredRestaurantId()) {
   const res = await apiClient.patch(`/${restaurantId}/admin/menu/componentgroups/${id}/availability`, { isAvailable });
   return res.data?.data;
+}
+
+export async function removeExtraRelation(type, extraId, menuItemId, restaurantId = getStoredRestaurantId()) {
+  await apiClient.delete(`/${restaurantId}/admin/menu/extras/${type}/${extraId}/dishes/${menuItemId}`);
 }
 
 export async function getAdminMenuItem(id, restaurantId = getStoredRestaurantId()) {

@@ -1,8 +1,25 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { scanQR } from '../api/qr';
-import { createOrder, getOrder } from '../api/orders';
+import { createOrder, getOrder, addGuestOrderItems, getMyOrders, getOrderNotifications, markNotificationsRead } from '../api/orders';
+import { getRestaurantInfo } from '../api/restaurants';
 import { useAuth } from './AuthContext';
 import { SUPPORTED_LANGS, SOURCE_LANG, fromApiLang } from '../i18n/langs';
+
+// ─── Global WS constants ──────────────────────────────────────────────────────
+const WS_MAX_RETRIES    = 5;
+const WS_RETRY_DELAY_MS = 3000;
+const WS_PING_INTERVAL  = 25000;
+
+function buildWsUrl() {
+  const wsUrl = import.meta.env.VITE_WS_URL;
+  if (wsUrl) return wsUrl;
+  const apiUrl = import.meta.env.VITE_API_URL || '';
+  if (apiUrl.startsWith('http')) {
+    return apiUrl.replace(/^http(s?):\/\/([^/]*).*$/, (_, s, host) => `ws${s}://${host}/ws`);
+  }
+  const proto = window.location.protocol === 'https:' ? 'wss' : 'ws';
+  return `${proto}://${window.location.host}/ws`;
+}
 
 const AppContext = createContext(null);
 
@@ -49,7 +66,7 @@ function saveCartState(restaurantId, items, groups) {
  *   • GET /orders/:id  and  POST /orders  → { order, servingGroups, items }
  *   • GET /user/orders list entries       → plain Order object (no items)
  */
-function normalizeApiOrder(raw) {
+export function normalizeApiOrder(raw) {
   if (!raw) return null;
 
   // Detect nested shape { order, servingGroups, items }
@@ -64,15 +81,18 @@ function normalizeApiOrder(raw) {
       ? item.menuItemId
       : {};
     return {
-      id:       dish._id  || dish.id  || (typeof item.menuItemId === 'string' ? item.menuItemId : '') || item._id,
-      name:     dish.name || item.name || '',
-      name_en:  dish.name_en || item.name_en || dish.name || '',
-      price:    dish.basePrice ?? dish.price ?? item.price ?? 0,
-      image:    dish.imageUrl  || dish.image  || item.image || '',
-      quantity: item.quantity ?? item.qty ?? 1,
-      groupId:  item.servingGroupId || 'main',
+      id:          dish._id  || dish.id  || (typeof item.menuItemId === 'string' ? item.menuItemId : '') || item._id,
+      // orderItemId is the OrderItem document _id — used to match DISH_STATUS_UPDATED WS events
+      orderItemId: String(item._id || item.id || ''),
+      // menuItemName is included in create-order response (snapshot stored on OrderItem)
+      name:        dish.name || item.menuItemName || item.name || '',
+      name_en:     dish.name_en || item.name_en || dish.name || item.menuItemName || '',
+      price:       dish.basePrice ?? dish.price ?? item.totalPrice ?? item.price ?? 0,
+      image:       dish.imageUrl  || dish.image  || item.image || '',
+      quantity:    item.quantity ?? item.qty ?? 1,
+      groupId:     item.servingGroupId || 'main',
       // Domain model field is `dishStatus`; fall back to `status` for local mock orders
-      status:   item.dishStatus || item.status || 'waiting',
+      status:      item.dishStatus || item.status || 'waiting',
     };
   });
 
@@ -85,14 +105,19 @@ function normalizeApiOrder(raw) {
         }))
       : [{ id: 'main', name: 'Основна група', name_en: 'Main group' }];
 
+  const computedTotal = items.reduce((s, i) => s + (i.price ?? 0) * (i.quantity ?? 1), 0);
+
   return {
     id:           orderData._id || orderData.id,
-    publicId:     orderData.publicId || null,   // human-readable order number e.g. "K4X9B2MR"
+    publicId:     orderData.publicId || null,
+    tableId:      orderData.tableId   || null,
     tableNumber:  orderData.tableNumber ?? orderData.table?.number,
+    restaurantId: orderData.restaurantId || null,
     servingGroups,
     items,
-    total:  orderData.totalAmount ?? orderData.total ?? 0,
+    total:  orderData.totalAmount ?? orderData.total ?? computedTotal,
     status: orderData.status,
+    date:   orderData.createdAt || null,
   };
 }
 
@@ -117,7 +142,9 @@ function isOrderActive(raw) {
 
   // Order-level terminal statuses
   const DONE_ORDER = new Set([
-    'completed', 'void', 'voided', 'cancelled', 'paid', 'closed', 'rejected',
+    'cancelled', 'completed_cash', 'completed_epay',
+    // legacy values that may exist in old data
+    'completed', 'void', 'voided', 'paid', 'closed', 'rejected',
   ]);
   if (orderData.status && DONE_ORDER.has(orderData.status)) return false;
 
@@ -142,7 +169,16 @@ export function AppProvider({ children }) {
   // AppProvider is rendered inside AuthProvider so useAuth() is safe here.
   const { accessToken, user } = useAuth();
 
-  const [orderHistory, setOrderHistory]   = useState([]);
+  // True while the async order-restore effect is running after login.
+  // Consumers (RootRedirect) wait for this to be false before deciding where to navigate.
+  const [restoringOrder, setRestoringOrder] = useState(() => !!accessToken);
+
+  const [orderHistory, setOrderHistory] = useState(() => {
+    try {
+      const raw = localStorage.getItem('orderHistory');
+      return raw ? JSON.parse(raw) : [];
+    } catch { return []; }
+  });
 
   // Hydrate cart + serving groups from localStorage on first render.
   // If the stored entry belongs to a different restaurant it is discarded.
@@ -153,6 +189,8 @@ export function AppProvider({ children }) {
 
   const [currentOrder, setCurrentOrder]   = useState(null);
   const [orderComment, setOrderComment]   = useState('');
+  // When set, the user is adding dishes to an existing order (not creating a new one)
+  const [editingOrder, setEditingOrder]   = useState(null);
 
   const [servingGroups, setServingGroups] = useState(() => {
     const saved = loadCartState();
@@ -160,11 +198,10 @@ export function AppProvider({ children }) {
   });
 
   // Session / table state (read from localStorage, kept in sync)
-  const [sessionToken, setSessionToken] = useState(() => localStorage.getItem('sessionToken'));
-  const [tableId, setTableId]           = useState(() => localStorage.getItem('tableId'));
-  const [tableNumber, setTableNumber]   = useState(
-    () => localStorage.getItem('tableNumber') || ''
-  );
+  const [sessionToken, setSessionToken]           = useState(() => localStorage.getItem('sessionToken'));
+  const [tableId, setTableId]                     = useState(() => localStorage.getItem('tableId'));
+  const [tableNumber, setTableNumber]             = useState(() => localStorage.getItem('tableNumber') || '');
+  const [tableHasActiveOrder, setTableHasActiveOrder] = useState(false);
   const [restaurantId, setRestaurantId] = useState(() => localStorage.getItem('restaurantId'));
   // restaurantName holds the source-language (ua) display name.
   // Additional variants are stored as restaurantName_<langCode>, e.g. restaurantName_en.
@@ -226,6 +263,23 @@ export function AppProvider({ children }) {
     }
   }
 
+  // ── Global WebSocket (persists across page navigation) ────────────────────
+  const [wsStatus, setWsStatus]       = useState('idle');
+  const [wsLatency, setWsLatency]     = useState(null);
+  const globalWsRef                   = useRef(null);
+  const wsRetriesRef                  = useRef(0);
+  const wsRetryTimerRef               = useRef(null);
+  const wsPingTimerRef                = useRef(null);
+  const wsPingTsRef                   = useRef(null);
+  const wsLastEventIdRef              = useRef(null);
+  const wsRoomsRef                    = useRef(new Set());
+  const wsListenersRef                = useRef(new Set());
+  const wsEnabledRef                  = useRef(false);
+
+  // ── Notifications ─────────────────────────────────────────────────────────
+  const [notifications, setNotifications] = useState([]);
+  const unreadCount = notifications.filter(n => !n.readAt).length;
+
   // ── Persist cart to localStorage on every change ─────────────────────────
   useEffect(() => {
     saveCartState(restaurantId, cart, servingGroups);
@@ -254,10 +308,12 @@ export function AppProvider({ children }) {
   useEffect(() => {
     if (!accessToken) {
       setCurrentOrder(null);
+      setRestoringOrder(false);
       localStorage.removeItem('orderId');
       return;
     }
 
+    setRestoringOrder(true);
     let cancelled = false;
 
     async function restore() {
@@ -301,27 +357,206 @@ export function AppProvider({ children }) {
         }
       }
 
-      // Strategy 2 (scan /user/orders) was removed.
-      // It caused "ghost orders" — after clearing browser data the strategy
-      // would re-discover any non-terminal order from history and silently
-      // re-write orderId to localStorage, making the order reappear.
-      // orderId is written to localStorage by submitOrder() at checkout time,
-      // so Strategy 1 is sufficient for all normal re-visit flows.
+      // ── Strategy 2: scan /user/orders for a non-terminal active order ───────
+      // Only runs when Strategies 0 and 1 both failed to find an active order.
+      // Scoped to non-terminal statuses so intentionally cleared cookies never
+      // re-surface completed/cancelled orders.
+      if (!raw) {
+        try {
+          const recentOrders = await getMyOrders();
+          const DONE = new Set(['completed', 'void', 'voided', 'cancelled', 'paid', 'closed']);
+          const active = Array.isArray(recentOrders)
+            ? recentOrders.find(o => !DONE.has(o.status))
+            : null;
+          if (active) {
+            const rid = active.restaurantId || localStorage.getItem('restaurantId');
+            if (rid) {
+              const full = await getOrder(active._id, rid);
+              if (full && isOrderActive(full)) raw = full;
+            }
+          }
+        } catch { /* fail silently */ }
+      }
 
       if (cancelled) return;
 
       if (raw && isOrderActive(raw)) {
-        setCurrentOrder(normalizeApiOrder(raw));
+        const normalized = normalizeApiOrder(raw);
+        setCurrentOrder(normalized);
         const id = raw.order?._id || raw.order?.id || raw._id || raw.id;
         if (id) localStorage.setItem('orderId', String(id));
+        // Restore table + restaurant context so the order is fully usable
+        if (normalized.restaurantId) {
+          setRestaurantId(normalized.restaurantId);
+          localStorage.setItem('restaurantId', normalized.restaurantId);
+          if (!localStorage.getItem('restaurantName')) {
+            getRestaurantInfo(normalized.restaurantId).then(info => {
+              if (info?.name) { setRestaurantName(info.name); localStorage.setItem('restaurantName', info.name); }
+              if (info?.name_en) { setRestaurantName_en(info.name_en); localStorage.setItem('restaurantName_en', info.name_en); }
+            }).catch(() => {});
+          }
+        }
+        if (normalized.tableId) {
+          setTableId(normalized.tableId);
+          localStorage.setItem('tableId', String(normalized.tableId));
+        }
+        if (normalized.tableNumber != null) {
+          setTableNumber(String(normalized.tableNumber));
+          localStorage.setItem('tableNumber', String(normalized.tableNumber));
+        }
       }
       // If nothing found, leave currentOrder as-is —
       // it may have been set by submitOrder() in this session already.
     }
 
-    restore();
+    restore().finally(() => { if (!cancelled) setRestoringOrder(false); });
     return () => { cancelled = true; };
   }, [accessToken, user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Global WS connect ─────────────────────────────────────────────────────
+  const wsConnect = useCallback(() => {
+    if (!wsEnabledRef.current) return;
+
+    const token        = localStorage.getItem('accessToken');
+    const st           = localStorage.getItem('sessionToken');
+    if (!token && !st) return;
+
+    const params = new URLSearchParams();
+    if (token) params.set('token', token);
+    if (st)    params.set('session_token', st);
+
+    setWsStatus(wsRetriesRef.current > 0 ? 'reconnecting' : 'connecting');
+    const ws = new WebSocket(`${buildWsUrl()}?${params}`);
+    globalWsRef.current = ws;
+
+    ws.onopen = () => {
+      if (!wsEnabledRef.current) { ws.close(); return; }
+      wsRetriesRef.current = 0;
+      setWsStatus('connected');
+
+      wsRoomsRef.current.forEach(room => {
+        ws.send(JSON.stringify({ event: 'SUBSCRIBE', payload: { room } }));
+      });
+      if (wsLastEventIdRef.current) {
+        ws.send(JSON.stringify({ event: 'REPLAY_REQUEST', payload: { last_event_id: wsLastEventIdRef.current } }));
+      }
+
+      clearInterval(wsPingTimerRef.current);
+      wsPingTimerRef.current = setInterval(() => {
+        if (ws.readyState === WebSocket.OPEN) {
+          wsPingTsRef.current = Date.now();
+          ws.send(JSON.stringify({ event: 'PING' }));
+        }
+      }, WS_PING_INTERVAL);
+    };
+
+    ws.onmessage = ({ data }) => {
+      try {
+        const msg = JSON.parse(data);
+        if (msg.event_id) wsLastEventIdRef.current = msg.event_id;
+        if (msg.event === 'PONG') {
+          if (wsPingTsRef.current !== null) {
+            setWsLatency(Date.now() - wsPingTsRef.current);
+            wsPingTsRef.current = null;
+          }
+          return;
+        }
+
+        if (msg.event === 'NOTIFICATION_NEW' && msg.payload?.notification) {
+          setNotifications(prev => [msg.payload.notification, ...prev]);
+        }
+
+        wsListenersRef.current.forEach(fn => { try { fn(msg); } catch {} });
+      } catch {}
+    };
+
+    ws.onclose = () => {
+      clearInterval(wsPingTimerRef.current);
+      if (!wsEnabledRef.current) return;
+      if (wsRetriesRef.current < WS_MAX_RETRIES) {
+        wsRetriesRef.current += 1;
+        setWsStatus('reconnecting');
+        wsRetryTimerRef.current = setTimeout(wsConnect, WS_RETRY_DELAY_MS);
+      } else {
+        setWsStatus('failed');
+      }
+    };
+
+    ws.onerror = () => ws.close();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Connect / disconnect global WS — fires for both guest (sessionToken) and staff (accessToken)
+  useEffect(() => {
+    const hasAuth = sessionToken || accessToken;
+    if (!hasAuth) {
+      wsEnabledRef.current = false;
+      clearTimeout(wsRetryTimerRef.current);
+      clearInterval(wsPingTimerRef.current);
+      if (globalWsRef.current) {
+        globalWsRef.current.onclose = null;
+        globalWsRef.current.close();
+        globalWsRef.current = null;
+      }
+      setWsStatus('idle');
+      wsRoomsRef.current.clear();
+      return;
+    }
+
+    wsEnabledRef.current  = true;
+    wsRetriesRef.current  = 0;
+
+    if (sessionToken) wsRoomsRef.current.add(`session:${sessionToken}`);
+    wsConnect();
+
+    return () => {
+      wsEnabledRef.current = false;
+      clearTimeout(wsRetryTimerRef.current);
+      clearInterval(wsPingTimerRef.current);
+      if (globalWsRef.current) {
+        globalWsRef.current.onclose = null;
+        globalWsRef.current.close();
+        globalWsRef.current = null;
+      }
+    };
+  }, [sessionToken, accessToken, wsConnect]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Subscribe to table room when tableId is available
+  useEffect(() => {
+    if (!tableId) return;
+    const room = `table:${tableId}`;
+    wsRoomsRef.current.add(room);
+    const ws = globalWsRef.current;
+    if (ws?.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ event: 'SUBSCRIBE', payload: { room } }));
+    }
+  }, [tableId]);
+
+  // Load notifications when active order is set
+  useEffect(() => {
+    if (!currentOrder?.id || !sessionToken) return;
+    getOrderNotifications(currentOrder.id).then(data => {
+      if (Array.isArray(data)) setNotifications(data);
+    }).catch(() => {});
+  }, [currentOrder?.id, sessionToken]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function wsSubscribe(room) {
+    wsRoomsRef.current.add(room);
+    const ws = globalWsRef.current;
+    if (ws?.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify({ event: 'SUBSCRIBE', payload: { room } }));
+    }
+  }
+
+  function addWsListener(fn)    { wsListenersRef.current.add(fn); }
+  function removeWsListener(fn) { wsListenersRef.current.delete(fn); }
+
+  async function markAllRead() {
+    if (!currentOrder?.id) return;
+    try {
+      await markNotificationsRead(currentOrder.id);
+      setNotifications(prev => prev.map(n => n.readAt ? n : { ...n, readAt: new Date().toISOString() }));
+    } catch {}
+  }
 
   // ─── session ─────────────────────────────────────────────────────────────
 
@@ -335,6 +570,7 @@ export function AppProvider({ children }) {
         tableNumber:  tn,
         restaurantId: rid,          // publicId
         restaurantName: rname = '',
+        tableHasActiveOrder: occupied = false,
         // Language meta (may be nested under restaurant object or at top level)
         restaurant:   restaurantObj,
         defaultLanguage,
@@ -350,6 +586,7 @@ export function AppProvider({ children }) {
       setTableNumber(String(tn));
       setRestaurantId(String(rid));
       if (rname) setRestaurantName(rname);
+      setTableHasActiveOrder(occupied);
       // Extract language meta from QR response (may be top-level or in restaurant sub-object)
       const meta = restaurantObj || {};
       setRestaurantMeta({
@@ -542,8 +779,58 @@ export function AppProvider({ children }) {
   // ─── order history ────────────────────────────────────────────────────────
 
   const addOrderToHistory = (newOrder) => {
-    setOrderHistory(prev => [newOrder, ...prev]);
+    setOrderHistory(prev => {
+      const next = [newOrder, ...prev].slice(0, 50); // keep last 50
+      try { localStorage.setItem('orderHistory', JSON.stringify(next)); } catch {}
+      return next;
+    });
   };
+
+  // ─── editing an existing order (guest adds dishes) ───────────────────────
+
+  function startEditingOrder(order) {
+    setEditingOrder(order);
+    // Clear any items from a previous cart so the user starts fresh
+    setCart([]);
+    setServingGroups([DEFAULT_MAIN_GROUP]);
+    setOrderComment('');
+    localStorage.removeItem('cartState');
+
+    // Restore table + restaurant context so canOrder passes and new items can be submitted
+    if (order.tableId) {
+      setTableId(order.tableId);
+      localStorage.setItem('tableId', String(order.tableId));
+    }
+    if (order.tableNumber != null) {
+      setTableNumber(String(order.tableNumber));
+      localStorage.setItem('tableNumber', String(order.tableNumber));
+    }
+    if (order.restaurantId) {
+      setRestaurantId(order.restaurantId);
+      localStorage.setItem('restaurantId', order.restaurantId);
+      // Fetch restaurant display name if not already cached for this restaurant
+      const cachedName = localStorage.getItem('restaurantName');
+      if (!cachedName) {
+        getRestaurantInfo(order.restaurantId).then(info => {
+          if (info?.name) {
+            setRestaurantName(info.name);
+            localStorage.setItem('restaurantName', info.name);
+          }
+          if (info?.name_en) {
+            setRestaurantName_en(info.name_en);
+            localStorage.setItem('restaurantName_en', info.name_en);
+          }
+        }).catch(() => {});
+      }
+    }
+  }
+
+  function cancelEditingOrder() {
+    setEditingOrder(null);
+    setCart([]);
+    setServingGroups([DEFAULT_MAIN_GROUP]);
+    localStorage.removeItem('cartState');
+  }
 
   // ─── submit order ─────────────────────────────────────────────────────────
   //
@@ -569,6 +856,39 @@ export function AppProvider({ children }) {
   async function submitOrder() {
     const currentTableId      = tableId      || localStorage.getItem('tableId');
     const currentSessionToken = sessionToken || localStorage.getItem('sessionToken');
+
+    // ── Add dishes to an existing order ────────────────────────────────────
+    if (editingOrder) {
+      const apiItems = cart.map(item => {
+        const groupChoices = Object.entries(item.componentGroupSelections || {}).map(([groupId, optionId]) => ({ groupId, optionId }));
+        return {
+          menuItemId: item.id,
+          qty: item.quantity,
+          excludedIngredients: (item.excludedIngredients || []).map(i => typeof i === 'object' ? i.id : i),
+          addons: (item.selectedAddons || []).map(a => ({ addOnId: typeof a === 'object' ? a.id : a, quantity: 1 })),
+          componentGroupChoices: groupChoices,
+          comment: item.comment || '',
+        };
+      });
+
+      try {
+        await addGuestOrderItems(editingOrder.id, apiItems, currentSessionToken);
+        const fresh = await getOrder(editingOrder.id);
+        const normalized = fresh ? normalizeApiOrder(fresh) : null;
+        if (normalized) {
+          normalized.restaurantId      = restaurantId      || normalized.restaurantId || null;
+          normalized.restaurantName    = restaurantName    || '';
+          normalized.restaurantName_en = restaurantName_en || '';
+          setCurrentOrder(normalized);
+        }
+        setEditingOrder(null);
+        clearCart();
+        return normalized;
+      } catch (err) {
+        console.error('addGuestOrderItems error:', err);
+        throw err;
+      }
+    }
 
     // Build named serving groups (default/main group is implicit on backend)
     const servingGroupNameById = {};
@@ -621,7 +941,14 @@ export function AppProvider({ children }) {
       if (orderId) localStorage.setItem('orderId', String(orderId));
 
       const normalized = normalizeApiOrder(result);
+      // Enrich with restaurant display names — not available in the API response
+      if (normalized) {
+        normalized.restaurantId       = restaurantId       || normalized.restaurantId || null;
+        normalized.restaurantName     = restaurantName     || '';
+        normalized.restaurantName_en  = restaurantName_en  || '';
+      }
       setCurrentOrder(normalized);
+      setTableHasActiveOrder(false); // we placed the order — table is ours now
       clearCart();
       return normalized;
     } catch (err) {
@@ -641,13 +968,18 @@ export function AppProvider({ children }) {
       cartTotal, cartCount,
       tableNumber,
       sessionToken, tableId, restaurantId, restaurantName, restaurantName_en,
+      tableHasActiveOrder, setTableHasActiveOrder,
+      restoringOrder,
       restaurantLangs, restaurantDefaultLang, setRestaurantMeta,
       initSession, selectRestaurant,
       submitOrder,
       currentOrder, setCurrentOrder,
       orderHistory, addOrderToHistory,
       orderComment, setOrderComment,
+      editingOrder, startEditingOrder, cancelEditingOrder,
       servingGroups, addServingGroup, removeServingGroup, renameServingGroup,
+      wsStatus, wsLatency, wsSubscribe, addWsListener, removeWsListener,
+      notifications, unreadCount, markAllRead,
     }}>
       {children}
     </AppContext.Provider>

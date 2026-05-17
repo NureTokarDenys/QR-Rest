@@ -42,3 +42,12 @@ export async function getRestaurants(q, page = 1, limit = 20) {
   const res = await apiClient.get('/restaurants', { params });
   return res.data?.data ?? [];
 }
+
+/**
+ * Fetch public display info for a single restaurant by publicId.
+ * Returns { publicId, name, name_en, defaultLanguage, enabledLanguages }
+ */
+export async function getRestaurantInfo(publicId) {
+  const res = await apiClient.get(`/${publicId}/info`);
+  return res.data;
+}

@@ -16,6 +16,9 @@ import uaOrderStatus from './locales/ua/client/orderStatus.json';
 import uaMyOrders from './locales/ua/client/myOrders.json';
 import uaRestaurantReviews from './locales/ua/client/restaurantReviews.json';
 import uaRestaurantPicker from './locales/ua/client/restaurantPicker.json';
+import uaForgotPassword from './locales/ua/client/forgotPassword.json';
+import uaRegister from './locales/ua/client/register.json';
+import uaConfirmEmailChange from './locales/ua/client/confirmEmailChange.json';
 
 import uaTableMap from './locales/ua/staff/tableMap.json';
 import uaTableDetail from './locales/ua/staff/tableDetails.json';
@@ -48,6 +51,9 @@ import enOrderStatus from './locales/en/client/orderStatus.json';
 import enMyOrders from './locales/en/client/myOrders.json';
 import enRestaurantReviews from './locales/en/client/restaurantReviews.json';
 import enRestaurantPicker from './locales/en/client/restaurantPicker.json';
+import enForgotPassword from './locales/en/client/forgotPassword.json';
+import enRegister from './locales/en/client/register.json';
+import enConfirmEmailChange from './locales/en/client/confirmEmailChange.json';
 
 import enTableMap from './locales/en/staff/tableMap.json';
 import enTableDetail from './locales/en/staff/tableDetails.json';
@@ -75,6 +81,9 @@ i18n.use(initReactI18next).init({
       myOrders: uaMyOrders,
       restaurantReviews: uaRestaurantReviews,
       restaurantPicker: uaRestaurantPicker,
+      forgotPassword: uaForgotPassword,
+      register: uaRegister,
+      confirmEmailChange: uaConfirmEmailChange,
       tableMap: uaTableMap, tableDetail: uaTableDetail, cooking: uaCooking,
       orderDetail: uaOrderDetail, menuManagement: uaMenuManagement,
       dishEdit: uaDishEdit, pdfGenerator: uaPdfGenerator,
@@ -93,6 +102,9 @@ i18n.use(initReactI18next).init({
       myOrders: enMyOrders,
       restaurantReviews: enRestaurantReviews,
       restaurantPicker: enRestaurantPicker,
+      forgotPassword: enForgotPassword,
+      register: enRegister,
+      confirmEmailChange: enConfirmEmailChange,
       tableMap: enTableMap, tableDetail: enTableDetail, cooking: enCooking,
       orderDetail: enOrderDetail, menuManagement: enMenuManagement,
       dishEdit: enDishEdit, pdfGenerator: enPdfGenerator,

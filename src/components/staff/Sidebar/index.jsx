@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Logo from '../../Logo';
 import { useAuth } from '../../../context/AuthContext';
+import { useApp } from '../../../context/AppContext';
+import WsStatusChip from '../../WsStatusChip';
 import styles from './sidebar.module.css';
 
 import {
@@ -25,8 +27,8 @@ const ALL_NAV = {
 const NAV_BY_ROLE = {
   admin:       ['map', 'orders', 'cooking', 'menu', 'extras', 'analytics', 'staff', 'reviews', 'restaurant'],
   waiter:      ['map', 'orders'],
-  cook:        ['cooking'],
-  waiter_cook: ['map', 'orders', 'cooking'],
+  cook:        ['cooking', 'menu', 'extras'],
+  waiter_cook: ['map', 'orders', 'cooking', 'menu', 'extras'],
 };
 
 function getRoleName(role, t) {
@@ -42,6 +44,8 @@ export default function Sidebar({ isOpen = false, onClose = () => {} }) {
   const location = useLocation();
   const { t } = useTranslation('components');
   const { user } = useAuth();
+
+  const { wsStatus, wsLatency } = useApp();
 
   const role     = user?.role ?? 'waiter';
   const initials = user?.name
@@ -86,6 +90,7 @@ export default function Sidebar({ isOpen = false, onClose = () => {} }) {
       >
         <div className={styles.avatar}>{initials}</div>
         <span className={styles.roleName}>{roleName}</span>
+        <WsStatusChip status={wsStatus} latency={wsLatency} compact preferTop />
       </button>
     </aside>
   );

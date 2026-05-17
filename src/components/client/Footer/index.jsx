@@ -15,7 +15,7 @@ export default function Footer() {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation('footer');
-  const { currentOrder } = useApp();
+  const { currentOrder, unreadCount } = useApp();
 
   const tabs = [
     { path: '/menu',    label: t('menu'),    icon: <MdOutlineRestaurant /> },
@@ -35,8 +35,6 @@ export default function Footer() {
   );
   const showFab = !!currentOrder && hasUnservedItems && !onActiveOrderPage;
 
-  const itemCount = currentOrder?.items?.reduce((s, i) => s + (i.quantity ?? 1), 0) ?? 0;
-
   return (
     <>
       {showFab && (
@@ -46,8 +44,8 @@ export default function Footer() {
           aria-label="View active order"
         >
           <MdReceipt className={styles.fabIcon} />
-          {itemCount > 0 && (
-            <span className={styles.fabBadge}>{itemCount}</span>
+          {unreadCount > 0 && (
+            <span className={styles.fabBadge}>{unreadCount > 99 ? '99+' : unreadCount}</span>
           )}
         </button>
       )}

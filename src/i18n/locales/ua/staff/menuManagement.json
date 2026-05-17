@@ -13,5 +13,7 @@
   "actions": "ДІЇ",
   "edit": "Редагувати",
   "delete": "Видалити",
-  "confirmDelete": "Видалити страву?"
+  "confirmDelete": "Видалити страву?",
+  "confirmDeleteSub": "Видалити \"{{name}}\" з меню?",
+  "cancel": "Скасувати"
 }

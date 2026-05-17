@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import StaffShell from '../../../components/staff/StaffShell';
-import ReadonlyField from '../../../components/staff/ReadonlyField';
 import InputField from '../../../components/InputField';
 import { Dropdown } from '../../../components/Dropdown';
 import PrimaryButton from '../../../components/PrimaryButton';
@@ -10,20 +9,34 @@ import SecondaryButton from '../../../components/SecondaryButton';
 import styles from './staffSettings.module.css';
 import { useTheme } from '../../../context/ThemeContext';
 import { useAuth } from '../../../context/AuthContext';
-import { MdSettings, MdNotifications } from "react-icons/md";
+import { forgotPassword, requestEmailChange } from '../../../api/auth';
+import { MdSettings, MdNotifications } from 'react-icons/md';
 
 export default function StaffSettings() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation('staffSettings');
-  const { user, changePassword, logout } = useAuth();
-  const [lang, setLang]           = useState(i18n.language);
-  const [sound, setSound]         = useState(true);
-  const [currentPwd, setCurrentPwd] = useState('');
-  const [newPwd, setNewPwd]         = useState('');
-  const [confirmPwd, setConfirmPwd] = useState('');
-  const [pwdError, setPwdError]     = useState('');
-  const [pwdOk, setPwdOk]           = useState(false);
+  const { user, updateProfile, logout } = useAuth();
   const { theme, setTheme } = useTheme();
+
+  const [lang, setLang]     = useState(i18n.language);
+  const [sound, setSound]   = useState(true);
+
+  // ── Name editing ──────────────────────────────────
+  const [name,        setName]        = useState(user?.name || '');
+  const [nameSaving,  setNameSaving]  = useState(false);
+  const [nameOk,      setNameOk]      = useState(false);
+  const [nameError,   setNameError]   = useState('');
+
+  // ── Email change flow ─────────────────────────────
+  const [emailStep,    setEmailStep]    = useState(0); // 0=info 1=input 2=sent
+  const [emailInput,   setEmailInput]   = useState('');
+  const [emailSending, setEmailSending] = useState(false);
+  const [emailError,   setEmailError]   = useState('');
+
+  // ── Password reset ────────────────────────────────
+  const [resetSent,      setResetSent]      = useState(false);
+  const [resetSending,   setResetSending]   = useState(false);
+  const [resetSendError, setResetSendError] = useState('');
 
   const langOptions = [
     { value: 'ua', label: t('lang_ua') },
@@ -39,17 +52,54 @@ export default function StaffSettings() {
     i18n.changeLanguage(val);
   }
 
-  async function handleChangePassword() {
-    setPwdError('');
-    setPwdOk(false);
-    if (newPwd !== confirmPwd) { setPwdError(t('passwordMismatch') || 'Passwords do not match'); return; }
-    if (newPwd.length < 8)     { setPwdError(t('passwordTooShort') || 'Min 8 characters'); return; }
+  async function handleSaveName() {
+    setNameError('');
+    setNameOk(false);
+    if (!name.trim() || name.trim().length < 2) {
+      setNameError(t('minNameLength'));
+      return;
+    }
+    setNameSaving(true);
     try {
-      await changePassword(currentPwd, newPwd);
-      setCurrentPwd(''); setNewPwd(''); setConfirmPwd('');
-      setPwdOk(true);
+      await updateProfile({ name: name.trim() });
+      setNameOk(true);
+    } catch {
+      setNameError(t('nameError'));
+    } finally {
+      setNameSaving(false);
+    }
+  }
+
+  async function handleSendEmailConfirmation() {
+    setEmailError('');
+    const addr = emailInput.trim().toLowerCase();
+    if (!addr || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(addr)) {
+      setEmailError(t('emailInvalid'));
+      return;
+    }
+    setEmailSending(true);
+    try {
+      await requestEmailChange(addr);
+      setEmailStep(2);
     } catch (err) {
-      setPwdError(err?.response?.data?.error?.message || 'Failed to change password');
+      const code = err?.response?.data?.error?.code;
+      if (code === 'EMAIL_TAKEN') setEmailError(t('emailTaken'));
+      else setEmailError(t('emailInvalid'));
+    } finally {
+      setEmailSending(false);
+    }
+  }
+
+  async function handleSendResetLink() {
+    setResetSendError('');
+    setResetSending(true);
+    try {
+      await forgotPassword(user?.email);
+      setResetSent(true);
+    } catch {
+      setResetSendError(t('resetSendError'));
+    } finally {
+      setResetSending(false);
     }
   }
 
@@ -90,12 +140,34 @@ export default function StaffSettings() {
           </div>
 
           <div className={styles.grid2}>
-            {/* Personal data */}
+            {/* Personal data – editable */}
             <div className={styles.section}>
               <p className={styles.sectionTitle}>{t('personalData')}</p>
-              <ReadonlyField label={t('name')}  value={user?.name  || '—'} />
-              <ReadonlyField label={t('email')} value={user?.email || '—'} />
-              <ReadonlyField label={t('role')}  value={t(`role_${user?.role}`) || user?.role || '—'} />
+
+              {/* Name */}
+              <InputField
+                label={t('name')}
+                value={name}
+                onChange={e => { setName(e.target.value); setNameOk(false); setNameError(''); }}
+                onKeyDown={e => e.key === 'Enter' && handleSaveName()}
+              />
+              {nameError && <p style={{ color: '#c0392b', fontSize: 13, margin: '0 0 4px' }}>{nameError}</p>}
+              {nameOk    && <p style={{ color: '#27ae60', fontSize: 13, margin: '0 0 4px' }}>{t('nameSaved')}</p>}
+              <div style={{ width: 160 }}>
+                <PrimaryButton
+                  label={nameSaving ? '...' : t('saveName')}
+                  onClick={handleSaveName}
+                  disabled={nameSaving}
+                />
+              </div>
+
+              <div style={{ height: 8 }} />
+
+              {/* Role (readonly) */}
+              <div style={{ fontSize: 13, color: 'var(--secondary-text)', marginBottom: 2 }}>{t('role')}</div>
+              <div style={{ fontSize: 15, color: 'var(--primary-text)', fontWeight: 500 }}>
+                {t(`role_${user?.role}`) || user?.role || '—'}
+              </div>
             </div>
 
             {/* Interface settings */}
@@ -112,19 +184,96 @@ export default function StaffSettings() {
             </div>
           </div>
 
-          {/* Change password */}
+          {/* Email change */}
+          <div className={styles.section}>
+            <p className={styles.sectionTitle}>{t('editEmail')}</p>
+
+            <div style={{ fontSize: 13, color: 'var(--secondary-text)', marginBottom: 4 }}>{t('email')}</div>
+            <div style={{ fontSize: 15, color: 'var(--primary-text)', fontWeight: 500, marginBottom: 12 }}>
+              {user?.email || '—'}
+            </div>
+
+            {emailStep === 0 && (
+              <>
+                <p style={{ fontSize: 14, color: 'var(--secondary-text)', lineHeight: 1.5, margin: '0 0 12px',
+                  padding: 12, background: 'rgba(148,163,184,0.08)', borderRadius: 10,
+                  border: '1px solid var(--separator-color)' }}>
+                  {t('emailChangeDesc')}
+                </p>
+                <div style={{ width: 200 }}>
+                  <PrimaryButton label={t('emailChangeContinue')} onClick={() => setEmailStep(1)} />
+                </div>
+              </>
+            )}
+
+            {emailStep === 1 && (
+              <>
+                <InputField
+                  label={t('emailNewLabel')}
+                  type="email"
+                  value={emailInput}
+                  onChange={e => { setEmailInput(e.target.value); setEmailError(''); }}
+                  onKeyDown={e => e.key === 'Enter' && handleSendEmailConfirmation()}
+                />
+                {emailError && <p style={{ color: '#c0392b', fontSize: 13, margin: '4px 0' }}>{emailError}</p>}
+                <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
+                  <div style={{ flex: 1 }}>
+                    <PrimaryButton
+                      label={emailSending ? '...' : t('emailSendConfirmation')}
+                      onClick={handleSendEmailConfirmation}
+                      disabled={emailSending}
+                    />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <SecondaryButton label={t('back')} onClick={() => { setEmailStep(0); setEmailError(''); }} />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {emailStep === 2 && (
+              <>
+                <p style={{ fontSize: 15, fontWeight: 700, color: '#16a34a', margin: '0 0 6px' }}>
+                  {t('emailChangeSentTitle')}
+                </p>
+                <p style={{ fontSize: 14, color: 'var(--secondary-text)', lineHeight: 1.5, margin: 0 }}>
+                  {t('emailChangeSentBody', { email: emailInput })}
+                </p>
+              </>
+            )}
+          </div>
+
+          {/* Password reset */}
           <div className={styles.section}>
             <p className={styles.sectionTitle}>{t('changePassword')}</p>
-            <div className={styles.grid3}>
-              <InputField label={t('currentPassword')} type="password" placeholder="••••••••" value={currentPwd} onChange={e => setCurrentPwd(e.target.value)} />
-              <InputField label={t('newPassword')}     type="password" placeholder="••••••••" value={newPwd}     onChange={e => setNewPwd(e.target.value)} />
-              <InputField label={t('confirmPassword')} type="password" placeholder="••••••••" value={confirmPwd} onChange={e => setConfirmPwd(e.target.value)} />
-            </div>
-            {pwdError && <p style={{ color: '#c0392b', fontSize: 13, marginTop: 4 }}>{pwdError}</p>}
-            {pwdOk    && <p style={{ color: '#27ae60', fontSize: 13, marginTop: 4 }}>{t('passwordChanged') || 'Password changed!'}</p>}
-            <div style={{ width: 200, marginTop: 8 }}>
-              <PrimaryButton label={t('changePasswordBtn')} onClick={handleChangePassword} />
-            </div>
+            {resetSent ? (
+              <>
+                <p style={{ fontSize: 15, fontWeight: 700, color: '#16a34a', margin: '0 0 6px' }}>
+                  {t('resetSentTitle')}
+                </p>
+                <p style={{ fontSize: 14, color: 'var(--secondary-text)', lineHeight: 1.5, margin: 0 }}>
+                  {t('resetSentBody')}
+                </p>
+              </>
+            ) : (
+              <>
+                <p style={{ fontSize: 14, color: 'var(--secondary-text)', lineHeight: 1.5, margin: '0 0 12px',
+                  padding: 12, background: 'rgba(148,163,184,0.08)', borderRadius: 10,
+                  border: '1px solid var(--separator-color)' }}>
+                  {t('resetPasswordInfo')}
+                </p>
+                {resetSendError && (
+                  <p style={{ color: '#c0392b', fontSize: 13, margin: '0 0 8px' }}>{resetSendError}</p>
+                )}
+                <div style={{ width: 200 }}>
+                  <PrimaryButton
+                    label={resetSending ? '...' : t('sendResetLink')}
+                    onClick={handleSendResetLink}
+                    disabled={resetSending}
+                  />
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

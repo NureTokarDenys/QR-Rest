@@ -1,0 +1,19 @@
+{
+    "title": "Create account",
+    "subtitle": "Join to save your orders and preferences.",
+    "name": "Full name",
+    "email": "Email",
+    "password": "Password",
+    "confirm_password": "Confirm password",
+    "register": "Create account",
+    "have_account": "Already have an account?",
+    "sign_in": "Sign in",
+
+    "fill_fields": "Please fill in all fields",
+    "name_too_short": "Name must be at least 2 characters",
+    "invalid_email": "Enter a valid email address",
+    "password_too_short": "Password must be at least 8 characters",
+    "password_mismatch": "Passwords do not match",
+    "email_taken": "This email is already registered.",
+    "error_generic": "Registration failed. Please try again."
+}

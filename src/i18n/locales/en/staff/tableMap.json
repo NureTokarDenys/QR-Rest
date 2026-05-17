@@ -17,7 +17,5 @@
   "avgCheck": "Avg. check",
   "accept": "Accept",
   "waiterCalled": "waiter called",
-  "newOrder": "New order",
-  "moreOrders_one": "{{count}} more order",
-  "moreOrders_other": "{{count}} more orders"
+  "newOrder": "New order"
 }

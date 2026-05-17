@@ -10,7 +10,7 @@ import InputField from '../../../components/InputField';
 import { useTheme } from '../../../context/ThemeContext';
 import { useAuth } from '../../../context/AuthContext';
 import { useApp } from '../../../context/AppContext';
-import { initiateGoogleOAuth } from '../../../api/auth';
+import { initiateGoogleOAuth, forgotPassword, requestEmailChange } from '../../../api/auth';
 import ConfirmDialog from '../../../components/ConfirmDialog';
 import styles from './profile.module.css';
 import { useTranslation } from 'react-i18next';
@@ -40,7 +40,10 @@ export default function Profile() {
   const { i18n }                = useTranslation();
   const { t }                   = useTranslation('profile');
   const navigate                = useNavigate();
-  const { user, isAuthenticated, updateProfile, changePassword, logout } = useAuth();
+  const { user, isAuthenticated, updateProfile, changePassword, logout, deleteAccount } = useAuth();
+  const [resetSent,      setResetSent]      = useState(false);
+  const [resetSending,   setResetSending]   = useState(false);
+  const [resetSendError, setResetSendError] = useState('');
   const { restaurantLangs }     = useApp();
 
   // ── Confirm dialog ────────────────────────────────
@@ -65,9 +68,15 @@ export default function Profile() {
 
   // ── Edit sheet state ──────────────────────────────
   const [sheet, setSheet]       = useState(null); // 'name' | 'email' | 'password'
-  const [fields, setFields]     = useState({ name: '', email: '', currentPw: '', newPw: '', confirmPw: '' });
+  const [fields, setFields]     = useState({ name: '', currentPw: '', newPw: '', confirmPw: '' });
   const [sheetError, setSheetError] = useState('');
   const [saving, setSaving]     = useState(false);
+
+  // ── Email change flow state ───────────────────────
+  const [emailStep,    setEmailStep]    = useState(0); // 0=info 1=input 2=sent
+  const [emailInput,   setEmailInput]   = useState('');
+  const [emailSending, setEmailSending] = useState(false);
+  const [emailError,   setEmailError]   = useState('');
 
   // Show only the languages the restaurant has enabled.
   // If restaurantLangs is empty the restaurant hasn't configured anything yet
@@ -80,14 +89,13 @@ export default function Profile() {
   // ── Sheet helpers ─────────────────────────────────
 
   function openSheet(type) {
-    setFields({
-      name:      user?.name  || '',
-      email:     user?.email || '',
-      currentPw: '',
-      newPw:     '',
-      confirmPw: '',
-    });
+    setFields({ name: user?.name || '', currentPw: '', newPw: '', confirmPw: '' });
     setSheetError('');
+    setResetSent(false);
+    setResetSendError('');
+    setEmailStep(0);
+    setEmailInput('');
+    setEmailError('');
     setSheet(type);
   }
 
@@ -100,6 +108,35 @@ export default function Profile() {
     setFields(prev => ({ ...prev, [key]: val }));
   }
 
+  async function handleSendEmailConfirmation() {
+    setEmailError('');
+    const addr = emailInput.trim().toLowerCase();
+    if (!addr || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(addr)) {
+      setEmailError(t('email_invalid'));
+      return;
+    }
+    setEmailSending(true);
+    try {
+      await requestEmailChange(addr);
+      setEmailStep(2);
+    } catch (err) {
+      const code = err?.response?.data?.error?.code;
+      if (code === 'EMAIL_TAKEN') setEmailError(t('email_taken'));
+      else setEmailError(t('save_error'));
+    } finally {
+      setEmailSending(false);
+    }
+  }
+
+  async function handleDeleteAccount() {
+    try {
+      await deleteAccount();
+    } catch {
+      // deleteAccount navigates away; ignore errors
+    }
+    setDialog(null);
+  }
+
   async function handleSave() {
     setSheetError('');
     setSaving(true);
@@ -109,15 +146,9 @@ export default function Profile() {
         await updateProfile({ name: fields.name.trim() });
         closeSheet();
 
-      } else if (sheet === 'email') {
-        if (!fields.email.trim()) { setSheetError(t('email_required')); return; }
-        await updateProfile({ email: fields.email.trim() });
-        closeSheet();
-
       } else if (sheet === 'password') {
-        if (!fields.newPw) { setSheetError(t('fill_fields')); return; }
+        if (!fields.newPw || fields.newPw.length < 8) { setSheetError(t('password_too_short')); return; }
         if (fields.newPw !== fields.confirmPw) { setSheetError(t('password_mismatch')); return; }
-        if (fields.newPw.length < 8) { setSheetError(t('password_too_short')); return; }
         // currentPw may be blank for Google-only accounts setting a password for the first time
         await changePassword(fields.currentPw, fields.newPw);
         closeSheet();
@@ -175,6 +206,24 @@ export default function Profile() {
         confirmLabel={t('clear_cache_dialog_confirm')}
         cancelLabel={t('cancel')}
         onConfirm={confirmClearCache}
+        onCancel={() => setDialog(null)}
+      />
+      <ConfirmDialog
+        open={dialog === 'deleteAccount1'}
+        title={t('delete_account_dialog1_title')}
+        message={t('delete_account_dialog1_message')}
+        confirmLabel={t('delete_account_dialog1_confirm')}
+        cancelLabel={t('cancel')}
+        onConfirm={() => setDialog('deleteAccount2')}
+        onCancel={() => setDialog(null)}
+      />
+      <ConfirmDialog
+        open={dialog === 'deleteAccount2'}
+        title={t('delete_account_dialog2_title')}
+        message={t('delete_account_dialog2_message')}
+        confirmLabel={t('delete_account_dialog2_confirm')}
+        cancelLabel={t('cancel')}
+        onConfirm={handleDeleteAccount}
         onCancel={() => setDialog(null)}
       />
     </>
@@ -300,6 +349,13 @@ export default function Profile() {
         <SettingsSection>
           <SettingsRow label={t('logout')} onClick={() => setDialog('logout')} danger />
         </SettingsSection>
+
+        {/* ── Delete account (guests only) ── */}
+        {user?.role === 'guest' && (
+          <SettingsSection>
+            <SettingsRow label={t('delete_account')} onClick={() => setDialog('deleteAccount1')} danger />
+          </SettingsSection>
+        )}
       </div>
 
       {dialogs}
@@ -310,11 +366,12 @@ export default function Profile() {
           <div className={styles.sheet} onClick={e => e.stopPropagation()}>
             <div className={styles.sheetHandle} />
             <h3 className={styles.sheetTitle}>
-              {sheet === 'name'     ? t('edit_name')          :
-               sheet === 'email'   ? t('edit_email')          :
+              {sheet === 'name'     ? t('edit_name') :
+               sheet === 'email'   ? t('email_change_title') :
                                      t('change_password_title')}
             </h3>
 
+            {/* ── Name ── */}
             {sheet === 'name' && (
               <InputField
                 label={t('name')}
@@ -324,27 +381,49 @@ export default function Profile() {
               />
             )}
 
-            {sheet === 'email' && (
-              <InputField
-                label={t('enail')}
-                type="email"
-                value={fields.email}
-                onChange={e => setField('email', e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && handleSave()}
-              />
+            {/* ── Email – 3-step flow ── */}
+            {sheet === 'email' && emailStep === 0 && (
+              <div className={styles.resetInfo}>
+                <p className={styles.resetInfoText}>{t('email_change_desc')}</p>
+              </div>
+            )}
+            {sheet === 'email' && emailStep === 1 && (
+              <>
+                <InputField
+                  label={t('email_new_label')}
+                  type="email"
+                  value={emailInput}
+                  onChange={e => setEmailInput(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleSendEmailConfirmation()}
+                />
+                {emailError && <p className={styles.sheetError}>{emailError}</p>}
+              </>
+            )}
+            {sheet === 'email' && emailStep === 2 && (
+              <div className={styles.resetInfo}>
+                <p className={styles.resetSentTitle}>{t('email_change_sent_title')}</p>
+                <p className={styles.resetSentBody}>{t('email_change_sent_body', { email: emailInput })}</p>
+              </div>
             )}
 
-            {sheet === 'password' && (
-              <>
-                {/* Skip "current password" field for Google-only accounts */}
-                {!googleOnly && (
-                  <InputField
-                    label={t('current_password')}
-                    type="password"
-                    value={fields.currentPw}
-                    onChange={e => setField('currentPw', e.target.value)}
-                  />
+            {/* ── Password – reset link for regular / set-password form for Google-only ── */}
+            {sheet === 'password' && !googleOnly && (
+              <div className={styles.resetInfo}>
+                {resetSent ? (
+                  <>
+                    <p className={styles.resetSentTitle}>{t('reset_sent_title')}</p>
+                    <p className={styles.resetSentBody}>{t('reset_sent_body', { email: user?.email })}</p>
+                  </>
+                ) : (
+                  <>
+                    <p className={styles.resetInfoText}>{t('reset_password_info')}</p>
+                    {resetSendError && <p className={styles.sheetError}>{resetSendError}</p>}
+                  </>
                 )}
+              </div>
+            )}
+            {sheet === 'password' && googleOnly && (
+              <>
                 <InputField
                   label={t('new_password')}
                   type="password"
@@ -358,18 +437,68 @@ export default function Profile() {
                   onChange={e => setField('confirmPw', e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleSave()}
                 />
+                {sheetError && <p className={styles.sheetError}>{sheetError}</p>}
               </>
             )}
 
-            {sheetError && <p className={styles.sheetError}>{sheetError}</p>}
-
             <div className={styles.sheetActions}>
-              <PrimaryButton
-                label={saving ? '...' : t('save')}
-                onClick={handleSave}
-                disabled={saving}
-              />
-              <SecondaryButton label={t('cancel')} onClick={closeSheet} />
+              {/* Email flow actions */}
+              {sheet === 'email' && emailStep === 0 && (
+                <>
+                  <PrimaryButton label={t('email_change_continue')} onClick={() => setEmailStep(1)} />
+                  <SecondaryButton label={t('cancel')} onClick={closeSheet} />
+                </>
+              )}
+              {sheet === 'email' && emailStep === 1 && (
+                <>
+                  <PrimaryButton
+                    label={emailSending ? '...' : t('email_send_confirmation')}
+                    onClick={handleSendEmailConfirmation}
+                    disabled={emailSending}
+                  />
+                  <SecondaryButton label={t('cancel')} onClick={() => setEmailStep(0)} />
+                </>
+              )}
+              {sheet === 'email' && emailStep === 2 && (
+                <SecondaryButton label={t('cancel')} onClick={closeSheet} />
+              )}
+
+              {/* Password sheet – reset link for regular accounts */}
+              {sheet === 'password' && !googleOnly && (
+                <>
+                  {!resetSent && (
+                    <PrimaryButton
+                      label={resetSending ? '...' : t('send_reset_link')}
+                      onClick={async () => {
+                        setResetSendError('');
+                        setResetSending(true);
+                        try {
+                          await forgotPassword(user?.email);
+                          setResetSent(true);
+                        } catch {
+                          setResetSendError(t('reset_send_error'));
+                        } finally {
+                          setResetSending(false);
+                        }
+                      }}
+                      disabled={resetSending}
+                    />
+                  )}
+                  <SecondaryButton label={t('cancel')} onClick={closeSheet} />
+                </>
+              )}
+
+              {/* Name and Google-only password form */}
+              {(sheet === 'name' || (sheet === 'password' && googleOnly)) && (
+                <>
+                  <PrimaryButton
+                    label={saving ? '...' : t('save')}
+                    onClick={handleSave}
+                    disabled={saving}
+                  />
+                  <SecondaryButton label={t('cancel')} onClick={closeSheet} />
+                </>
+              )}
             </div>
           </div>
         </div>

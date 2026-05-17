@@ -41,6 +41,7 @@ export default function MenuManagement() {
   const [query, setQuery] = useState('');
   const [dishes, setDishes] = useState([]);
   const [cats, setCats] = useState([]);
+  const [deleteDialog, setDeleteDialog] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -73,13 +74,11 @@ export default function MenuManagement() {
   }
 
   async function handleDelete(id) {
-    if (window.confirm(t('confirmDelete'))) {
-      try {
-        await deleteMenuItem(id);
-        setDishes(prev => prev.filter(d => d.id !== id));
-      } catch (err) {
-        console.error('deleteMenuItem error:', err);
-      }
+    try {
+      await deleteMenuItem(id);
+      setDishes(prev => prev.filter(d => d.id !== id));
+    } catch (err) {
+      console.error('deleteMenuItem error:', err);
     }
   }
 
@@ -126,7 +125,10 @@ export default function MenuManagement() {
                     dish={dish}
                     dish_category={cats.find(c => c.id === dish.category)}
                     onToggle={handleToggle}
-                    onDelete={handleDelete}
+                    onDelete={(id) => {
+                      const target = dishes.find(d => d.id === id);
+                      setDeleteDialog({ id, name: target?.name || '' });
+                    }}
                   />
                 ))}
               </tbody>
@@ -134,6 +136,29 @@ export default function MenuManagement() {
           </div>
         </div>
       </div>
+      {deleteDialog && (
+        <div className={styles.overlay} onClick={() => setDeleteDialog(null)}>
+          <div className={styles.dialog} onClick={(e) => e.stopPropagation()}>
+            <p className={styles.dialogTitle}>{t('confirmDelete')}</p>
+            <p className={styles.dialogSub}>{t('confirmDeleteSub', { name: deleteDialog.name })}</p>
+            <div className={styles.dialogActions}>
+              <button className={styles.dialogCancel} onClick={() => setDeleteDialog(null)}>
+                {t('cancel')}
+              </button>
+              <button
+                className={styles.dialogConfirm}
+                onClick={async () => {
+                  const id = deleteDialog.id;
+                  setDeleteDialog(null);
+                  await handleDelete(id);
+                }}
+              >
+                {t('delete')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </StaffShell>
   );
 }

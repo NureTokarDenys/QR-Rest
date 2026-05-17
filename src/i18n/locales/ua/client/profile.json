@@ -15,8 +15,13 @@
     "theme_dark": "Темна",
     "security": "Безпека",
     "change_password": "Змінити пароль",
-    "change_password_title": "Змінити пароль",
+    "change_password_title": "Скидання пароля",
     "change": "Змінити",
+    "reset_password_info": "Ми надішлемо посилання для скидання пароля на вашу пошту. Посилання дійсне 1 годину.",
+    "send_reset_link": "Надіслати посилання",
+    "reset_sent_title": "Перевірте пошту",
+    "reset_sent_body": "Посилання для скидання пароля надіслано на {{email}}. Дотримуйтесь інструкцій у листі.",
+    "reset_send_error": "Не вдалося надіслати посилання. Спробуйте ще раз.",
     "logout": "Вихід",
 
     "guest": "Гість",
@@ -58,5 +63,23 @@
 
     "clear_cache_dialog_title": "Очистити кешовані дані?",
     "clear_cache_dialog_message": "Буде видалено збережену сесію, кошик та дані ресторану. Вас буде перенаправлено до вибору ресторану.",
-    "clear_cache_dialog_confirm": "Очистити дані"
+    "clear_cache_dialog_confirm": "Очистити дані",
+
+    "email_change_title": "Змінити пошту",
+    "email_change_desc": "Ми надішлемо посилання для підтвердження на нову адресу. Пошта буде змінена лише після кліку по посиланню.",
+    "email_change_continue": "Продовжити",
+    "email_new_label": "Нова електронна адреса",
+    "email_send_confirmation": "Надіслати підтвердження",
+    "email_change_sent_title": "Перевірте пошту",
+    "email_change_sent_body": "Посилання для підтвердження надіслано на {{email}}. Перейдіть за ним, щоб активувати нову адресу.",
+    "email_taken": "Ця адреса вже використовується.",
+    "email_invalid": "Введіть коректну електронну адресу.",
+
+    "delete_account": "Видалити акаунт",
+    "delete_account_dialog1_title": "Видалити акаунт?",
+    "delete_account_dialog1_message": "Ваш акаунт та всі пов'язані дані будуть назавжди видалені. Цю дію не можна скасувати.",
+    "delete_account_dialog1_confirm": "Так, видалити",
+    "delete_account_dialog2_title": "Ви абсолютно впевнені?",
+    "delete_account_dialog2_message": "Це назавжди видалить ваш акаунт. Відновити його буде неможливо.",
+    "delete_account_dialog2_confirm": "Видалити назавжди"
 }

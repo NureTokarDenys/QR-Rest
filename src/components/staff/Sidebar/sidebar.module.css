@@ -95,6 +95,11 @@
 .roleName {
   font-size: 13px;
   color: var(--menu-secondary-text);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Mobile: hidden by default, shown as overlay drawer */

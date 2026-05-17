@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import Logo from '../../components/Logo';
 import InputField from '../../components/InputField';
 import PrimaryButton from '../../components/PrimaryButton';
@@ -9,12 +9,11 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { initiateGoogleOAuth } from '../../api/auth';
 
-/** Maps a user role to the correct landing page after login. */
 function staffHome(role) {
   if (role === 'cook')   return '/staff/cooking';
   if (role === 'waiter') return '/staff/map';
   if (role === 'admin')  return '/staff/map';
-  return '/menu';
+  return '/';
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -26,28 +25,19 @@ export default function Login() {
   const navigate = useNavigate();
   const { login, loginAsGuest, isAuthenticated, user } = useAuth();
 
-  // If the user already has a valid session, skip the login screen.
   useEffect(() => {
-    if (isAuthenticated && user) {
-      navigate(staffHome(user.role), { replace: true });
-    }
+    if (isAuthenticated && user) navigate(staffHome(user.role), { replace: true });
   }, [isAuthenticated, user, navigate]);
 
   const [email,    setEmail]    = useState('');
   const [password, setPassword] = useState('');
-
-  // Per-field validation errors (shown after blur or submit attempt)
   const [emailError,    setEmailError]    = useState('');
   const [passwordError, setPasswordError] = useState('');
-
-  // Server / general error
-  const [serverError, setServerError] = useState('');
-  const [loading,     setLoading]     = useState(false);
-
-  // ── Validators ─────────────────────────────────────────────────────────────
+  const [serverError,   setServerError]   = useState('');
+  const [loading,       setLoading]       = useState(false);
 
   function validateEmail(val) {
-    if (!val)              return t('fill_fields');
+    if (!val)                return t('fill_fields');
     if (!EMAIL_RE.test(val)) return t('invalid_email');
     return '';
   }
@@ -58,7 +48,6 @@ export default function Login() {
     return '';
   }
 
-  /** Run all validators; sets field errors and returns true if form is valid. */
   function validateAll() {
     const eErr = validateEmail(email);
     const pErr = validatePassword(password);
@@ -67,18 +56,14 @@ export default function Login() {
     return !eErr && !pErr;
   }
 
-  // ── Handlers ───────────────────────────────────────────────────────────────
-
   async function handleLogin() {
     setServerError('');
     if (!validateAll()) return;
-
     setLoading(true);
     try {
-      const user = await login(email, password);
-      navigate(staffHome(user?.role));
+      const u = await login(email, password);
+      navigate(staffHome(u?.role));
     } catch (err) {
-      console.error('Login error:', err);
       const apiMsg = err?.response?.data?.message;
       setServerError(apiMsg || t('login_error'));
     } finally {
@@ -121,6 +106,9 @@ export default function Login() {
             error={passwordError}
             autoComplete="current-password"
           />
+          <Link to="/forgot-password" className={styles.forgotLink}>
+            {t('forgot_password')}
+          </Link>
           {serverError && <p className={styles.errorMsg}>{serverError}</p>}
         </div>
 
@@ -147,19 +135,20 @@ export default function Login() {
           />
         </div>
 
+        <p className={styles.signupRow}>
+          {t('no_account')}{' '}
+          <Link to="/register" className={styles.signupLink}>{t('create_one')}</Link>
+        </p>
+
         <div className={styles.langRow}>
           <button
             className={`${styles.langBtn} ${i18n.language === 'ua' ? styles.langActive : ''}`}
             onClick={() => i18n.changeLanguage('ua')}
-          >
-            UA
-          </button>
+          >UA</button>
           <button
             className={`${styles.langBtn} ${i18n.language === 'en' ? styles.langActive : ''}`}
             onClick={() => i18n.changeLanguage('en')}
-          >
-            EN
-          </button>
+          >EN</button>
         </div>
       </div>
     </div>

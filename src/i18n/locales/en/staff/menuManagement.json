@@ -13,5 +13,7 @@
   "actions": "ACTIONS",
   "edit": "Edit",
   "delete": "Delete",
-  "confirmDelete": "Delete dish?"
+  "confirmDelete": "Delete dish?",
+  "confirmDeleteSub": "Delete \"{{name}}\" from menu?",
+  "cancel": "Cancel"
 }

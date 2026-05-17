@@ -79,6 +79,12 @@ export function AuthProvider({ children }) {
     return authApi.changePassword(currentPassword, newPassword);
   }
 
+  async function deleteAccount() {
+    await authApi.deleteAccount();
+    _clear();
+    window.location.href = '/login';
+  }
+
   async function logout() {
     try {
       await authApi.logout();
@@ -102,6 +108,10 @@ export function AuthProvider({ children }) {
     if (u?.restaurantId) {
       localStorage.setItem('restaurantId', u.restaurantId);
     }
+    // Clear any guest session so the WS hook authenticates as staff (JWT)
+    // rather than accidentally reusing a leftover session token
+    localStorage.removeItem('sessionToken');
+    localStorage.removeItem('tableId');
     setAccessToken(at);
     setUser(u);
   }
@@ -120,7 +130,7 @@ export function AuthProvider({ children }) {
     <AuthContext.Provider value={{
       accessToken, user, isAuthenticated, isStaff,
       login, loginAsGuest, loginFromOAuth,
-      updateProfile, changePassword, logout,
+      updateProfile, changePassword, deleteAccount, logout,
     }}>
       {children}
     </AuthContext.Provider>

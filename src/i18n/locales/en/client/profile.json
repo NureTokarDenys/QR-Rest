@@ -15,8 +15,13 @@
     "theme_dark": "Dark",
     "security": "Security",
     "change_password": "Change Password",
-    "change_password_title": "Change Password",
+    "change_password_title": "Reset Password",
     "change": "Change",
+    "reset_password_info": "We'll send a reset link to your email address. The link is valid for 1 hour.",
+    "send_reset_link": "Send reset link",
+    "reset_sent_title": "Check your inbox",
+    "reset_sent_body": "A password reset link has been sent to {{email}}. Follow the instructions in the email.",
+    "reset_send_error": "Failed to send reset link. Please try again.",
     "logout": "Logout",
 
     "guest": "Guest",
@@ -58,5 +63,23 @@
 
     "clear_cache_dialog_title": "Clear cached data?",
     "clear_cache_dialog_message": "This will remove your saved session, cart, and restaurant data. You'll be taken to the restaurant picker.",
-    "clear_cache_dialog_confirm": "Clear data"
+    "clear_cache_dialog_confirm": "Clear data",
+
+    "email_change_title": "Change Email",
+    "email_change_desc": "We'll send a confirmation link to your new email address. Your email will only be updated after you click that link.",
+    "email_change_continue": "Continue",
+    "email_new_label": "New email address",
+    "email_send_confirmation": "Send confirmation",
+    "email_change_sent_title": "Check your inbox",
+    "email_change_sent_body": "A confirmation link has been sent to {{email}}. Click it to activate your new email address.",
+    "email_taken": "This email is already in use.",
+    "email_invalid": "Please enter a valid email address.",
+
+    "delete_account": "Delete account",
+    "delete_account_dialog1_title": "Delete account?",
+    "delete_account_dialog1_message": "Your account and all associated data will be permanently deleted. This cannot be undone.",
+    "delete_account_dialog1_confirm": "Yes, delete",
+    "delete_account_dialog2_title": "Are you absolutely sure?",
+    "delete_account_dialog2_message": "This will permanently delete your account. You will not be able to recover it.",
+    "delete_account_dialog2_confirm": "Delete permanently"
 }

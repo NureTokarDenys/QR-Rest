@@ -1,0 +1,53 @@
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  position: sticky;
+  top: 52px; /* sits just below the sticky header (min-height: 52px) */
+  z-index: 9;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.reconnecting {
+  background: #f59e0b;
+  color: #fff;
+}
+
+.failed {
+  background: #ef4444;
+  color: #fff;
+}
+
+.icon {
+  flex-shrink: 0;
+  font-size: 16px;
+}
+
+.spin {
+  animation: spin 1.2s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.reloadBtn {
+  margin-left: auto;
+  background: rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 4px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.reloadBtn:hover {
+  background: rgba(255, 255, 255, 0.35);
+}

@@ -1,0 +1,66 @@
+.page {
+  width: 100%;
+  min-height: 100vh;
+  background: var(--bg-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.container {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.logoSection {
+  display: flex;
+  justify-content: center;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.icon {
+  font-size: 48px;
+  line-height: 1;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--primary-text);
+  margin: 0;
+}
+
+.message {
+  font-size: 15px;
+  color: var(--secondary-text);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.link {
+  display: inline-block;
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--accent-color);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.link:hover {
+  text-decoration: underline;
+}

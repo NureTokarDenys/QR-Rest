@@ -8,5 +8,10 @@
     "abcent": "(Absent)",
     "snipet": "The order will be sent to the kitchen immediately after confirmation",
     "confirm_and_sent": "Confirm and send",
-    "edit_order": "Edit order"
+    "edit_order": "Edit order",
+    "no_table_hint": "Scan the QR code on your table to place an order",
+    "submit_error": "Failed to place order. Please try again.",
+    "confirm_add": "Confirm and add",
+    "locked_section_label": "Already ordered",
+    "adding_to_order": "Adding to order #{{id}}"
 }

@@ -9,18 +9,18 @@ import { getTables, getMenuItems } from '../../../api/admin';
 import {
   getOrder, getTableOrders,
   addOrderItems, updateOrderItem, deleteOrderItem,
-  getWaiterCalls, confirmWaiterCall,
+  voidOrder,
+  getWaiterCalls, resolveWaiterCall,
+  openTableRecovery,
 } from '../../../api/orders';
 import styles from './tableDetail.module.css';
 
-import { MdEdit, MdDelete, MdAdd, MdCheck, MdClose, MdSearch } from 'react-icons/md';
+import { MdEdit, MdDelete, MdAdd, MdCheck, MdClose, MdSearch, MdBlock } from 'react-icons/md';
 
 function mapStatus(s) {
   if (!s) return 'free';
-  if (s === 'occupied')    return 'busy';
-  if (s === 'waiter_call') return 'waiter';
-  if (s === 'reserved')    return 'reserved';
-  return s;
+  if (s === 'occupied') return 'busy';
+  return s; // free, disabled
 }
 
 // Accepts t() so the output respects the current UI language
@@ -52,12 +52,57 @@ export default function TableDetail() {
   // inline edit state
   const [editItem, setEditItem] = useState(null);
 
+  // void order state
+  const [voidingOrderId, setVoidingOrderId] = useState(null);
+  const [voidReason, setVoidReason]         = useState('');
+  const [voidSaving, setVoidSaving]         = useState(false);
+  const [voidError, setVoidError]           = useState('');
+
+  // recovery-window state
+  const [recoveryWindowUntil, setRecoveryWindowUntil] = useState(null); // Date | null
+  const [recoveryOpening, setRecoveryOpening]         = useState(false);
+  const [countdown, setCountdown]                     = useState(null); // seconds remaining | null
+
   // add-items panel state
   const [addOrderId, setAddOrderId]   = useState(null);
   const [allMenuItems, setAllMenuItems] = useState([]);
   const [search, setSearch]           = useState('');
   const [addQtys, setAddQtys]         = useState({});
   const [addSaving, setAddSaving]     = useState(false);
+
+  // ── Recovery-window countdown ─────────────────────────────────────────────────
+  useEffect(() => {
+    if (!recoveryWindowUntil) { setCountdown(null); return; }
+    function tick() {
+      const remaining = Math.max(0, Math.ceil((recoveryWindowUntil.getTime() - Date.now()) / 1000));
+      setCountdown(remaining);
+      if (remaining === 0) setRecoveryWindowUntil(null);
+    }
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [recoveryWindowUntil]);
+
+  function formatCountdown(secs) {
+    const m = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${m}:${String(s).padStart(2, '0')}`;
+  }
+
+  async function openRecoveryWindow() {
+    if (!tableInfo._id) return;
+    setRecoveryOpening(true);
+    try {
+      const data = await openTableRecovery(tableInfo._id);
+      if (data?.recoveryWindowClosesAt) {
+        setRecoveryWindowUntil(new Date(data.recoveryWindowClosesAt));
+      }
+    } catch (err) {
+      console.error('openRecoveryWindow error:', err);
+    } finally {
+      setRecoveryOpening(false);
+    }
+  }
 
   // ── Dish status label map (uses t so it reacts to language changes) ──────────
   const dishStatusLabel = {
@@ -101,25 +146,24 @@ export default function TableDetail() {
         shortCode: apiTable.shortCode || null,
       });
 
-      const refs = apiTable.currentOrders ?? (apiTable.currentOrder ? [apiTable.currentOrder] : []);
+      const ref = apiTable.currentOrder ?? null;
 
       const [loaded, hist, allCalls] = await Promise.all([
-        Promise.all(
-          refs.map(async ref => {
-            const data  = await getOrder(ref._id);
-            const items = (data?.items || []).map(i => ({
-              id:      i._id,
-              name:    i.menuItemId?.name || '—',
-              qty:     i.qty ?? i.quantity ?? 1,
-              price:   i.totalPrice ?? 0,
-              status:  i.dishStatus || 'waiting',
-              comment: i.comment || '',
-            }));
-            return { orderId: ref._id, order: data?.order, items };
-          })
-        ),
+        ref
+          ? getOrder(ref._id).then(data => {
+              const items = (data?.items || []).map(i => ({
+                id:      i._id,
+                name:    i.menuItemId?.name || '—',
+                qty:     i.qty ?? i.quantity ?? 1,
+                price:   i.totalPrice ?? 0,
+                status:  i.dishStatus || 'waiting',
+                comment: i.comment || '',
+              }));
+              return [{ orderId: ref._id, order: data?.order, items }];
+            })
+          : Promise.resolve([]),
         getTableOrders(tableId),
-        getWaiterCalls({ confirmed: 'false' }),
+        getWaiterCalls({ status: 'active' }),
       ]);
 
       setOrders(loaded);
@@ -144,11 +188,11 @@ export default function TableDetail() {
     if (!pendingCall) return;
     setAcceptingCall(true);
     try {
-      await confirmWaiterCall(pendingCall._id);
+      await resolveWaiterCall(pendingCall._id);
       setPendingCall(null);
       load(); // refresh table status
     } catch (err) {
-      console.error('confirmWaiterCall error:', err);
+      console.error('resolveWaiterCall error:', err);
     } finally {
       setAcceptingCall(false);
     }
@@ -166,6 +210,38 @@ export default function TableDetail() {
       load();
     } catch (err) {
       console.error('updateOrderItem error:', err);
+    }
+  }
+
+  // ── Void order ───────────────────────────────────────────────────────────────
+  function openVoid(orderId) {
+    setVoidingOrderId(orderId);
+    setVoidReason('');
+    setVoidError('');
+  }
+
+  function cancelVoid() {
+    setVoidingOrderId(null);
+    setVoidReason('');
+    setVoidError('');
+  }
+
+  async function handleVoidOrder() {
+    if (voidReason.trim().length < 10) {
+      setVoidError(t('voidReasonTooShort'));
+      return;
+    }
+    setVoidSaving(true);
+    setVoidError('');
+    try {
+      await voidOrder(voidingOrderId, voidReason.trim());
+      cancelVoid();
+      load();
+    } catch (err) {
+      console.error('voidOrder error:', err);
+      setVoidError(err?.response?.data?.message || t('voidReasonTooShort'));
+    } finally {
+      setVoidSaving(false);
     }
   }
 
@@ -213,7 +289,7 @@ export default function TableDetail() {
   }
 
   // ── Computed ─────────────────────────────────────────────────────────────────
-  const grandTotal   = orders.reduce((s, o) => s + o.items.reduce((s2, i) => s2 + (i.price || 0), 0), 0);
+  const grandTotal   = orders[0]?.items.reduce((s, i) => s + (i.price || 0), 0) ?? 0;
   const filteredMenu = allMenuItems.filter(m =>
     !search || m.name.toLowerCase().includes(search.toLowerCase())
   );
@@ -232,6 +308,26 @@ export default function TableDetail() {
           <div className={styles.titleBlock}>
             <h2 className={styles.tableTitle}>{tableInfo.name}</h2>
             <p className={styles.tableSub}>{t('hall')} A · {tableInfo.seats} {t('seats')}</p>
+          </div>
+
+          <div className={styles.scanWindowRow}>
+            {countdown !== null ? (
+              <>
+                <span className={styles.scanWindowBanner}>🔄 {t('recoveryWindowOpen') || 'Відновлення відкрито'}</span>
+                <button className={`${styles.scanWindowBtn} ${styles.scanWindowBtnActive}`} disabled>
+                  {formatCountdown(countdown)}
+                </button>
+              </>
+            ) : (
+              <button
+                className={styles.scanWindowBtn}
+                onClick={openRecoveryWindow}
+                disabled={recoveryOpening}
+                title={t('recoveryWindowHint') || 'Відкрити 1-хвилинне вікно для відновлення сесії гостя'}
+              >
+                🔄 {recoveryOpening ? '…' : (t('openRecoveryWindow') || 'Відновити сесію')}
+              </button>
+            )}
           </div>
         </div>
 
@@ -258,20 +354,56 @@ export default function TableDetail() {
             value={tableStatusLabel(tableInfo.status)}
             highlight={isWaiterCall}
           />
-          <MicroStat label={t('orders')} value={orders.length} />
+          <MicroStat label={t('currentOrder')} value={orders.length ? `#${orders[0].orderId}` : '—'} />
           <MicroStat label={t('total')} value={`${grandTotal.toFixed(0)}₴`} highlight />
         </div>
 
-        {/* ── Orders table ── */}
+        {/* ── Order ── */}
         {loading ? (
           <div className={styles.noOrder}>{t('loading')}</div>
         ) : orders.length === 0 ? (
           <div className={styles.noOrder}>{t('noOrder')}</div>
-        ) : (
+        ) : (() => {
+          const o = orders[0];
+          const subTotal = o.items.reduce((s, i) => s + (i.price || 0), 0);
+          return (
           <div className={styles.orderBox}>
             <div className={styles.orderHeader}>
-              <p className={styles.orderTitle}>{t('activeOrders')}</p>
+              <p className={styles.orderTitle}>{t('currentOrder')} #{o.orderId}</p>
+              <div className={styles.sepActions}>
+                <button className={styles.addBtn} onClick={() => openAddPanel(o.orderId)}>
+                  <MdAdd /> {t('addDishes')}
+                </button>
+                <button
+                  className={`${styles.addBtn} ${styles.voidBtn}`}
+                  onClick={() => voidingOrderId === o.orderId ? cancelVoid() : openVoid(o.orderId)}
+                >
+                  <MdBlock /> {t('voidOrder')}
+                </button>
+              </div>
             </div>
+
+            {voidingOrderId === o.orderId && (
+              <div className={styles.voidForm}>
+                <textarea
+                  className={styles.voidReasonInput}
+                  value={voidReason}
+                  onChange={e => { setVoidReason(e.target.value); setVoidError(''); }}
+                  placeholder={t('voidReasonPlaceholder')}
+                  rows={2}
+                  autoFocus
+                />
+                {voidError && <span className={styles.voidError}>{voidError}</span>}
+                <div className={styles.voidActions}>
+                  <button className={styles.voidConfirmBtn} onClick={handleVoidOrder} disabled={voidSaving}>
+                    {voidSaving ? '…' : t('confirmVoid')}
+                  </button>
+                  <button className={styles.voidCancelBtn} onClick={cancelVoid}>
+                    {t('cancel')}
+                  </button>
+                </div>
+              </div>
+            )}
 
             <table className={styles.table}>
               <thead>
@@ -283,117 +415,68 @@ export default function TableDetail() {
                   <th style={{ width: 80 }}></th>
                 </tr>
               </thead>
-
-              {orders.map(o => {
-                const subTotal = o.items.reduce((s, i) => s + (i.price || 0), 0);
-                return (
-                  <React.Fragment key={o.orderId}>
-
-                    {/* ── Order section header ── */}
-                    <tbody>
-                      <tr className={styles.orderSepRow}>
-                        <td colSpan={4} className={styles.orderSepCell}>
-                          <div className={styles.orderSepInner}>
-                            <span className={styles.orderSepId}>#{o.orderId}</span>
-                            <span className={styles.orderSepTime}>{timeAgo(o.order?.createdAt, t)}</span>
+              <tbody>
+                {o.items.map(item => {
+                  const isEditing = editItem?.itemId === item.id && editItem?.orderId === o.orderId;
+                  return (
+                    <tr key={item.id} className={styles.tableRow}>
+                      <td className={styles.td}>{item.name}</td>
+                      <td className={styles.td}>
+                        {isEditing ? (
+                          <input
+                            type="number"
+                            min={1}
+                            className={styles.qtyInput}
+                            value={editItem.qty}
+                            onChange={e => setEditItem(p => ({ ...p, qty: Number(e.target.value) }))}
+                          />
+                        ) : item.qty}
+                      </td>
+                      <td className={`${styles.td} ${styles.priceCell}`}>{item.price.toFixed(0)}₴</td>
+                      <td className={styles.td}>
+                        <span className={`${styles.badge} ${styles[item.status]}`}>
+                          {dishStatusLabel[item.status] || item.status}
+                        </span>
+                      </td>
+                      <td className={styles.td}>
+                        {isEditing ? (
+                          <div className={styles.rowActions}>
+                            <button className={styles.saveBtn} onClick={saveEdit} title={t('confirm')}><MdCheck /></button>
+                            <button className={styles.cancelBtn} onClick={() => setEditItem(null)} title={t('cancel')}><MdClose /></button>
                           </div>
-                        </td>
-                        <td className={styles.orderSepAction}>
-                          <button className={styles.addBtn} onClick={() => openAddPanel(o.orderId)}>
-                            <MdAdd /> {t('addDishes')}
-                          </button>
-                        </td>
-                      </tr>
-                    </tbody>
-
-                    {/* ── Items ── */}
-                    <tbody>
-                      {o.items.map(item => {
-                        const isEditing = editItem?.itemId === item.id && editItem?.orderId === o.orderId;
-                        return (
-                          <tr key={item.id} className={styles.tableRow}>
-                            <td className={styles.td}>{item.name}</td>
-
-                            <td className={styles.td}>
-                              {isEditing ? (
-                                <input
-                                  type="number"
-                                  min={1}
-                                  className={styles.qtyInput}
-                                  value={editItem.qty}
-                                  onChange={e => setEditItem(p => ({ ...p, qty: Number(e.target.value) }))}
-                                />
-                              ) : item.qty}
-                            </td>
-
-                            <td className={`${styles.td} ${styles.priceCell}`}>
-                              {item.price.toFixed(0)}₴
-                            </td>
-
-                            <td className={styles.td}>
-                              <span className={`${styles.badge} ${styles[item.status]}`}>
-                                {dishStatusLabel[item.status] || item.status}
-                              </span>
-                            </td>
-
-                            <td className={styles.td}>
-                              {isEditing ? (
-                                <div className={styles.rowActions}>
-                                  <button className={styles.saveBtn} onClick={saveEdit} title={t('confirm')}>
-                                    <MdCheck />
-                                  </button>
-                                  <button className={styles.cancelBtn} onClick={() => setEditItem(null)} title={t('cancel')}>
-                                    <MdClose />
-                                  </button>
-                                </div>
-                              ) : item.status === 'waiting' ? (
-                                <div className={styles.rowActions}>
-                                  <button
-                                    className={styles.iconBtn}
-                                    title={t('editOrder')}
-                                    onClick={() => setEditItem({ orderId: o.orderId, itemId: item.id, qty: item.qty, comment: item.comment })}
-                                  >
-                                    <MdEdit />
-                                  </button>
-                                  <button
-                                    className={`${styles.iconBtn} ${styles.deleteIconBtn}`}
-                                    title={t('voidOrder')}
-                                    onClick={() => handleDelete(o.orderId, item.id)}
-                                  >
-                                    <MdDelete />
-                                  </button>
-                                </div>
-                              ) : null}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-
-                    {/* ── Sub-total ── */}
-                    <tbody>
-                      <tr className={styles.subTotalRow}>
-                        <td colSpan={2} className={styles.subTotalLabel}>{t('subtotal')}:</td>
-                        <td colSpan={3} className={styles.subTotalVal}>{subTotal.toFixed(0)}₴</td>
-                      </tr>
-                    </tbody>
-
-                  </React.Fragment>
-                );
-              })}
-
-              {/* ── Grand total (only when 2+ orders) ── */}
-              {orders.length > 1 && (
-                <tbody>
-                  <tr className={styles.grandTotalRow}>
-                    <td colSpan={2} className={styles.grandTotalLabel}>{t('grandTotal')}:</td>
-                    <td colSpan={3} className={styles.grandTotalVal}>{grandTotal.toFixed(0)}₴</td>
-                  </tr>
-                </tbody>
-              )}
+                        ) : item.status === 'waiting' ? (
+                          <div className={styles.rowActions}>
+                            <button
+                              className={styles.iconBtn}
+                              title={t('editOrder')}
+                              onClick={() => setEditItem({ orderId: o.orderId, itemId: item.id, qty: item.qty, comment: item.comment })}
+                            >
+                              <MdEdit />
+                            </button>
+                            <button
+                              className={`${styles.iconBtn} ${styles.deleteIconBtn}`}
+                              title={t('voidOrder')}
+                              onClick={() => handleDelete(o.orderId, item.id)}
+                            >
+                              <MdDelete />
+                            </button>
+                          </div>
+                        ) : null}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+              <tbody>
+                <tr className={styles.subTotalRow}>
+                  <td colSpan={2} className={styles.subTotalLabel}>{t('total')}:</td>
+                  <td colSpan={3} className={styles.subTotalVal}>{subTotal.toFixed(0)}₴</td>
+                </tr>
+              </tbody>
             </table>
           </div>
-        )}
+          );
+        })()}
 
         {/* ── Add-items panel ── */}
         {addOrderId && (

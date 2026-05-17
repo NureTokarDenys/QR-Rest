@@ -2,7 +2,9 @@ import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import StaffShell from '../../../components/staff/StaffShell';
 import KanbanColumn from '../../../components/staff/KanbanColumn';
+import WsStatusBanner from '../../../components/WsStatusBanner';
 import { getKitchenOrders, updateGroupStatus } from '../../../api/kitchen';
+import { useWebSocket } from '../../../hooks/useWebSocket';
 import styles from './cooking.module.css';
 
 import { MdLocalFireDepartment, MdViewColumn, MdTableChart } from 'react-icons/md';
@@ -181,6 +183,34 @@ function applyGroupUpdate(orders, orderId, groupId, newStatus) {
   });
 }
 
+// Apply an incoming DISH_STATUS_UPDATED event in-place
+function applyDishStatusUpdate(orders, orderId, orderItemId, dishStatus) {
+  return orders.map(order => {
+    if (String(order._id || order.id) !== String(orderId)) return order;
+    return {
+      ...order,
+      items: (order.items || []).map(item =>
+        String(item._id) === String(orderItemId) ? { ...item, dishStatus } : item
+      ),
+    };
+  });
+}
+
+// Apply an incoming GROUP_STATUS_UPDATED event — set all items in the group
+function applyGroupStatusEvent(orders, orderId, groupId, status) {
+  return orders.map(order => {
+    if (String(order._id || order.id) !== String(orderId)) return order;
+    return {
+      ...order,
+      items: (order.items || []).map(item =>
+        item.servingGroupId && String(item.servingGroupId) === String(groupId)
+          ? { ...item, dishStatus: status }
+          : item
+      ),
+    };
+  });
+}
+
 export default function Cooking() {
   const { t } = useTranslation('cooking');
   const { t: tc } = useTranslation('components');
@@ -205,9 +235,35 @@ export default function Cooking() {
     }
   }, []);
 
+  // ── WebSocket ──────────────────────────────────────────────────────────────
+  const handleWsMessage = useCallback((msg) => {
+    const { event, payload } = msg;
+    if (!payload) return;
+
+    if (event === 'ORDER_NEW' || event === 'ORDER_UPDATED') {
+      // New/updated order — full refetch to get all item details
+      fetchOrders();
+      return;
+    }
+    if (event === 'ORDER_VOID' || event === 'ORDER_CANCELLED') {
+      setOrders(prev => prev.filter(o => String(o._id || o.id) !== String(payload.orderId)));
+      return;
+    }
+    if (event === 'DISH_STATUS_UPDATED') {
+      setOrders(prev => applyDishStatusUpdate(prev, payload.orderId, payload.orderItemId, payload.dishStatus));
+      return;
+    }
+    if (event === 'GROUP_STATUS_UPDATED') {
+      setOrders(prev => applyGroupStatusEvent(prev, payload.orderId, payload.groupId, payload.status));
+    }
+  }, [fetchOrders]);
+
+  const { status: wsStatus } = useWebSocket({ onMessage: handleWsMessage });
+
   useEffect(() => {
     fetchOrders();
-    const interval = setInterval(fetchOrders, 15000);
+    // Fallback poll — fires if WS events are missed (network hiccup, proxy, etc.)
+    const interval = setInterval(fetchOrders, 60_000);
     return () => clearInterval(interval);
   }, [fetchOrders]);
 
@@ -354,6 +410,8 @@ export default function Cooking() {
         </div>
       }
     >
+      <WsStatusBanner status={wsStatus} />
+
       {view === 'order' ? (
         <div className={styles.board}>
           {STATUSES.map(status => (

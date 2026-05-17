@@ -10,6 +10,7 @@ import Footer from '../../../components/client/Footer';
 import styles from './cart.module.css';
 import { useTranslation } from 'react-i18next';
 import { useLocalField } from '../../../i18n/useLang';
+import { MdLock } from 'react-icons/md';
 
 import { MdShoppingCart, MdAdd, MdDelete, MdEdit, MdCheck, MdDragIndicator } from 'react-icons/md';
 
@@ -19,8 +20,17 @@ export default function Cart() {
   const navigate = useNavigate();
   const {
     cart, cartTotal, orderComment, setOrderComment,
+    tableId, tableHasActiveOrder,
     servingGroups, addServingGroup, removeServingGroup, renameServingGroup, moveToGroup,
+    editingOrder, cancelEditingOrder,
+    currentOrder, startEditingOrder,
   } = useApp();
+
+  const TERMINAL = new Set(['completed', 'void', 'voided', 'cancelled', 'paid', 'closed']);
+  // True when there is a live order and we are NOT already in the "add-to-order" flow
+  const hasActiveOrder = !editingOrder && currentOrder && !TERMINAL.has(currentOrder.status);
+
+  const canOrder = Boolean(tableId) && !tableHasActiveOrder;
 
   const [editingGroupId, setEditingGroupId] = useState(null);
   const [editGroupName, setEditGroupName] = useState('');
@@ -118,6 +128,65 @@ export default function Cart() {
       />
 
       <div className={styles.content}>
+        {/* ── Table occupied — menu-only mode ── */}
+        {tableHasActiveOrder && !hasActiveOrder && (
+          <div className={styles.activeOrderBanner}>
+            <p className={styles.activeOrderTitle}>⚠ {t('table_occupied')}</p>
+            <p className={styles.activeOrderHint}>{t('table_occupied_hint')}</p>
+          </div>
+        )}
+
+        {/* ── Active-order guard ── */}
+        {hasActiveOrder && (
+          <div className={styles.activeOrderBanner}>
+            <p className={styles.activeOrderTitle}>⚠ {t('active_order_exists')}</p>
+            <p className={styles.activeOrderHint}>{t('active_order_hint')}</p>
+            <div className={styles.activeOrderActions}>
+              <PrimaryButton
+                label={t('view_active_order')}
+                onClick={() => navigate(`/order-status/${currentOrder.id}`)}
+              />
+              <SecondaryButton
+                label={`+ ${t('add_to_active_order')}`}
+                onClick={() => { startEditingOrder(currentOrder); }}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* ── Editing banner + locked previous-order section ── */}
+        {editingOrder && (
+          <>
+            <div className={styles.editingBanner}>
+              <MdLock className={styles.editingBannerIcon} />
+              <div>
+                <p className={styles.editingBannerTitle}>{t('editing_banner', { id: editingOrder.id })}</p>
+                <p className={styles.editingBannerHint}>{t('editing_banner_hint')}</p>
+              </div>
+            </div>
+
+            <div className={styles.lockedBlock}>
+              <p className={styles.lockedLabel}>{t('locked_section_label')}</p>
+              {(editingOrder.servingGroups || []).map(group => {
+                const groupItems = (editingOrder.items || []).filter(i => i.groupId === group.id);
+                return (
+                  <div key={group.id} className={styles.lockedGroup}>
+                    <p className={styles.lockedGroupName}>{local(group, 'name')}</p>
+                    {groupItems.map(item => (
+                      <div key={item.orderItemId || item.id} className={styles.lockedItem}>
+                        <span className={styles.lockedItemName}>{local(item, 'name')}</span>
+                        <span className={styles.lockedItemQty}>×{item.quantity}</span>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })}
+            </div>
+
+            <p className={styles.newItemsLabel}>{t('new_items_label')}</p>
+          </>
+        )}
+
         {cart.length === 0 ? (
           <div className={styles.empty}>
             <span className={styles.emptyIcon}><MdShoppingCart /></span>
@@ -229,17 +298,32 @@ export default function Cart() {
       </div>
 
       <div className={styles.footer}>
-        {cart.length > 0 ? (
-          <PrimaryButton
-            label={`${t('confirm_offer')} ${cartTotal}₴`}
-            onClick={() => navigate('/confirm')}
-            disabled={cart.length === 0}
-          />
-        ) : null}
+        {cart.length > 0 && (
+          <>
+            <PrimaryButton
+              label={editingOrder
+                ? `${t('confirm_add')} ${cartTotal}₴`
+                : `${t('confirm_offer')} ${cartTotal}₴`}
+              onClick={() => navigate('/confirm')}
+              disabled={!canOrder || hasActiveOrder}
+            />
+            {!canOrder && (
+              <p className={styles.noTableHint}>
+                📍 {t('no_table_hint') || 'Відскануйте QR-код на вашому столику, щоб зробити замовлення'}
+              </p>
+            )}
+          </>
+        )}
         <SecondaryButton
           label={t('back_to_menu')}
           onClick={() => navigate('/menu')}
         />
+        {editingOrder && (
+          <SecondaryButton
+            label={`✕ ${t('cancel_editing')}`}
+            onClick={() => { cancelEditingOrder(); navigate(`/order-status/${editingOrder.id}`); }}
+          />
+        )}
       </div>
 
       <Footer />

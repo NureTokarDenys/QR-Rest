@@ -20,6 +20,15 @@
   box-sizing: border-box;
 }
 
+.loading,
+.empty {
+  font-size: 14px;
+  color: var(--secondary-text, #888);
+  text-align: center;
+  padding: 40px 0;
+  grid-column: 1 / -1;
+}
+
 /* ════════ Responsive ════════ */
 
 @media (min-width: 600px) {

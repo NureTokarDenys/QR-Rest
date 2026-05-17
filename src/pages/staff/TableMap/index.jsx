@@ -9,10 +9,9 @@ import { MdMap } from "react-icons/md";
 
 
 const LEGEND = [
-  { className: 'free',   label_ua: 'Вільний',  label_en: 'Free' },
-  { className: 'busy',   label_ua: 'Зайнятий', label_en: 'Busy' },
-  { className: 'bill', label_ua: 'Рахунок',  label_en: 'Bill' },
-  { className: 'waiter', label_ua: 'Виклик офіціанта', label_en: 'Waiter call' },
+  { className: 'free',     label_ua: 'Вільний',  label_en: 'Free' },
+  { className: 'busy',     label_ua: 'Зайнятий', label_en: 'Busy' },
+  { className: 'disabled', label_ua: 'Вимкнений', label_en: 'Disabled' },
 ];
 
 // Map API status → UI status key
@@ -20,8 +19,7 @@ function mapStatus(apiStatus) {
   if (!apiStatus) return 'free';
   const s = apiStatus.toLowerCase();
   if (s === 'occupied') return 'busy';
-  if (s === 'waiter_call') return 'waiter';
-  return s; // free, bill
+  return s; // free, disabled
 }
 
 function mapDishes(items = []) {
@@ -37,13 +35,13 @@ function mapDishes(items = []) {
 
 // Normalize API table to shape expected by TableMapItem
 function normaliseTable(t) {
-  const rawOrders = t.currentOrders ?? (t.currentOrder ? [t.currentOrder] : []);
+  const raw = t.currentOrder ?? null;
   return {
     id:     t.number ?? t._id,
     name:   t.name || t.label || `Стіл ${t.number}`,
     status: mapStatus(t.status),
     seats:  t.capacity ?? t.seats ?? 4,
-    orders: rawOrders.map(o => ({ id: o._id, dishes: mapDishes(o.items) })),
+    orders: raw ? [{ id: raw._id, dishes: mapDishes(raw.items) }] : [],
   };
 }
 

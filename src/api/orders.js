@@ -19,13 +19,32 @@ export async function getMyOrders(params = {}) {
   return res.data?.data; // Order[]  (no items embedded — list view only)
 }
 
-export async function voidOrder(orderId, reason, restaurantId = getStoredRestaurantId()) {
-  const res = await apiClient.post(`/${restaurantId}/orders/${orderId}/void`, { reason });
+export async function cancelOrder(orderId, reason, restaurantId = getStoredRestaurantId()) {
+  const res = await apiClient.post(`/${restaurantId}/orders/${orderId}/cancel`, { reason });
   return res.data?.data;
+}
+
+export async function voidOrder(orderId, reason, restaurantId = getStoredRestaurantId()) {
+  return cancelOrder(orderId, reason, restaurantId);
 }
 
 export async function addOrderItems(orderId, items, restaurantId = getStoredRestaurantId()) {
   const res = await apiClient.post(`/${restaurantId}/orders/${orderId}/items`, { items });
+  return res.data?.data;
+}
+
+export async function addGuestOrderItems(orderId, items, sessionToken, restaurantId = getStoredRestaurantId()) {
+  const res = await apiClient.post(`/${restaurantId}/orders/${orderId}/guest-items`, { sessionToken, items });
+  return res.data?.data; // { newGroup, items }
+}
+
+export async function cancelGuestOrder(orderId, sessionToken, restaurantId = getStoredRestaurantId()) {
+  const res = await apiClient.post(`/${restaurantId}/orders/${orderId}/client-cancel`, { sessionToken });
+  return res.data?.data;
+}
+
+export async function cancelGuestServingGroup(orderId, groupId, sessionToken, restaurantId = getStoredRestaurantId()) {
+  const res = await apiClient.post(`/${restaurantId}/orders/${orderId}/serving-groups/${groupId}/client-cancel`, { sessionToken });
   return res.data?.data;
 }
 
@@ -48,12 +67,38 @@ export async function waiterCall(orderId, restaurantId = getStoredRestaurantId()
   return res.data?.data;
 }
 
+export async function waiterCallCash(orderId, restaurantId = getStoredRestaurantId()) {
+  const res = await apiClient.post(`/${restaurantId}/orders/${orderId}/waiter-call-cash`);
+  return res.data?.data;
+}
+
+export async function initiatePayment(orderId, restaurantId = getStoredRestaurantId()) {
+  const res = await apiClient.post(`/${restaurantId}/payments/initiate`, { orderId });
+  return res.data?.data; // { data, signature, publicKey }
+}
+
 export async function getWaiterCalls(params = {}, restaurantId = getStoredRestaurantId()) {
   const res = await apiClient.get(`/${restaurantId}/waiter/calls`, { params });
   return res.data?.data ?? [];
 }
 
-export async function confirmWaiterCall(callId, restaurantId = getStoredRestaurantId()) {
-  const res = await apiClient.patch(`/${restaurantId}/waiter/calls/${callId}/confirm`);
+export async function resolveWaiterCall(callId, restaurantId = getStoredRestaurantId()) {
+  const res = await apiClient.patch(`/${restaurantId}/waiter/calls/${callId}/resolve`);
   return res.data?.data;
+}
+
+export async function getOrderNotifications(orderId, restaurantId = getStoredRestaurantId()) {
+  const res = await apiClient.get(`/${restaurantId}/notifications/${orderId}/notifications`);
+  return res.data?.data ?? [];
+}
+
+export async function markNotificationsRead(orderId, restaurantId = getStoredRestaurantId()) {
+  const res = await apiClient.patch(`/${restaurantId}/notifications/${orderId}/notifications/read-all`);
+  return res.data?.data;
+}
+
+// Staff opens a 1-minute recovery window so a guest who lost their cookie can re-scan
+export async function openTableRecovery(tableId, restaurantId = getStoredRestaurantId()) {
+  const res = await apiClient.post(`/${restaurantId}/waiter/tables/${tableId}/session/recovery`);
+  return res.data?.data; // { tableId, tableNumber, recoveryWindowClosesAt }
 }

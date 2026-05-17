@@ -73,6 +73,36 @@
   background: var(--separator-color);
 }
 
+.forgotLink {
+  display: block;
+  text-align: right;
+  font-size: 13px;
+  color: var(--accent-color);
+  text-decoration: none;
+  margin-top: -4px;
+}
+
+.forgotLink:hover {
+  text-decoration: underline;
+}
+
+.signupRow {
+  font-size: 14px;
+  color: var(--secondary-text);
+  text-align: center;
+  margin: 0;
+}
+
+.signupLink {
+  color: var(--accent-color);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.signupLink:hover {
+  text-decoration: underline;
+}
+
 .langRow {
   display: flex;
   justify-content: center;

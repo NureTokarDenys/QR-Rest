@@ -49,8 +49,8 @@ function buildAnalyticsData(revenue, orderStats, popularDishes) {
   if (Array.isArray(orderStats)) {
     orderStats.forEach(s => { if (s._id) statsMap[s._id] = s.count ?? 0; });
   }
-  const completed = statsMap.completed ?? 0;
-  const voided    = statsMap.void ?? statsMap.cancelled ?? 0;
+  const completed = (statsMap.completed_cash ?? 0) + (statsMap.completed_epay ?? 0);
+  const voided    = statsMap.cancelled ?? 0;
   const total     = completed + voided;
   const conversionPct = total > 0 ? Math.round((completed / total) * 100) : 0;
   const avgCheck  = completed > 0 ? Math.round(totalRevenue / completed) : 0;

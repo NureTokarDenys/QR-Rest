@@ -2,5 +2,13 @@
     "header": "My Orders",
     "order_label": "Order",
     "total_sum": "Total",
-    "order_details": "View Details"
+    "order_details": "View Details",
+    "loading": "Loading…",
+    "empty": "No orders yet",
+    "status_open": "In progress",
+    "status_cancelled": "Cancelled",
+    "status_completed_cash": "Paid (cash)",
+    "status_completed_epay": "Paid (online)",
+    "status_void": "Cancelled",
+    "status_payment": "Awaiting payment"
 }

@@ -1,0 +1,15 @@
+{
+  "title_loading": "Verifying…",
+  "title_success": "Email Updated",
+  "title_expired": "Link Expired",
+  "title_invalid": "Invalid Link",
+  "title_taken":   "Email Unavailable",
+
+  "message_loading": "Please wait while we confirm your new email address.",
+  "message_success": "Your email has been successfully changed to {{email}}.",
+  "message_expired": "This confirmation link has expired. Please request a new one from your profile settings.",
+  "message_invalid": "This confirmation link is invalid or has already been used.",
+  "message_taken":   "This email address was registered by another account in the meantime. Please choose a different email.",
+
+  "go_profile": "Back to Profile"
+}

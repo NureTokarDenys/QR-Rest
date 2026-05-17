@@ -2,5 +2,13 @@
     "header": "Мої замовлення",
     "order_label": "Замовлення",
     "total_sum": "Загальна сума",
-    "order_details": "Деталі"
+    "order_details": "Деталі",
+    "loading": "Завантаження…",
+    "empty": "Замовлень поки немає",
+    "status_open": "В процесі",
+    "status_cancelled": "Скасовано",
+    "status_completed_cash": "Оплачено готівкою",
+    "status_completed_epay": "Оплачено онлайн",
+    "status_void": "Скасовано",
+    "status_payment": "Очікує оплати"
 }

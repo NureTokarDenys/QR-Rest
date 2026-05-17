@@ -29,6 +29,25 @@
   margin: 0;
 }
 
+.cancelBtn {
+  color: var(--primary-text);
+  border: 1px solid var(--separator-color);
+  background-color: var(--danger-color);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 14px;
+}
+
+.saveBtn {
+  color: var(--primary-text);
+  border: 1px solid var(--separator-color);
+  background-color: var(--accent-color);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 14px;
+}
+
+
 .langBar {
   margin-bottom: 4px;
 }

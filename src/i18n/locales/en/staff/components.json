@@ -40,6 +40,12 @@
   "edit": "Edit",
   "delete": "Delete",
   "waiterCalled": "needs a waiter",
+  "waiterCalledCash": "cash payment requested",
+  "voidOrder": "Cancel order",
+  "voidReasonPlaceholder": "Reason for cancellation (min. 10 chars)...",
+  "voidReasonTooShort": "Enter at least 10 characters",
+  "confirmVoid": "Confirm cancellation",
+  "cancel": "Cancel",
   "newOrder": "New order",
   "accept": "Accept",
   "uploadHint": "Drag photo here or click",
@@ -64,5 +70,14 @@
   "nav_extras": "Extras",
   "nav_staff": "Staff",
   "nav_reviews": "Reviews",
-  "nav_restaurant": "Settings"
+  "nav_restaurant": "Settings",
+
+  "ws_online_label": "Online",
+  "ws_online_desc": "Live updates active. Changes appear instantly.",
+  "ws_reconnecting_label": "Reconnecting…",
+  "ws_reconnecting_desc": "Connection lost. Retrying automatically.",
+  "ws_connecting_desc": "Establishing connection to server.",
+  "ws_offline_label": "Offline",
+  "ws_offline_desc": "Could not connect. Reload the page to retry.",
+  "ws_ping": "Ping"
 }

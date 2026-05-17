@@ -6,15 +6,15 @@
 .page {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  max-width: 900px;
+  gap: 18px;
+  width: 100%;
 }
 
 .section {
   background: var(--surface-color);
   border: 1px solid var(--separator-color);
   border-radius: 14px;
-  padding: 20px;
+  padding: 22px;
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -28,6 +28,16 @@
   letter-spacing: 0.5px;
   margin: 0;
 }
+
+.saveBtn {
+  color: #fff;
+  border: 1px solid #1d7afc;
+  background-color: #1d7afc;
+  border-radius: 6px;
+  padding: 7px 14px;
+  font-size: 14px;
+}
+
 
 .langBar {
   margin-bottom: 4px;
@@ -67,8 +77,8 @@
 }
 
 .logoDropzone {
-  width: 180px;
-  height: 120px;
+  width: 220px;
+  height: 140px;
   border: 2px dashed var(--separator-color);
   border-radius: 12px;
   display: flex;
@@ -109,8 +119,8 @@
 }
 
 .logoPreview {
-  width: 120px;
-  height: 80px;
+  width: 180px;
+  height: 120px;
   object-fit: contain;
   border-radius: 8px;
   border: 1px solid var(--separator-color);
@@ -140,6 +150,22 @@
   cursor: pointer;
   color: var(--accent-color);
   align-self: flex-end;
+}
+
+.logoButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cancelLogoBtn {
+  background: none;
+  border: 1px solid var(--separator-color);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--secondary-text);
 }
 
 /* ── Language checkboxes ── */

@@ -176,6 +176,13 @@
   text-align: right;
 }
 
+.sepActions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
 .addBtn {
   display: inline-flex;
   align-items: center;
@@ -194,6 +201,80 @@
 .addBtn:hover {
   background: #dbeafe;
 }
+
+.voidBtn {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.voidBtn:hover { background: #fee2e2; }
+
+/* ── Void form ── */
+.voidFormRow td {
+  padding: 10px 16px 14px;
+  background: #fff5f5;
+  border-bottom: 2px solid #fecaca;
+}
+
+.voidForm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.voidReasonInput {
+  width: 100%;
+  min-height: 60px;
+  border: 1.5px solid #fca5a5;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--primary-text);
+  background: #fff;
+  resize: none;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.voidReasonInput:focus { border-color: #ef4444; }
+
+.voidError {
+  font-size: 12px;
+  color: #dc2626;
+}
+
+.voidActions {
+  display: flex;
+  gap: 8px;
+}
+
+.voidConfirmBtn {
+  padding: 6px 16px;
+  border-radius: 8px;
+  border: none;
+  background: #ef4444;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.voidConfirmBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+.voidConfirmBtn:hover:not(:disabled) { background: #dc2626; }
+
+.voidCancelBtn {
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--separator-color);
+  background: none;
+  font-size: 13px;
+  color: var(--secondary-text);
+  cursor: pointer;
+}
+
+.voidCancelBtn:hover { background: var(--bg-color); }
 
 /* ── Inline row edit ── */
 .qtyInput {
@@ -512,4 +593,59 @@
   .bottomRow { grid-template-columns: 1fr; }
   .td { padding: 10px 12px; }
   .tableHead th { padding: 8px 12px; }
+}
+
+/* ── Scan window opener ── */
+.scanWindowRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.scanWindowBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border-radius: 10px;
+  border: 1.5px solid var(--accent-color);
+  background: none;
+  color: var(--accent-color);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.scanWindowBtn:hover:not(:disabled) {
+  background: var(--accent-color);
+  color: #fff;
+}
+.scanWindowBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Active state: shows countdown — green-tinted */
+.scanWindowBtnActive {
+  border-color: #16a34a;
+  color: #fff;
+  background: #16a34a;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.5px;
+  cursor: default;
+  animation: scanPulse 2s ease-in-out infinite;
+}
+.scanWindowBtnActive:hover { background: #16a34a; color: #fff; }
+
+@keyframes scanPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.4); }
+  50%       { box-shadow: 0 0 0 6px rgba(22, 163, 74, 0); }
+}
+
+.scanWindowBanner {
+  font-size: 13px;
+  font-weight: 500;
+  color: #16a34a;
 }

@@ -21,6 +21,10 @@
   "logoUploadHint": "Drag photo here or click to select",
   "logoFormats": "JPG, PNG, WEBP (up to 5 MB)",
   "logoUploading": "Uploading…",
+  "uploadNewLogo": "Upload new",
+  "replaceLogo": "Replace logo",
+  "logoReadyToSave": "Logo selected and ready to save",
+  "logoWillUploadOnSave": "New logo will be uploaded only after pressing \"Save\".",
   "removeLogo": "Remove logo",
 
   "languages": "Languages",

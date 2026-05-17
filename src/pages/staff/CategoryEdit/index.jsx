@@ -102,8 +102,8 @@ export default function CategoryEdit() {
       backTo="/staff/menu"
       rightActions={
         <div className={styles.headerActions}>
-          <SecondaryButton label={t('cancel')} onClick={() => navigate('/staff/menu')} />
-          <PrimaryButton label={saving ? '…' : t('save')} onClick={handleSave} disabled={saving} />
+          <SecondaryButton label={t('cancel')} onClick={() => navigate('/staff/menu')} className={styles.cancelBtn} />
+          <PrimaryButton label={saving ? '…' : t('save')} onClick={handleSave} disabled={saving} className={styles.saveBtn} />
         </div>
       }
     >

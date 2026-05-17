@@ -43,6 +43,7 @@
   "voidOrder": "Скасувати замовлення",
   "markWalkout": "Незавершений візит (walk-out)",
   "voidReasonPlaceholder": "Причина скасування (мін. 10 символів)...",
+  "voidReasonTooShort": "Введіть не менше 10 символів",
   "minChars": "мін. символів",
   "confirmVoid": "Підтвердити скасування",
   "cancel": "Відміна",
@@ -59,5 +60,8 @@
   "timeAgoLess1": "<1 хв",
   "timeAgoMinAgo": "{{n}} хв тому",
   "timeAgoHourAgo": "{{n}} год тому",
-  "timeAgoDayAgo": "{{n}} дн тому"
+  "timeAgoDayAgo": "{{n}} дн тому",
+  "openScanWindow": "Відкрити вікно сканування",
+  "scanWindowOpen": "Вікно відкрите — гості можуть сканувати",
+  "scanWindowExpired": "Вікно сканування закрито"
 }
