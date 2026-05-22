@@ -11,6 +11,7 @@ import { useToast } from '../../../context/ClientToastContext';
 import { useTranslation } from 'react-i18next';
 import { useLocalField, useFallbackField, useLang } from '../../../i18n/useLang';
 import FallbackMark from '../../../components/FallbackMark';
+import Lightbox from '../../../components/client/Lightbox';
 
 const MAX_COMMENT = 300;
 
@@ -92,6 +93,12 @@ export default function DishDetail() {
   const [isAnimated, setIsAnimated] = useState(true);
   const [dragX,      setDragX]      = useState(0);
   const [dragging,   setDragging]   = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  // Ref (not state) — set during touchmove if the finger moved enough to
+  // count as a swipe, read by the click handler to suppress the ghost-click
+  // that iOS/Android fire after touchend. State would be reset by the
+  // re-render between touchend and click; the ref survives.
+  const swipeMovedRef = useRef(false);
   const touchStartX    = useRef(null);
   const containerRef   = useRef(null);
   const transiting     = useRef(false);
@@ -274,14 +281,23 @@ export default function DishDetail() {
           ref={containerRef}
           className={styles.imageWrapper}
           onTouchStart={e => {
-            if (N < 2 || transiting.current) return;
+            // Let overlay buttons (back arrow, carousel arrows, dots) handle
+            // their own taps without us hijacking the gesture into a swipe
+            // or a lightbox-open.
+            if (e.target.closest('button')) return;
+            if (transiting.current) return;
             touchStartX.current = e.touches[0].clientX;
-            setDragging(true);
-            setDragX(0);
+            swipeMovedRef.current = false;
+            if (N >= 2) {
+              setDragging(true);
+              setDragX(0);
+            }
           }}
           onTouchMove={e => {
             if (touchStartX.current === null) return;
-            setDragX(e.touches[0].clientX - touchStartX.current);
+            const dx = e.touches[0].clientX - touchStartX.current;
+            if (Math.abs(dx) > 8) swipeMovedRef.current = true;
+            if (N >= 2) setDragX(dx);
           }}
           onTouchEnd={e => {
             if (touchStartX.current === null) return;
@@ -290,7 +306,14 @@ export default function DishDetail() {
             touchStartX.current = null;
             setDragging(false);
             setDragX(0);
-            if (Math.abs(dx) >= threshold) go(dx < 0 ? 1 : -1);
+            if (N >= 2 && Math.abs(dx) >= threshold) {
+              go(dx < 0 ? 1 : -1);
+            } else if (!swipeMovedRef.current) {
+              // A genuine tap (no significant movement) — open the lightbox.
+              // Note: we handle this here on touch devices so the synthetic
+              // click after touchend can't ALSO open it after a real swipe.
+              setLightboxOpen(true);
+            }
           }}
         >
           {N > 0 ? (
@@ -300,9 +323,21 @@ export default function DishDetail() {
                 transform: `translateX(calc(-${trackIdx * 100}% + ${dragX}px))`,
                 transition: (dragging || !isAnimated) ? 'none' : 'transform 0.32s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
               }}
+              onClick={(e) => {
+                // Desktop (mouse) entry point — on touch devices the lightbox
+                // is opened from onTouchEnd above, and we swallow the ghost
+                // click here via the swipeMovedRef guard.
+                if (e.target.closest('button')) return;
+                if (swipeMovedRef.current) {
+                  swipeMovedRef.current = false;
+                  return;
+                }
+                e.stopPropagation();
+                setLightboxOpen(true);
+              }}
             >
               {strip.map((url, i) => (
-                <img key={i} src={url} alt={i === trackIdx ? local(dish, 'name') : ''} className={styles.imageSlide} />
+                <img key={i} src={url} alt={i === trackIdx ? local(dish, 'name') : ''} className={styles.imageSlide} draggable={false} />
               ))}
             </div>
           ) : (
@@ -488,9 +523,17 @@ export default function DishDetail() {
       <div className={styles.footer}>
         {!editCartId && (
           <div className={styles.qty}>
-            <button className={styles.qtyBtn} onClick={() => setQuantity(q => Math.max(1, q - 1))}>−</button>
+            <button
+              className={styles.qtyBtn}
+              onClick={() => setQuantity(q => Math.max(1, q - 1))}
+              disabled={quantity <= 1}
+            >−</button>
             <span className={styles.qtyVal}>{quantity}</span>
-            <button className={styles.qtyBtn} onClick={() => setQuantity(q => q + 1)}>+</button>
+            <button
+              className={styles.qtyBtn}
+              onClick={() => setQuantity(q => Math.min(10, q + 1))}
+              disabled={quantity >= 10}
+            >+</button>
           </div>
         )}
         <div className={styles.addBtn}>
@@ -503,6 +546,14 @@ export default function DishDetail() {
           />
         </div>
       </div>
+
+      <Lightbox
+        images={dish.images}
+        initialIndex={Math.max(0, dish.images.length > 1 ? (trackIdx - 1 + dish.images.length) % dish.images.length : 0)}
+        open={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+        alt={dishName}
+      />
     </div>
   );
 }

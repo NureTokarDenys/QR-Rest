@@ -6,7 +6,7 @@ import RightPanel from '../RightPanel';
 import StaffNotificationToast from '../StaffNotificationToast';
 import styles from './staffShell.module.css';
 
-function Inner({ children, title, backTo, rightActions }) {
+function Inner({ children, title, backTo, rightActions, titleHideBelow }) {
   const { panelOpen } = useStaffLayout();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -21,6 +21,7 @@ function Inner({ children, title, backTo, rightActions }) {
           title={title}
           backTo={backTo}
           rightActions={rightActions}
+          titleHideBelow={titleHideBelow}
           onMenuToggle={() => setSidebarOpen(o => !o)}
         />
         <div className={styles.content}>
@@ -33,10 +34,12 @@ function Inner({ children, title, backTo, rightActions }) {
   );
 }
 
-export default function StaffShell({ children, title, backTo, rightActions }) {
+export default function StaffShell({ children, title, backTo, rightActions, titleHideBelow }) {
   return (
     <StaffLayoutProvider>
-      <Inner title={title} backTo={backTo} rightActions={rightActions}> {children} </Inner>
+      <Inner title={title} backTo={backTo} rightActions={rightActions} titleHideBelow={titleHideBelow}>
+        {children}
+      </Inner>
     </StaffLayoutProvider>
   );
 }

@@ -232,3 +232,44 @@
   font-size: 13px;
   color: var(--secondary-text);
 }
+
+@media (max-width: 640px) {
+  /* Wrap card header so rating drops to a new line under the author name.
+     DOM order: avatar → authorBlock → metaBlock → deleteBtn.
+     We want first line: [avatar] [authorBlock]                    [deleteBtn]
+                second line:        [stars] [date]
+     Use `order` to push metaBlock after deleteBtn, and flex-basis:100% to
+     force metaBlock onto its own line. */
+  .cardHeader {
+    flex-wrap: wrap;
+    row-gap: 6px;
+    align-items: flex-start;
+  }
+
+  /* Author block takes the remaining width on row 1 */
+  .authorBlock {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* Delete button stays pinned to the right of row 1 */
+  .deleteBtn {
+    order: 1;
+    margin-left: auto;
+    align-self: flex-start;
+  }
+
+  /* Move metaBlock (stars + date) to its own line, left-aligned under name */
+  .metaBlock {
+    order: 2;
+    flex-basis: 100%;
+    width: 100%;
+    padding-left: 48px; /* avatar 36px + gap 12px = align under name */
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+  }
+
+  /* Comment indent already matches via base style */
+}

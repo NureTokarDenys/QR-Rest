@@ -168,8 +168,8 @@ export default function ExtrasEdit() {
       showToast(t(isNew ? 'savedNew' : 'savedUpdated', isNew ? 'Додано' : 'Збережено'));
       navigate(backTo ? decodeURIComponent(backTo) : '/staff/extras');
     } catch (err) {
+      // HttpErrorToast surfaces the api:error event globally — no inline alert needed.
       console.error('save extra error:', err);
-      alert(err?.response?.data?.message || 'Save failed');
     } finally {
       setSaving(false);
     }
@@ -213,10 +213,14 @@ export default function ExtrasEdit() {
     <UpgradeModal open={upgradeOpen} onClose={() => setUpgradeOpen(false)} ns="components" />
     <StaffShell
       title={<><MdTune /> {getTitle()}</>}
-      backTo="/staff/extras"
+      backTo={backTo ? decodeURIComponent(backTo) : '/staff/extras'}
       rightActions={
         <div className={styles.headerActions}>
-          <SecondaryButton label={t('cancel')} onClick={() => navigate('/staff/extras')} className={styles.cancelBtn} />
+          <SecondaryButton
+            label={t('cancel')}
+            onClick={() => navigate(backTo ? decodeURIComponent(backTo) : '/staff/extras')}
+            className={styles.cancelBtn}
+          />
           <PrimaryButton label={saving ? '…' : t('save')} onClick={handleSave} disabled={saving} className={styles.saveBtn} />
         </div>
       }

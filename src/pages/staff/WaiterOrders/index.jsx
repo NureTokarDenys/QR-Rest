@@ -349,10 +349,10 @@ export default function WaiterOrders() {
             <div
               key={order.orderId}
               className={`${styles.card} ${order.waiterCallCash ? styles.cardAlertCash : order.waiterCall ? styles.cardAlert : ''}`}
-              onClick={() => navigate(`/staff/table/${order.tableNum}`)}
+              onClick={() => navigate(`/staff/order/${order.orderId}`)}
               role="button"
               tabIndex={0}
-              onKeyDown={e => e.key === 'Enter' && navigate(`/staff/table/${order.tableNum}`)}
+              onKeyDown={e => e.key === 'Enter' && navigate(`/staff/order/${order.orderId}`)}
             >
               <div className={styles.cardTop}>
                 <span className={styles.tableLabel}>

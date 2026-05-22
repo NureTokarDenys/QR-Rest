@@ -7,7 +7,9 @@ import TopCategoryItem from '../../../components/staff/TopCategoryItem';
 import TopDishRow from '../../../components/staff/TopDishRow';
 import { getRevenue, getOrderStats, getPopularDishes, getTopCategories, exportAnalyticsCsv } from '../../../api/admin';
 import styles from './analytics.module.css';
-import { MdBarChart, MdWarning, MdTimelapse, MdCheckCircle, MdDownload } from 'react-icons/md';
+import HeaderPopover from '../../../components/staff/HeaderPopover';
+import popoverStyles from '../../../components/staff/HeaderPopover/headerPopover.module.css';
+import { MdBarChart, MdWarning, MdTimelapse, MdCheckCircle, MdDownload, MdExpandMore } from 'react-icons/md';
 
 const PERIODS = ['today', 'week', 'month'];
 
@@ -207,8 +209,10 @@ export default function Analytics() {
   return (
     <StaffShell
       title={<><MdBarChart className={styles.headerIcon} /> {t('title')}</>}
+      titleHideBelow={390}
       rightActions={
         <div className={styles.headerActions}>
+          {/* Inline period buttons — shown ≥600px; hidden below via CSS */}
           <div className={styles.periods}>
             {PERIODS.map(p => (
               <button
@@ -220,13 +224,29 @@ export default function Analytics() {
               </button>
             ))}
           </div>
+          {/* Compact dropdown — shown only at narrow widths via CSS */}
+          <div className={styles.periodsPopover}>
+            <HeaderPopover
+              trigger={<>{t(period)} <MdExpandMore /></>}
+            >
+              {PERIODS.map(p => (
+                <button
+                  key={p}
+                  className={`${popoverStyles.item} ${period === p ? popoverStyles.itemActive : ''}`}
+                  onClick={() => setPeriod(p)}
+                >
+                  {t(p)}
+                </button>
+              ))}
+            </HeaderPopover>
+          </div>
           <button
             className={`${styles.exportBtn} ${exporting ? styles.exportBtnBusy : ''}`}
             onClick={handleExport}
             disabled={exporting}
           >
             <MdDownload style={{ fontSize: 15, verticalAlign: 'middle', marginRight: 4 }} />
-            {exporting ? '…' : t('exportCsv')}
+            <span className={styles.exportBtnLabel}>{exporting ? '…' : t('exportCsv')}</span>
           </button>
         </div>
       }

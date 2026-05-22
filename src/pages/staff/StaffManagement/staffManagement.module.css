@@ -16,10 +16,23 @@
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 .addBtn:hover {
   opacity: 0.9;
+}
+
+@media (max-width: 768px) {
+  .addBtn { padding: 6px 12px; font-size: 13px; gap: 5px; }
+}
+
+@media (max-width: 480px) {
+  .addBtn { padding: 5px 10px; font-size: 12px; gap: 4px; }
+}
+
+@media (max-width: 360px) {
+  .addBtn { padding: 4px 8px; font-size: 11px; gap: 3px; }
 }
 
 .empty {
@@ -284,4 +297,90 @@
     flex-direction: column;
     align-items: flex-start;
   }
+
+  /* Hide email column */
+  .table thead tr th:nth-child(2),
+  .table tbody tr td:nth-child(2) {
+    display: none;
+  }
+
+  /* Merge status + actions into a compact stacked cell */
+  .table thead tr th:nth-child(4) {
+    display: none;
+  }
+
+  .table tbody tr td:nth-child(4) {
+    display: none;
+  }
+
+  /* Actions cell: show status badge inline above the buttons */
+  .table tbody tr td:nth-child(5) {
+    padding: 8px 10px;
+  }
+
+  .actionBtn {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+
+  .th {
+    padding: 8px 10px;
+    font-size: 10px;
+  }
+
+  .td {
+    padding: 10px 10px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .roleDropdown {
+    min-width: 120px;
+  }
+
+  .actions {
+    gap: 4px;
+  }
+}
+
+@media (max-width: 415px) {
+  /* Stack each row's cells vertically — table becomes a card per row */
+  .tableWrap { border: none; background: transparent; }
+
+  .table,
+  .table thead,
+  .table tbody,
+  .table tr,
+  .table td {
+    display: block;
+    width: 100%;
+  }
+
+  .table thead { display: none; }
+
+  .table tbody tr.row {
+    background: var(--surface-color);
+    border: 1px solid var(--separator-color);
+    border-radius: 12px;
+    margin-bottom: 10px;
+    padding: 12px;
+  }
+
+  .row:hover .td { background: transparent; }
+
+  .table tbody tr td {
+    border-bottom: none;
+    padding: 6px 0;
+  }
+
+  /* Re-show columns that were hidden in the table layout — now each is its
+     own stacked row inside the card */
+  .table tbody tr td:nth-child(4) {
+    display: block;
+  }
+
+  .roleDropdown { min-width: 100%; }
+
+  .actions { flex-direction: row; gap: 6px; flex-wrap: wrap; }
 }

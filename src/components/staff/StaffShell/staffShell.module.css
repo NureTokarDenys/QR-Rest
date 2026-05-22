@@ -59,3 +59,9 @@
     z-index: 199;
   }
 }
+
+@media (max-width: 380px) {
+  .content {
+    padding: 8px;
+  }
+}

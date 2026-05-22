@@ -274,6 +274,7 @@ export default function RestaurantSettings() {
   return (
     <StaffShell
       title={<><MdStorefront /> {t('title')}</>}
+      titleHideBelow={340}
       rightActions={
         <div className={styles.headerActions}>
           <PrimaryButton

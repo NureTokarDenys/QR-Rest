@@ -51,6 +51,7 @@
   "accept": "Accept",
   "uploadHint": "Drag photo here or click",
   "uploadFormats": "Supports JPG, PNG, WEBP (up to 5MB)",
+  "uploadResolutionHint": "Recommended resolution: 1200×800 px, landscape orientation",
   
   "nav_tableMap": "Table Map",
   "nav_orders": "Orders",

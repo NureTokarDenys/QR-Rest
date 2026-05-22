@@ -470,6 +470,7 @@ export default function Cooking() {
   return (
     <StaffShell
       title={<><MdLocalFireDepartment /> {t('title')}</>}
+      titleHideBelow={350}
       rightActions={
         <div className={styles.headerExtra}>
           <span className={styles.count}>{activeCount} {tc('dish', { count: activeCount })}</span>
@@ -478,13 +479,13 @@ export default function Cooking() {
               className={`${styles.viewBtn} ${view === 'order' ? styles.viewBtnActive : ''}`}
               onClick={() => setView('order')}
             >
-              <MdViewColumn /> {t('order_view')}
+              <MdViewColumn /> <span className={styles.viewBtnLabel}>{t('order_view')}</span>
             </button>
             <button
               className={`${styles.viewBtn} ${view === 'table' ? styles.viewBtnActive : ''}`}
               onClick={() => setView('table')}
             >
-              <MdTableChart /> {t('table_view')}
+              <MdTableChart /> <span className={styles.viewBtnLabel}>{t('table_view')}</span>
             </button>
           </div>
         </div>

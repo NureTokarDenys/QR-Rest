@@ -5,14 +5,21 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 10px;
   padding: 0 20px;
   flex-shrink: 0;
+  /* sit above the notification panel (z-index 100) so the bell stays
+     clickable even when the panel is open and overlaps the header */
+  position: relative;
+  z-index: 105;
 }
 
 .left {
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 .back {
@@ -23,6 +30,7 @@
   color: var(--accent-color);
   padding: 0;
   line-height: 1;
+  flex-shrink: 0;
 }
 
 .title {
@@ -32,12 +40,17 @@
   font-size: 16px;
   font-weight: 700;
   color: var(--primary-text);
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .right {
   display: flex;
   align-items: center;
   gap: 14px;
+  flex-shrink: 0;
 }
 
 .time {
@@ -117,9 +130,16 @@
   }
 }
 
+@media (max-width: 900px) {
+  .right {
+    gap: 10px;
+  }
+}
+
 @media (max-width: 768px) {
   .header {
     padding: 0 12px;
+    gap: 8px;
   }
 
   .time {
@@ -133,4 +153,45 @@
   .title {
     font-size: 15px;
   }
+
+  .right {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 0 10px;
+    gap: 6px;
+  }
+  .title {
+    font-size: 13px;
+  }
+  .right {
+    gap: 6px;
+  }
+}
+
+@media (max-width: 380px) {
+  /* Hide the title icon at the very smallest widths to give right actions
+     more space. The text label still reads, but bare. */
+  .title svg {
+    display: none;
+  }
+  .title {
+    font-size: 12px;
+  }
+}
+
+/* Per-page title hide breakpoints — opt-in via the `titleHideBelow` prop on
+   StaffShell. Each rule both hides the title and lets `.left` shrink so the
+   back button + hamburger remain visible. */
+@media (max-width: 390px) {
+  .titleHide390 { display: none; }
+}
+@media (max-width: 350px) {
+  .titleHide350 { display: none; }
+}
+@media (max-width: 340px) {
+  .titleHide340 { display: none; }
 }

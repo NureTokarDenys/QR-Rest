@@ -1,0 +1,158 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.94);
+  z-index: 2000;
+  overflow: hidden;
+  /* iOS notch / home indicator */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+           env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+/* Stage is a plain block (NOT display:flex) so the .track inside can rely on
+   `width: 100%; height: 100%` resolving against the stage's own box. With
+   stage as a flex container, the track's main-size was being computed from
+   its own content (sum of slides) rather than the stage, which left each
+   slide undersized and the carousel translating by the wrong amount. */
+.stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  touch-action: pan-y;
+}
+
+.track {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  will-change: transform;
+}
+
+.slide {
+  flex-shrink: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Minimal padding so the image fills almost the entire viewport. The
+     close/arrow buttons sit on top via position:absolute so they don't need
+     a padded gutter to live in. */
+  padding: 4px;
+  box-sizing: border-box;
+}
+
+.image {
+  /* Stretch to the longer dimension so portrait photos fill the height and
+     landscape photos fill the width. `object-fit: contain` keeps the aspect
+     ratio intact. */
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.closeBtn {
+  position: absolute;
+  top: calc(env(safe-area-inset-top) + 12px);
+  right: 12px;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+  backdrop-filter: blur(8px);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.closeBtn:hover { background: rgba(0, 0, 0, 0.75); }
+
+.counter {
+  position: absolute;
+  top: calc(env(safe-area-inset-top) + 18px);
+  left: 50%;
+  transform: translateX(-50%);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  padding: 6px 14px;
+  background: rgba(0, 0, 0, 0.55);
+  border-radius: 20px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.arrow:hover { background: rgba(0, 0, 0, 0.75); }
+
+.arrowPrev { left: 12px; }
+.arrowNext { right: 12px; }
+
+/* On narrow viewports keep the arrows visible but shrink them so they don't
+   eat the image edges. */
+@media (max-width: 480px) {
+  .arrow { width: 38px; height: 38px; font-size: 24px; }
+  .arrowPrev { left: 6px; }
+  .arrowNext { right: 6px; }
+}
+
+.dots {
+  position: absolute;
+  bottom: calc(env(safe-area-inset-bottom) + 18px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 2;
+  padding: 6px 12px;
+  background: rgba(0, 0, 0, 0.55);
+  border-radius: 14px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.15s, transform 0.15s;
+}
+
+.dot:hover { background: rgba(255, 255, 255, 0.75); }
+
+.dotActive {
+  background: #fff;
+  transform: scale(1.2);
+}

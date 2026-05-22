@@ -60,7 +60,11 @@ export default function TableDetail() {
   // Shared cache: tables + menu items are lazy-loaded the first time this page
   // (or any other page that needs them) is opened, then kept fresh via WS.
   const { tables: cachedTables, menuItems: cachedMenu, refreshTables, ensureTables, ensureMenuItems } = useStaffData();
-  useEffect(() => { ensureTables(); ensureMenuItems(); }, [ensureTables, ensureMenuItems]);
+  const canManageMenu = ['admin', 'root_admin', 'cook', 'waiter_cook'].includes(user?.role);
+  useEffect(() => {
+    ensureTables();
+    if (canManageMenu) ensureMenuItems();
+  }, [ensureTables, ensureMenuItems, canManageMenu]);
 
   const [tableInfo, setTableInfo] = useState({
     id, status: 'free', seats: 4, name: `Стіл ${id}`,

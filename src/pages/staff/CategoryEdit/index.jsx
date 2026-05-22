@@ -25,14 +25,14 @@ const PALETTE = [
 
 const EMPTY_NAMES = emptyI18n('name');
 
-function CategoryPreview({ name, color, imageUrl }) {
+function CategoryPreview({ name, color, imageUrl, count = 0, dishLabel }) {
   return (
-    <div className={styles.previewCard}>
-      <div className={styles.previewHeader} style={{ background: color || 'var(--separator-color)' }}>
-        {imageUrl && <img src={imageUrl} alt="" className={styles.previewHeaderImg} />}
-      </div>
-      <div className={styles.previewBody}>
+    <div className={styles.previewCard} style={{ background: color || 'var(--separator-color)' }}>
+      {imageUrl && <img src={imageUrl} alt="" className={styles.previewImg} />}
+      <div className={styles.previewOverlay} />
+      <div className={styles.previewContent}>
         <span className={styles.previewName}>{name || '—'}</span>
+        <span className={styles.previewCount}>{count} {dishLabel}</span>
       </div>
     </div>
   );
@@ -42,6 +42,9 @@ export default function CategoryEdit() {
   const { id }    = useParams();
   const navigate  = useNavigate();
   const { t }          = useTranslation('categoryEdit');
+  // Reused only for the pluralised "dish" label in the preview card so the
+  // count chip matches the wording on the client's CategoryCard.
+  const { t: tCategory } = useTranslation('category');
   const { showToast }  = useToast();
   const isNew     = !id || id === 'new';
   const { isFree } = usePlan();
@@ -304,7 +307,13 @@ export default function CategoryEdit() {
         <div className={styles.sideCol}>
           <div className={styles.section}>
             <p className={styles.sectionTitle}>{t('preview', 'Превʼю')}</p>
-            <CategoryPreview name={previewName} color={color} imageUrl={previewImage} />
+            <CategoryPreview
+              name={previewName}
+              color={color}
+              imageUrl={previewImage}
+              count={dishes.length}
+              dishLabel={tCategory('dish', { count: dishes.length })}
+            />
           </div>
         </div>
 

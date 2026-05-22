@@ -393,10 +393,17 @@
 @media (max-width: 1024px) {
   .layout {
     flex-direction: column;
+    width: 100%;
+  }
+
+  .mainCol {
+    width: 100%;
+    max-width: 100%;
   }
 
   .sideCol {
     width: 100%;
+    max-width: 100%;
   }
 
   .grid3 {

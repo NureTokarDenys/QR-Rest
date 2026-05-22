@@ -13,7 +13,9 @@ import { deleteMenuItem } from '../../../api/admin';
 import { useStaffData } from '../../../context/StaffDataContext';
 import { usePlan } from '../../../hooks/usePlan';
 import styles from './menuManagement.module.css';
-import { MdOutlineRestaurant } from "react-icons/md";
+import HeaderPopover from '../../../components/staff/HeaderPopover';
+import popoverStyles from '../../../components/staff/HeaderPopover/headerPopover.module.css';
+import { MdOutlineRestaurant, MdMoreVert, MdPictureAsPdf, MdAdd, MdLock } from "react-icons/md";
 
 const FREE_CATEGORY_LIMIT = 5;
 const FREE_ITEM_LIMIT     = 50;
@@ -145,12 +147,32 @@ export default function MenuManagement() {
               </span>
             </div>
           )}
-          <SecondaryButton label={t('generatePdf')} onClick={() => navigate('/staff/menu/pdf')} className={styles.exportBtn} />
-          <PrimaryButton
-            label={t('addDish')}
-            onClick={() => atItemLimit ? setUpgradeOpen('items') : navigate('/staff/menu/dish/new')}
-            className={styles.addDishBtn}
-          />
+          {/* Inline buttons — shown ≥600px */}
+          <div className={styles.inlineActions}>
+            <SecondaryButton label={t('generatePdf')} onClick={() => navigate('/staff/menu/pdf')} className={styles.exportBtn} />
+            <PrimaryButton
+              label={t('addDish')}
+              onClick={() => atItemLimit ? setUpgradeOpen('items') : navigate('/staff/menu/dish/new')}
+              className={styles.addDishBtn}
+            />
+          </div>
+          {/* Popover — shown <600px via CSS */}
+          <div className={styles.actionsPopover}>
+            <HeaderPopover trigger={<MdMoreVert size={20} />}>
+              <button
+                className={popoverStyles.item}
+                onClick={() => navigate('/staff/menu/pdf')}
+              >
+                <MdPictureAsPdf /> {t('generatePdf')}
+              </button>
+              <button
+                className={popoverStyles.item}
+                onClick={() => atItemLimit ? setUpgradeOpen('items') : navigate('/staff/menu/dish/new')}
+              >
+                {atItemLimit ? <MdLock /> : <MdAdd />} {t('addDish')}
+              </button>
+            </HeaderPopover>
+          </div>
         </div>
       }
     >

@@ -125,13 +125,17 @@ export default function DishEdit() {
   const { t }         = useTranslation('dishEdit');
   const { showToast } = useToast();
   const { isFree }    = usePlan();
+  // Either `false` (closed) or the i18n key for the upgrade reason
+  // ('upgrade_limit_images' for the photo cap, default for the auto-translate
+  // upsell). Tracked as a single piece of state so the modal carries the
+  // right context message.
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const isNew         = !id || id === 'new';
 
   const [form,        setForm]        = useState(EMPTY_FORM);
 
   // Categories from shared cache — lazy-loaded on first dish-edit visit.
-  const { categories: cachedCats, ensureCategories } = useStaffData();
+  const { categories: cachedCats, ensureCategories, refreshMenuItems } = useStaffData();
   useEffect(() => { ensureCategories(); }, [ensureCategories]);
   const categories = Array.isArray(cachedCats)
     ? cachedCats.map(c => ({ id: c._id || c.id, name: c.name, name_en: c.name_en || '', color: c.color }))
@@ -274,8 +278,8 @@ export default function DishEdit() {
         };
       });
     } catch (err) {
+      // HttpErrorToast surfaces the api:error event globally — no inline alert needed.
       console.error('Translate error:', err);
-      alert('Помилка перекладу.');
     } finally {
       setTranslating(false);
     }
@@ -332,7 +336,20 @@ export default function DishEdit() {
       const result  = isNew ? await createMenuItem(payload) : await updateMenuItem(id, payload);
       const savedId = isNew ? (result?._id || result?.id) : id;
       if (savedId) {
-        // Upload each new file, collect final URLs
+        // Reset the server-side images array to just the URLs the user wants
+        // to keep BEFORE uploading new files. This frees up plan-limit slots
+        // and discards any orphaned images left by a previous failed save —
+        // each /image POST checks `item.images.length` against the free-plan
+        // cap, so stale entries would otherwise pre-block fresh uploads.
+        if (!isNew) {
+          const keptUrls = form.images.filter(img => !img.file).map(img => img.url);
+          await setMenuItemImages(savedId, {
+            images: keptUrls,
+            selectedImageIdx: Math.min(form.selectedImageIdx, Math.max(0, keptUrls.length - 1)),
+          });
+        }
+
+        // Upload each new file, collect final URLs in display order
         const finalUrls = [];
         for (const img of form.images) {
           if (img.file) {
@@ -349,11 +366,15 @@ export default function DishEdit() {
           });
         }
       }
+      // Image endpoints (POST /image, PUT /images) don't emit MENU_UPDATED on
+      // the backend, so the cached menu thumbnails would otherwise still show
+      // the old `imageUrl` after navigating back. Force a refresh.
+      refreshMenuItems();
       showToast(t(isNew ? 'savedNew' : 'savedUpdated', isNew ? 'Страву додано' : 'Зміни збережено'));
       navigate('/staff/menu');
     } catch (err) {
+      // HttpErrorToast surfaces the api:error event globally — no inline alert needed.
       console.error('Save dish error:', err);
-      alert(err?.response?.data?.message || 'Save failed');
     } finally {
       setSaving(false);
     }
@@ -493,7 +514,12 @@ export default function DishEdit() {
   return (
     <>
     <TranslateOverlay visible={translating} lang={activeLangLabel} />
-    <UpgradeModal open={upgradeOpen} onClose={() => setUpgradeOpen(false)} ns="components" />
+    <UpgradeModal
+      open={!!upgradeOpen}
+      onClose={() => setUpgradeOpen(false)}
+      ns="components"
+      reason={typeof upgradeOpen === 'string' ? upgradeOpen : undefined}
+    />
     <StaffShell
       title={isNew ? t('titleAdd') : t('titleEdit')}
       backTo="/staff/menu"
@@ -691,14 +717,9 @@ export default function DishEdit() {
           <div className={styles.section}>
             <div className={styles.sectionHeader}>
               <p className={styles.sectionTitle}>{t('componentGroupsSection')}</p>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button className={styles.addRowBtn} onClick={() => navigate(`/staff/extras/componentgroup/new?backTo=${encodeURIComponent(location.pathname)}`)}>
-                  <MdAdd /> {t('createNewPage')}
-                </button>
-                <button className={styles.addRowBtn} onClick={() => addNewCg('')}>
-                  <MdAdd /> {t('addGroup')}
-                </button>
-              </div>
+              <button className={styles.addRowBtn} onClick={() => navigate(`/staff/extras/componentgroup/new?backTo=${encodeURIComponent(location.pathname)}`)}>
+                <MdAdd /> {t('createNewPage')}
+              </button>
             </div>
             <SearchPicker
               placeholder={t('searchComponentGroups')}
@@ -781,15 +802,15 @@ export default function DishEdit() {
             <div className={styles.sectionHeader}>
               <p className={styles.sectionTitle}>{t('photos')}</p>
               <span className={styles.photoCount}>
-                {form.images.length} / {isFree ? 5 : 20}
+                {form.images.length} / {isFree ? 3 : 20}
               </span>
             </div>
             <PhotoUpload
               images={form.images}
               selectedIdx={form.selectedImageIdx}
               onChange={(imgs, idx) => setForm(p => ({ ...p, images: imgs, selectedImageIdx: idx }))}
-              maxImages={isFree ? 5 : 20}
-              onAttemptBeyondLimit={() => setUpgradeOpen(true)}
+              maxImages={isFree ? 3 : 20}
+              onAttemptBeyondLimit={() => setUpgradeOpen(isFree ? 'upgrade_limit_images' : true)}
             />
           </div>
         </div>

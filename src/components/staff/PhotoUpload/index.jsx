@@ -1,6 +1,7 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { MdAddAPhoto, MdClose } from 'react-icons/md';
+import { MdAddAPhoto, MdClose, MdFullscreen } from 'react-icons/md';
+import Lightbox from '../../client/Lightbox';
 import styles from './photoUpload.module.css';
 
 // images:               Array<{ url: string, file: File | null }>
@@ -11,6 +12,8 @@ import styles from './photoUpload.module.css';
 export default function PhotoUpload({ images = [], selectedIdx = 0, onChange, maxImages = Infinity, onAttemptBeyondLimit }) {
   const { t } = useTranslation('components');
   const inputRef = useRef(null);
+  // null when closed, otherwise the index of the image being previewed.
+  const [lightboxIdx, setLightboxIdx] = useState(null);
 
   const atLimit = images.length >= maxImages;
 
@@ -48,6 +51,7 @@ export default function PhotoUpload({ images = [], selectedIdx = 0, onChange, ma
           <MdAddAPhoto className={styles.icon} />
           <p className={styles.hint}>{t('uploadHint')}</p>
           <p className={styles.formats}>{t('uploadFormats')}</p>
+          <p className={styles.resolutionHint}>{t('uploadResolutionHint')}</p>
           <input
             ref={inputRef}
             type="file"
@@ -68,6 +72,14 @@ export default function PhotoUpload({ images = [], selectedIdx = 0, onChange, ma
               onClick={() => handleSelect(i)}
             >
               <img src={img.url} alt="" className={styles.thumbImg} />
+              <button
+                className={styles.expand}
+                type="button"
+                title={t('previewFullscreen', 'Переглянути на весь екран')}
+                onClick={e => { e.stopPropagation(); setLightboxIdx(i); }}
+              >
+                <MdFullscreen size={11} />
+              </button>
               <button className={styles.remove} type="button" onClick={e => handleRemove(e, i)}>
                 <MdClose size={9} />
               </button>
@@ -75,6 +87,13 @@ export default function PhotoUpload({ images = [], selectedIdx = 0, onChange, ma
           ))}
         </div>
       )}
+
+      <Lightbox
+        images={images.map(img => img.url)}
+        initialIndex={lightboxIdx ?? 0}
+        open={lightboxIdx !== null}
+        onClose={() => setLightboxIdx(null)}
+      />
     </div>
   );
 }

@@ -2,7 +2,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .count {
@@ -12,6 +12,28 @@
   background: #eff6ff;
   border-radius: 8px;
   padding: 4px 10px;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .headerExtra { gap: 6px; }
+  .count { font-size: 12px; padding: 3px 8px; }
+  .viewBtn { padding: 4px 9px; font-size: 12px; }
+}
+
+@media (max-width: 600px) {
+  .count { font-size: 11px; padding: 2px 6px; }
+  .viewBtn { padding: 4px 7px; font-size: 11px; gap: 3px; }
+  /* hide button labels — only the icon remains */
+  .viewBtnLabel { display: none; }
+}
+
+@media (max-width: 420px) {
+  .count { display: none; }
+}
+
+@media (max-width: 350px) {
+  .viewBtn { padding: 4px 6px; }
 }
 
 .board {
@@ -19,6 +41,27 @@
   gap: 12px;
   height: calc(100dvh - 56px - 52px);
   overflow-x: auto;
+}
+
+@media (max-width: 640px) {
+  /* Switch from horizontal flex to a 2-column grid so all 4 status columns
+     fit on-screen without horizontal scrolling. The page scrolls vertically
+     instead. */
+  .board {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    height: auto;
+    overflow-x: hidden;
+  }
+}
+
+@media (max-width: 420px) {
+  /* Stack columns vertically — one per row */
+  .board {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
 }
 
 /* View toggle */
@@ -391,7 +434,9 @@
   border: 1px solid #fde68a;
 }
 
-@media (max-width: 768px) {
+@media (min-width: 641px) and (max-width: 768px) {
+  /* Only applies to the horizontal-flex layout (≥641px). Below 640px the
+     board switches to a grid with auto height and vertical scrolling. */
   .board {
     height: calc(100dvh - 52px - 52px - 48px);
   }

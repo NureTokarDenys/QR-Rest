@@ -6,7 +6,7 @@ import styles from './staffHeader.module.css';
 
 import { MdNotifications, MdAccessTime, MdMenu } from 'react-icons/md';
 
-export default function StaffHeader({ title, backTo, rightActions, onMenuToggle }) {
+export default function StaffHeader({ title, backTo, rightActions, onMenuToggle, titleHideBelow }) {
   const navigate = useNavigate();
   const { panelOpen, togglePanel } = useStaffLayout();
   const { unreadCount } = useStaffNotifications();
@@ -31,7 +31,11 @@ export default function StaffHeader({ title, backTo, rightActions, onMenuToggle 
         {backTo && (
           <button className={styles.back} onClick={() => navigate(backTo)}>←</button>
         )}
-        <h1 className={styles.title}>{title}</h1>
+        <h1
+          className={`${styles.title} ${titleHideBelow ? styles[`titleHide${titleHideBelow}`] : ''}`}
+        >
+          {title}
+        </h1>
       </div>
       <div className={styles.right}>
         {rightActions}

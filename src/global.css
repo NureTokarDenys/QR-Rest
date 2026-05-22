@@ -1,3 +1,20 @@
+/* ── Responsive base font size ───────────────────────────────────────────────
+   Staff pages use px in CSS Modules; setting font-size here on html scales
+   any rem/em units and provides a single place to tune the global text density.
+   Client pages are unaffected (they use their own layout roots). */
+html { font-size: 16px; }
+
+@media (max-width: 1280px) { html { font-size: 15px; } }
+@media (max-width: 1024px) { html { font-size: 14px; } }
+@media (max-width: 768px)  { html { font-size: 13px; } }
+@media (max-width: 480px)  { html { font-size: 12px; } }
+
+/* ── Minimum supported viewport ──────────────────────────────────────────────
+   280px is the smallest width we commit to rendering cleanly. Below that the
+   body still scrolls horizontally so the user can pan; we don't try to fit
+   below it. */
+html, body { min-width: 280px; }
+
 :root {
   --bg-color: #f2f2f7;
   --surface-color: #ffffff;

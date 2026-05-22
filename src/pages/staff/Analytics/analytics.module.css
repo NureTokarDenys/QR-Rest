@@ -2,7 +2,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .periods {
@@ -11,6 +11,15 @@
   border-radius: 8px;
   padding: 2px;
   gap: 2px;
+}
+
+/* The popover trigger is hidden until the viewport gets narrow enough that
+   the inline buttons would no longer fit. */
+.periodsPopover { display: none; }
+
+@media (max-width: 600px) {
+  .periods { display: none; }
+  .periodsPopover { display: inline-flex; }
 }
 
 .periodBtn {
@@ -226,6 +235,20 @@
   .chartsRow {
     grid-template-columns: 1fr 1fr;
   }
+
+  .headerActions {
+    gap: 6px;
+  }
+
+  .periodBtn {
+    padding: 5px 9px;
+    font-size: 12px;
+  }
+
+  .exportBtn {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -236,6 +259,34 @@
   .kpiCard {
     flex: 0 0 calc(50% - 6px);
   }
+
+  .headerActions {
+    gap: 4px;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+  }
+
+  .periods {
+    gap: 1px;
+    padding: 1px;
+  }
+
+  .periodBtn {
+    padding: 4px 7px;
+    font-size: 11px;
+  }
+
+  .exportBtn {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 520px) {
+  .periodBtn { padding: 3px 6px; font-size: 10px; }
+  .exportBtn { padding: 3px 6px; font-size: 10px; }
+  /* Collapse the export button to just its icon on very small screens */
+  .exportBtnLabel { display: none; }
 }
 
 @media (max-width: 480px) {
