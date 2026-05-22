@@ -3,6 +3,7 @@ import { StaffLayoutProvider, useStaffLayout } from '../../../context/StaffLayou
 import Sidebar from '../Sidebar';
 import StaffHeader from '../StaffHeader';
 import RightPanel from '../RightPanel';
+import StaffNotificationToast from '../StaffNotificationToast';
 import styles from './staffShell.module.css';
 
 function Inner({ children, title, backTo, rightActions }) {
@@ -27,6 +28,7 @@ function Inner({ children, title, backTo, rightActions }) {
         </div>
       </div>
       <RightPanel />
+      <StaffNotificationToast />
     </div>
   );
 }

@@ -12,6 +12,7 @@
   "active": "Active",
   "inactive": "Inactive",
 
+  "role_root_admin": "Owner",
   "role_admin": "Administrator",
   "role_waiter": "Waiter",
   "role_cook": "Cook",
@@ -41,5 +42,6 @@
   "roleUpdated": "Role updated",
   "errorCreate": "Failed to create staff member",
   "errorLoad": "Failed to load staff",
-  "cancel": "Cancel"
+  "cancel": "Cancel",
+  "nameEmailRequired": "Name and email are required"
 }

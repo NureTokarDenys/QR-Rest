@@ -15,5 +15,7 @@
   "delete": "Видалити",
   "confirmDelete": "Видалити страву?",
   "confirmDeleteSub": "Видалити \"{{name}}\" з меню?",
-  "cancel": "Скасувати"
+  "cancel": "Скасувати",
+  "free_limit_categories": "{{count}}/{{max}} категорій",
+  "free_limit_items": "{{count}}/{{max}} позицій"
 }

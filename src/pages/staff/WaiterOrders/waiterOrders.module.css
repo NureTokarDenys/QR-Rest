@@ -13,7 +13,7 @@
 .count {
   font-size: 15px;
   font-weight: 600;
-  color: var(--menu-text);
+  color: var(--primary-text);
   flex: 1;
 }
 
@@ -21,7 +21,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--menu-secondary-text);
+  color: var(--secondary-text);
   font-size: 22px;
   display: flex;
   align-items: center;
@@ -50,7 +50,7 @@
   align-items: center;
   gap: 12px;
   padding: 60px 0;
-  color: var(--menu-secondary-text);
+  color: var(--secondary-text);
 }
 
 .emptyIcon { font-size: 48px; opacity: 0.35; }
@@ -64,8 +64,8 @@
 }
 
 .card {
-  background: var(--menu-card-bg, #fff);
-  border: 1.5px solid var(--menu-border, #e5e7eb);
+  background: var(--surface-color);
+  border: 1.5px solid var(--separator-color);
   border-radius: 12px;
   padding: 14px 16px;
   cursor: pointer;
@@ -79,17 +79,17 @@
 
 .card:hover {
   box-shadow: 0 4px 18px rgba(0,0,0,0.1);
-  border-color: var(--accent-color, #1d7afc);
+  border-color: var(--accent-color);
 }
 
 .cardAlert {
-  border-color: #f97316;
-  background: #fff7ed;
+  border-color: var(--warn-border);
+  background: var(--warn-bg);
 }
 
 .cardAlertCash {
-  border-color: #16a34a;
-  background: #f0fdf4;
+  border-color: var(--success-text);
+  background: var(--success-bg);
 }
 
 /* ─── Card header ───────────────────────────────────────────────────────────── */
@@ -107,7 +107,7 @@
   gap: 6px;
   font-size: 15px;
   font-weight: 700;
-  color: var(--menu-text);
+  color: var(--primary-text);
 }
 
 .statusBadge {
@@ -119,10 +119,10 @@
   letter-spacing: 0.04em;
 }
 
-.status_waiting { background: #fef3c7; color: #92400e; }
-.status_cooking { background: #fee2e2; color: #991b1b; }
-.status_ready   { background: #dcfce7; color: #166534; }
-.status_served  { background: #f3f4f6; color: #6b7280; }
+.status_waiting { background: var(--order-status-waiting-bg); color: var(--order-status-waiting-text); }
+.status_cooking { background: var(--order-status-cooking-bg); color: var(--order-status-cooking-text); }
+.status_ready   { background: var(--order-status-ready-bg);   color: var(--order-status-ready-text);   }
+.status_served  { background: var(--order-status-served-bg);  color: var(--order-status-served-text);  }
 
 /* ─── Waiter alert ──────────────────────────────────────────────────────────── */
 
@@ -132,18 +132,40 @@
   gap: 6px;
   font-size: 13px;
   font-weight: 600;
-  color: #c2410c;
-  background: #fff7ed;
-  border: 1px solid #fed7aa;
+  color: var(--warn-text);
+  background: var(--warn-bg);
+  border: 1px solid var(--warn-border);
   border-radius: 8px;
   padding: 6px 10px;
 }
 
 .waiterAlertCash {
-  color: #15803d;
-  background: #f0fdf4;
-  border-color: #bbf7d0;
+  color: var(--success-text);
+  background: var(--success-bg);
+  border-color: var(--success-text);
 }
+
+.waiterAlertIcon { flex-shrink: 0; }
+
+.waiterAlertText { flex: 1; }
+
+.waiterAlertAcceptBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--success-text);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.waiterAlertAcceptBtn:hover:not(:disabled) { opacity: 0.9; }
+.waiterAlertAcceptBtn:disabled { opacity: 0.6; cursor: default; }
 
 /* ─── Item list ─────────────────────────────────────────────────────────────── */
 
@@ -161,7 +183,7 @@
   align-items: center;
   gap: 6px;
   font-size: 13px;
-  color: var(--menu-text);
+  color: var(--primary-text);
 }
 
 .itemName {
@@ -173,7 +195,7 @@
 
 .itemQty {
   font-weight: 600;
-  color: var(--menu-secondary-text);
+  color: var(--secondary-text);
   flex-shrink: 0;
 }
 
@@ -184,14 +206,14 @@
   flex-shrink: 0;
 }
 
-.dot_waiting { background: #f59e0b; }
-.dot_cooking { background: #ef4444; }
-.dot_ready   { background: #22c55e; }
-.dot_served  { background: #9ca3af; }
+.dot_waiting { background: var(--order-status-waiting-text); }
+.dot_cooking { background: var(--order-status-cooking-text); }
+.dot_ready   { background: var(--order-status-ready-text);   }
+.dot_served  { background: var(--secondary-text);            }
 
 .moreItems {
   font-size: 12px;
-  color: var(--menu-secondary-text);
+  color: var(--secondary-text);
 }
 
 /* ─── Card footer ───────────────────────────────────────────────────────────── */
@@ -199,7 +221,7 @@
 .cardActions {
   display: flex;
   gap: 8px;
-  border-top: 1px solid var(--menu-border, #e5e7eb);
+  border-top: 1px solid var(--separator-color);
   padding-top: 10px;
 }
 
@@ -207,27 +229,27 @@
   flex: 1;
   padding: 6px 10px;
   border-radius: 8px;
-  border: 1px solid var(--menu-border, #e5e7eb);
+  border: 1px solid var(--separator-color);
   background: none;
   font-size: 12px;
   font-weight: 600;
-  color: var(--menu-text);
+  color: var(--primary-text);
   cursor: pointer;
   transition: background 0.15s;
 }
 
-.cardActionBtn:hover { background: #f9fafb; }
+.cardActionBtn:hover { background: var(--bg-color); }
 
 .cardVoidBtn {
-  color: #dc2626;
-  border-color: #fecaca;
+  color: var(--danger-text);
+  border-color: var(--danger-soft-border);
 }
-.cardVoidBtn:hover { background: #fef2f2; }
+.cardVoidBtn:hover { background: var(--danger-soft-bg); }
 
 /* ─── Void form ─────────────────────────────────────────────────────────────── */
 
 .voidForm {
-  border-top: 1px solid #fecaca;
+  border-top: 1px solid var(--danger-soft-border);
   padding-top: 10px;
   display: flex;
   flex-direction: column;
@@ -237,23 +259,23 @@
 .voidReasonInput {
   width: 100%;
   min-height: 58px;
-  border: 1.5px solid #fca5a5;
+  border: 1.5px solid var(--danger-soft-border);
   border-radius: 8px;
   padding: 8px;
   font-size: 13px;
   font-family: inherit;
-  color: var(--menu-text);
-  background: #fff;
+  color: var(--primary-text);
+  background: var(--surface-color);
   resize: none;
   outline: none;
   box-sizing: border-box;
 }
 
-.voidReasonInput:focus { border-color: #ef4444; }
+.voidReasonInput:focus { border-color: var(--danger-text); }
 
 .voidErrorText {
   font-size: 12px;
-  color: #dc2626;
+  color: var(--danger-text);
 }
 
 .voidFormActions {
@@ -266,35 +288,35 @@
   padding: 7px;
   border-radius: 8px;
   border: none;
-  background: #ef4444;
+  background: var(--danger-color);
   color: #fff;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  transition: background 0.12s;
+  transition: opacity 0.12s;
 }
 
 .voidConfirmBtn:disabled { opacity: 0.5; cursor: not-allowed; }
-.voidConfirmBtn:hover:not(:disabled) { background: #dc2626; }
+.voidConfirmBtn:hover:not(:disabled) { opacity: 0.85; }
 
 .voidCancelBtn {
   padding: 7px 14px;
   border-radius: 8px;
-  border: 1px solid var(--menu-border, #e5e7eb);
+  border: 1px solid var(--separator-color);
   background: none;
   font-size: 13px;
-  color: var(--menu-text);
+  color: var(--primary-text);
   cursor: pointer;
 }
 
-.voidCancelBtn:hover { background: #f9fafb; }
+.voidCancelBtn:hover { background: var(--bg-color); }
 
 .cardBottom {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  border-top: 1px solid var(--menu-border, #e5e7eb);
+  border-top: 1px solid var(--separator-color);
   padding-top: 10px;
   margin-top: 2px;
 }
@@ -304,7 +326,7 @@
   align-items: center;
   gap: 4px;
   font-size: 12px;
-  color: var(--menu-secondary-text);
+  color: var(--secondary-text);
 }
 
 .total {

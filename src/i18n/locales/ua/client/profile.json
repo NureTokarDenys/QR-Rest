@@ -13,6 +13,7 @@
     "theme": "Тема",
     "theme_light": "Світла",
     "theme_dark": "Темна",
+    "sound_notifications": "Звукові сповіщення",
     "security": "Безпека",
     "change_password": "Змінити пароль",
     "change_password_title": "Скидання пароля",
@@ -47,8 +48,12 @@
     "google_connected": "Google",
     "google_connect": "Google",
     "connected": "Підключено",
+    "google_account_connected": "Підключено",
     "add": "Підключити",
     "google_no_password": "Ваш акаунт використовує лише Google — встановіть пароль нижче, щоб також входити через email.",
+    "google_link_success": "Акаунт Google успішно підключено.",
+    "google_disconnect": "Від'єднати Google",
+    "disconnect": "Від'єднати",
     "set_password": "Встановити пароль",
 
     "storage": "Сховище",
@@ -81,5 +86,14 @@
     "delete_account_dialog1_confirm": "Так, видалити",
     "delete_account_dialog2_title": "Ви абсолютно впевнені?",
     "delete_account_dialog2_message": "Це назавжди видалить ваш акаунт. Відновити його буде неможливо.",
-    "delete_account_dialog2_confirm": "Видалити назавжди"
+    "delete_account_dialog2_confirm": "Видалити назавжди",
+
+    "email_change_confirm_title": "Змінити пошту?",
+    "email_change_confirm_message": "Ми попросимо вас ввести нову адресу та надішлемо посилання для підтвердження.",
+
+    "password_confirm_title": "Скинути пароль?",
+    "password_confirm_message": "Ми надішлемо посилання для скидання на {{email}}. Продовжити?",
+    "password_confirm": "Надіслати посилання",
+
+    "close": "Закрити"
 }

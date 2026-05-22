@@ -27,9 +27,7 @@ export default function Footer() {
   // – there must be an active order with at least one unserved item
   // – we're not already viewing that specific order's status page
   const activeOrderPath = currentOrder?.id ? `/order-status/${currentOrder.id}` : null;
-  const onActiveOrderPage = activeOrderPath
-    ? location.pathname === activeOrderPath
-    : location.pathname === '/order-status';
+  const onActiveOrderPage = location.pathname.startsWith('/order-status');
   const hasUnservedItems = currentOrder?.items?.some(
     item => (STATUS_RANK[item.status] ?? 0) < STATUS_RANK.served
   );

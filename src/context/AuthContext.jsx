@@ -15,7 +15,7 @@ export function AuthProvider({ children }) {
   });
 
   const isAuthenticated = Boolean(accessToken && user);
-  const isStaff = Boolean(user && ['admin', 'waiter', 'cook', 'waiter_cook'].includes(user.role));
+  const isStaff = Boolean(user && ['admin', 'root_admin', 'waiter', 'cook', 'waiter_cook'].includes(user.role));
 
   // ── On mount: if a token exists, refresh user data from server so stale
   //    cached profile data is always replaced with the latest.
@@ -79,6 +79,20 @@ export function AuthProvider({ children }) {
     return authApi.changePassword(currentPassword, newPassword);
   }
 
+  /** Re-fetch /auth/me and update stored user data (e.g. after linking Google). */
+  async function refreshUser() {
+    try {
+      const freshUser = await authApi.getMe();
+      if (freshUser) {
+        localStorage.setItem('user', JSON.stringify(freshUser));
+        setUser(freshUser);
+      }
+      return freshUser;
+    } catch {
+      return null;
+    }
+  }
+
   async function deleteAccount() {
     await authApi.deleteAccount();
     _clear();
@@ -130,7 +144,7 @@ export function AuthProvider({ children }) {
     <AuthContext.Provider value={{
       accessToken, user, isAuthenticated, isStaff,
       login, loginAsGuest, loginFromOAuth,
-      updateProfile, changePassword, deleteAccount, logout,
+      updateProfile, changePassword, refreshUser, deleteAccount, logout,
     }}>
       {children}
     </AuthContext.Provider>

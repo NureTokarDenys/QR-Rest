@@ -61,18 +61,30 @@
 
 .badge {
   position: absolute;
-  top: 0;
-  right: 0;
-  width: 16px;
+  top: -2px;
+  right: -2px;
+  min-width: 16px;
   height: 16px;
+  padding: 0 3px;
   background: #ff3b30;
   color: #fff;
   font-size: 10px;
   font-weight: 700;
-  border-radius: 50%;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+@keyframes badgePulse {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.35); }
+  100% { transform: scale(1); }
+}
+
+.badgePulse {
+  animation: badgePulse 0.4s ease;
+  animation-iteration-count: 1;
 }
 
 .timeIcon {

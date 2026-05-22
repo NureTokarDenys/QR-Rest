@@ -5,6 +5,25 @@
   "cancel": "Скасувати",
   "saved": "Збережено",
 
+  "subscriptionSuccess": "🎉 Підписку активовано! Ваш ресторан тепер на Premium-плані.",
+  "subscriptionVerifying": "Перевіряємо оплату…",
+  "subscriptionTimeout": "Не вдалося автоматично підтвердити оплату. Якщо кошти були списані — статус оновиться протягом кількох хвилин.",
+  "subscriptionTimeoutRetry": "Оновити сторінку",
+
+  "celebrationTitle": "Ласкаво просимо до Premium!",
+  "celebrationSubtitle": "Ваш ресторан тепер має доступ до всіх преміум-функцій.",
+  "celebrationCta": "Чудово, розпочати!",
+  "celebrationFeature1": "Необмежені страви та категорії",
+  "celebrationFeature2": "Необмежена кількість персоналу",
+  "celebrationFeature3": "Онлайн-оплата через LiqPay",
+  "celebrationFeature4": "Аналітика та звіти",
+  "celebrationFeature5": "Управління відгуками",
+  "celebrationFeature6": "PDF-чеки та рахунки",
+  "celebrationFeature7": "Авто-переклад меню",
+
+  "paymentFailedBanner": "Платіж не пройшов або було скасовано. Спробуйте ще раз.",
+  "paymentFailedRetry": "Спробувати знову",
+
   "basicInfo": "Основна інформація",
   "name": "Назва",
   "namePlaceholder": "Назва ресторану",
@@ -42,5 +61,15 @@
   "lang_sk": "Slovenčina",
 
   "srcHintPrefix": "Джерело",
-  "fallback_tooltip": "Поле відображається мовою оригіналу"
+  "fallback_tooltip": "Поле відображається мовою оригіналу",
+
+  "liqpayTitle": "LiqPay (онлайн-платежі)",
+  "liqpayHint": "Введіть публічний і приватний ключі LiqPay для прийому онлайн-платежів від клієнтів. Ключі зберігаються в зашифрованому вигляді.",
+  "liqpayConnected": "Ключі збережено. Онлайн-платежі активовано.",
+  "liqpayPublicKey": "Публічний ключ",
+  "liqpayPrivateKey": "Приватний ключ",
+  "liqpayStored": "збережено",
+  "liqpaySave": "Зберегти ключі оплати",
+  "liqpayBothRequired": "Обидва ключі — публічний і приватний — є обов'язковими.",
+  "liqpaySaveError": "Не вдалося зберегти ключі. Спробуйте ще раз."
 }

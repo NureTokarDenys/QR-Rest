@@ -66,27 +66,25 @@
   flex-wrap: wrap;
 }
 
-.qtyBtn {
-  width: 28px;
-  height: 28px;
-  background: none;
-  border: 1.5px solid var(--primary-btn-active);
-  border-radius: 6px;
-  color: var(--primary-btn-active);
-  font-size: 16px;
-  font-weight: 700;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 
-.qty {
-  font-size: 15px;
+.duplicateBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
   font-weight: 600;
-  min-width: 18px;
-  text-align: center;
-  color: var(--primary-text);
+  cursor: pointer;
+  border: 1.5px solid var(--separator-color);
+  background: var(--bg-color);
+  color: var(--secondary-text);
+  transition: border-color 0.15s, color 0.15s;
+}
+.duplicateBtn svg { font-size: 14px; }
+.duplicateBtn:hover {
+  border-color: var(--primary-btn-active);
+  color: var(--primary-btn-active);
 }
 
 .deleteBtn {
@@ -100,6 +98,25 @@
   transition: color 0.15s;
 }
 .deleteBtn:hover { color: var(--danger-color); }
+
+/* Comment textarea inside details panel */
+.commentTextarea {
+  width: 100%;
+  min-height: 56px;
+  border: 1.5px solid var(--separator-color);
+  background: var(--bg-color);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--primary-text);
+  resize: none;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+.commentTextarea::placeholder { color: var(--secondary-text); }
+.commentTextarea:focus { border-color: var(--primary-btn-active); }
 
 /* Details toggle */
 .detailsToggle {
@@ -308,5 +325,4 @@
   .image   { width: 88px; height: 88px; border-radius: 12px; }
   .nameBtn { font-size: 17px; }
   .price   { font-size: 17px; }
-  .qtyBtn  { width: 32px; height: 32px; font-size: 18px; }
 }

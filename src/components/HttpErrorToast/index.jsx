@@ -1,42 +1,14 @@
 import { useEffect, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import styles from './httpErrorToast.module.css';
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-const STATUS_TITLES = {
-  0:   'Network Error',
-  400: 'Bad Request',
-  403: 'Access Denied',
-  404: 'Not Found',
-  405: 'Method Not Allowed',
-  408: 'Request Timeout',
-  409: 'Conflict',
-  410: 'Gone',
-  422: 'Validation Error',
-  429: 'Too Many Requests',
-  500: 'Server Error',
-  502: 'Bad Gateway',
-  503: 'Service Unavailable',
-  504: 'Gateway Timeout',
-};
-
-function getTitle(status, code) {
-  if (STATUS_TITLES[status]) return STATUS_TITLES[status];
-  if (status >= 500) return 'Server Error';
-  if (status >= 400) return 'Request Error';
-  if (status === 0)  return 'Network Error';
-  return 'Error';
-}
-
 function getSeverity(status) {
-  if (status === 0 || status >= 500) return 'critical'; // red
-  if (status >= 400) return 'warn';                     // amber
+  if (status === 0 || status >= 500) return 'critical';
+  if (status >= 400) return 'warn';
   return 'info';
 }
 
 let _nextId = 1;
-
-// ─── Component ────────────────────────────────────────────────────────────────
 
 const AUTO_DISMISS_MS = 6000;
 const MAX_VISIBLE     = 3;
@@ -55,11 +27,9 @@ export default function HttpErrorToast() {
 
       setToasts(prev => {
         const next = [...prev, { id, status, code, message }];
-        // Keep only the most recent MAX_VISIBLE toasts
         return next.slice(-MAX_VISIBLE);
       });
 
-      // Auto-dismiss
       setTimeout(() => remove(id), AUTO_DISMISS_MS);
     }
 
@@ -79,8 +49,25 @@ export default function HttpErrorToast() {
 }
 
 function Toast({ toast, onClose }) {
+  const { t } = useTranslation('errors');
   const { status, code, message } = toast;
-  const title    = getTitle(status, code);
+
+  // Title from HTTP status code, with generic fallbacks
+  const title = t(`status.${status}`, {
+    defaultValue: status >= 500
+      ? t('status.5xx')
+      : status >= 400
+      ? t('status.4xx')
+      : status === 0
+      ? t('status.0')
+      : t('generic'),
+  });
+
+  // Description: prefer translated error code, fall back to raw API message, then generic
+  const description = code
+    ? t(`code.${code}`, { defaultValue: message || t('generic') })
+    : (message || t('generic'));
+
   const severity = getSeverity(status);
   const badge    = status > 0 ? String(status) : '!';
 
@@ -92,9 +79,7 @@ function Toast({ toast, onClose }) {
         <button className={styles.close} onClick={onClose} aria-label="Dismiss">✕</button>
       </div>
 
-      {message && (
-        <p className={styles.message}>{message}</p>
-      )}
+      <p className={styles.message}>{description}</p>
 
       {code && code !== 'NETWORK_ERROR' && (
         <p className={styles.code}>{code}</p>

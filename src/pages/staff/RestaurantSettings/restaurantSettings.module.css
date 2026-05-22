@@ -40,6 +40,14 @@
 
 
 .langBar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--surface-color);
+  border: 1px solid var(--separator-color);
+  border-radius: 14px;
+  padding: 12px 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   margin-bottom: 4px;
 }
 
@@ -201,6 +209,148 @@
   cursor: pointer;
   flex-shrink: 0;
 }
+
+/* ── LiqPay ── */
+.liqpayStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #16a34a;
+  background: rgba(22, 163, 74, 0.08);
+  border: 1px solid rgba(22, 163, 74, 0.25);
+  border-radius: 8px;
+  padding: 6px 12px;
+}
+
+.liqpayStatusIcon {
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.liqpayInput {
+  width: 100%;
+  box-sizing: border-box;
+  height: 40px;
+  border: 1px solid var(--separator-color);
+  border-radius: 8px;
+  padding: 0 12px;
+  font-size: 14px;
+  background: var(--bg-color);
+  color: var(--primary-text);
+  outline: none;
+  font-family: monospace;
+  transition: border-color 0.15s;
+}
+.liqpayInput:focus {
+  border-color: var(--accent-color);
+}
+
+.liqpayStoredBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 8px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #16a34a;
+  background: rgba(22, 163, 74, 0.1);
+  border-radius: 4px;
+  padding: 1px 5px;
+  vertical-align: middle;
+  text-transform: uppercase;
+}
+
+.liqpayError {
+  font-size: 13px;
+  color: #ef4444;
+  margin: 0;
+}
+
+.liqpaySaveBtn {
+  align-self: flex-start;
+  height: 36px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--accent-color);
+  color: #fff;
+  transition: opacity 0.12s;
+}
+.liqpaySaveBtn:hover    { opacity: 0.85; }
+.liqpaySaveBtn:disabled { opacity: 0.55; cursor: default; }
+
+/* ── Payment flow banners ── */
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.verifyingBanner,
+.timeoutBanner,
+.failedBanner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-radius: 12px;
+  padding: 13px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  animation: slideDown 0.25s ease;
+  flex-wrap: wrap;
+}
+
+.verifyingBanner {
+  background: rgba(29, 122, 252, 0.08);
+  border: 1px solid rgba(29, 122, 252, 0.25);
+  color: #1d7afc;
+}
+
+.timeoutBanner {
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #b45309;
+  justify-content: space-between;
+}
+
+.failedBanner {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #dc2626;
+  justify-content: space-between;
+}
+
+.verifyingSpinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(29, 122, 252, 0.25);
+  border-top-color: #1d7afc;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.bannerAction {
+  background: none;
+  border: 1px solid currentColor;
+  border-radius: 8px;
+  padding: 4px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  color: inherit;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.12s;
+}
+.bannerAction:hover { background: rgba(0, 0, 0, 0.05); }
 
 /* ── Responsive ── */
 @media (max-width: 768px) {

@@ -1,12 +1,13 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { fieldFor } from '../../../i18n/langs';
 import { Dropdown } from '../../Dropdown';
 import styles from './activeOrderRow.module.css';
 
 import { STATUS_STYLES, STATUS_KEYS } from '../../../constants/mainConstants'; 
 
 export default function ActiveOrderRow({ item, onStatusChange }) {
-  const { t } = useTranslation('components');
+  const { t, i18n } = useTranslation('components');
   
   const s = STATUS_STYLES[item.status] || STATUS_STYLES.waiting;
   const statusKey = item.status || 'waiting';
@@ -18,7 +19,7 @@ export default function ActiveOrderRow({ item, onStatusChange }) {
 
   return (
     <tr className={styles.row}>
-      <td className={styles.name}>{item.name}</td>
+      <td className={styles.name}>{item[fieldFor('name', i18n.language)] || item.name}</td>
       <td className={styles.cell}>{item.qty}</td>
       <td className={`${styles.cell} ${styles.price}`}>
         {item.price} {t('currency_symbol', '₴')}

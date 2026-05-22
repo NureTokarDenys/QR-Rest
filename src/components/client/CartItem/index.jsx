@@ -5,7 +5,7 @@ import { getDishDetail } from '../../../api/menu';
 import styles from './cartItem.module.css';
 import { useLocalField } from '../../../i18n/useLang';
 import { useTranslation } from 'react-i18next';
-import { MdDelete, MdExpandMore, MdExpandLess } from 'react-icons/md';
+import { MdDelete, MdExpandMore, MdExpandLess, MdContentCopy } from 'react-icons/md';
 
 /**
  * Maps the raw API dish response into everything the details panel needs:
@@ -44,7 +44,7 @@ function mapDetail(raw) {
 }
 
 export default function CartItem({ item }) {
-  const { updateQuantity, removeFromCart, updateCartItem } = useApp();
+  const { removeFromCart, updateCartItem, duplicateCartItem, updateItemComment } = useApp();
   const local = useLocalField();
   const navigate = useNavigate();
   const { t } = useTranslation('cart');
@@ -67,6 +67,7 @@ export default function CartItem({ item }) {
   const [localGroups, setLocalGroups] = useState(
     () => ({ ...(item.componentGroupSelections ?? {}) })
   );
+  const [localComment, setLocalComment] = useState(() => item.comment ?? '');
 
   // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -78,7 +79,7 @@ export default function CartItem({ item }) {
           excludedIngredients:      [...localExcluded],
           selectedAddons:           [...localAddons],
           componentGroupSelections: { ...localGroups },
-          comment:                  item.comment ?? '',
+          comment:                  localComment,
         },
       },
     });
@@ -112,7 +113,7 @@ export default function CartItem({ item }) {
             excludedIngredients:      item.excludedIngredients ?? [],
             selectedAddons:           item.selectedAddons      ?? [],
             componentGroupSelections: withDefaults,
-            comment:                  item.comment             ?? '',
+            comment:                  localComment,
           });
         }
       })
@@ -138,7 +139,7 @@ export default function CartItem({ item }) {
       excludedIngredients:      [...newExcluded],
       selectedAddons:           [...newAddons],
       componentGroupSelections: { ...newGroups },
-      comment:                  item.comment ?? '',
+      comment:                  localComment,
     });
   }
 
@@ -178,9 +179,13 @@ export default function CartItem({ item }) {
         <span className={styles.price}>{item.price * item.quantity}₴</span>
 
         <div className={styles.controls}>
-          <button className={styles.qtyBtn} onClick={() => updateQuantity(item.cartItemId, -1)}>−</button>
-          <span className={styles.qty}>{item.quantity}</span>
-          <button className={styles.qtyBtn} onClick={() => updateQuantity(item.cartItemId, 1)}>+</button>
+          <button
+            className={styles.duplicateBtn}
+            onClick={() => duplicateCartItem(item.cartItemId)}
+          >
+            <MdContentCopy />
+            <span>{t('duplicate_item')}</span>
+          </button>
           <button className={styles.deleteBtn} onClick={() => removeFromCart(item.cartItemId)}>
             <MdDelete />
           </button>
@@ -202,6 +207,21 @@ export default function CartItem({ item }) {
         <div className={`${styles.detailsOuter} ${expanded ? styles.detailsOuterOpen : ''}`}>
           <div className={styles.detailsInner}>
             <div className={styles.detailsPanel}>
+              {/* Comment field — always available, no detail fetch required */}
+              <div className={styles.detailSection}>
+                <span className={styles.detailSectionLabel}>{t('dish_comment')}</span>
+                <textarea
+                  className={styles.commentTextarea}
+                  placeholder={t('dish_comment_placeholder')}
+                  value={localComment}
+                  onChange={e => {
+                    setLocalComment(e.target.value);
+                    updateItemComment(item.cartItemId, e.target.value);
+                  }}
+                  rows={2}
+                />
+              </div>
+
               {detail && (
                 <>
                   {/* Component groups — radio chip row per group */}

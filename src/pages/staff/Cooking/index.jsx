@@ -1,13 +1,38 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import StaffShell from '../../../components/staff/StaffShell';
-import KanbanColumn from '../../../components/staff/KanbanColumn';
+import KanbanColumn, { KanbanColumnSkeleton } from '../../../components/staff/KanbanColumn';
 import WsStatusBanner from '../../../components/WsStatusBanner';
-import { getKitchenOrders, updateGroupStatus } from '../../../api/kitchen';
+import { updateGroupStatus } from '../../../api/kitchen';
+import { useStaffData } from '../../../context/StaffDataContext';
 import { useWebSocket } from '../../../hooks/useWebSocket';
 import styles from './cooking.module.css';
 
 import { MdLocalFireDepartment, MdViewColumn, MdTableChart } from 'react-icons/md';
+
+function nameOf(obj) {
+  if (!obj) return '';
+  if (typeof obj === 'string') return obj;
+  return obj.name || obj.name_en || '';
+}
+function getExcluded(item) {
+  return (item.excludedIngredients || []).map(x => nameOf(x)).filter(Boolean);
+}
+function getAddons(item) {
+  return (item.addons || []).map(ao => {
+    const base = nameOf(typeof ao.addonId === 'object' ? ao.addonId : ao) || nameOf(ao.addon);
+    if (!base) return null;
+    return ao.quantity > 1 ? `${base} ×${ao.quantity}` : base;
+  }).filter(Boolean);
+}
+function getChoices(item) {
+  return (item.componentGroupChoices || []).map(c => {
+    const grp = nameOf(typeof c.groupId === 'object' ? c.groupId : null) || c.groupName || '';
+    const opt = nameOf(typeof c.optionId === 'object' ? c.optionId : null) || c.optionName || '';
+    if (grp && opt) return `${grp}: ${opt}`;
+    return opt || grp || null;
+  }).filter(Boolean);
+}
 
 function formatElapsed(isoTimestamp, now) {
   if (!isoTimestamp) return null;
@@ -25,6 +50,7 @@ function formatElapsed(isoTimestamp, now) {
 
 const STATUSES = ['waiting', 'cooking', 'ready', 'served'];
 const STATUS_LEVEL = { waiting: 0, cooking: 1, ready: 2, served: 3 };
+const ROLLBACK_WINDOW_MS = 2 * 60 * 1000; // 2 minutes
 
 const ORDER_COLORS = [
   '#ef4444', '#f97316', '#f59e0b', '#eab308', '#84cc16',
@@ -58,30 +84,35 @@ function buildGroupCards(orders) {
 
     if (sortedGroups.length === 0 && (order.items || []).length > 0) {
       const groupStatus = getGroupStatus(order.items);
-      if (groupStatus !== 'served') {
-        cards.push({
-          id: `${orderId}_ungrouped`,
-          groupId: null,
-          orderId,
-          groupNumber: 1,
-          groupName: '',
-          tableId: tableNum,
-          orderColor,
-          status: groupStatus,
-          canAdvance: true,
-          blockingGroupNumber: null,
-          createdAt: order.createdAt || null,
-          statusChangedAt: null,
-          items: (order.items || []).map(item => ({
-            id: String(item._id),
-            name: (typeof item.menuItemId === 'object' ? item.menuItemId?.name : null) || item.name || '—',
-            quantity: item.quantity || 1,
-            categoryName:  item.categoryName  || null,
-            categoryColor: item.categoryColor || null,
-          })),
-          hiddenBelow: 0,
-        });
-      }
+      // Served groups stay visible — they only disappear when the order closes
+      // (completed_cash / completed_epay / cancelled), which the backend filter
+      // already removes from this list.
+      cards.push({
+        id: `${orderId}_ungrouped`,
+        groupId: null,
+        orderId,
+        groupNumber: 1,
+        groupName: '',
+        tableId: tableNum,
+        orderColor,
+        status: groupStatus,
+        canAdvance: groupStatus !== 'served',
+        blockingGroupNumber: null,
+        createdAt: order.createdAt || null,
+        statusChangedAt: null,
+        items: (order.items || []).map(item => ({
+          id: String(item._id),
+          name: (typeof item.menuItemId === 'object' ? item.menuItemId?.name : null) || item.name || '—',
+          quantity: item.quantity || 1,
+          categoryName:  item.categoryName  || null,
+          categoryColor: item.categoryColor || null,
+          excludedIngredients:    item.excludedIngredients    || [],
+          addons:                 item.addons                 || [],
+          componentGroupChoices:  item.componentGroupChoices  || [],
+          comment:                item.comment                || null,
+        })),
+        hiddenBelow: 0,
+      });
       continue;
     }
 
@@ -102,7 +133,8 @@ function buildGroupCards(orders) {
       if (groupItems.length === 0) continue;
 
       const groupStatus = groupStatuses[i];
-      if (groupStatus === 'served') continue;
+      // Served groups remain in the "served" column until the parent order
+      // closes (the backend filter already excludes completed_* / cancelled).
 
       if (groupStatus === 'waiting') {
         const precedingAllStarted = groupStatuses.slice(0, i).every((s, k) => {
@@ -151,12 +183,17 @@ function buildGroupCards(orders) {
         blockingGroupNumber,
         createdAt: group.createdAt || null,
         statusChangedAt: group.statusChangedAt || null,
+        wasRolledBack: group.wasRolledBack || false,
         items: groupItems.map(item => ({
           id: String(item._id),
           name: (typeof item.menuItemId === 'object' ? item.menuItemId?.name : null) || item.name || '—',
           quantity: item.quantity || 1,
           categoryName:  item.categoryName  || null,
           categoryColor: item.categoryColor || null,
+          excludedIngredients:   item.excludedIngredients   || [],
+          addons:                item.addons                || [],
+          componentGroupChoices: item.componentGroupChoices || [],
+          comment:               item.comment               || null,
         })),
         hiddenBelow,
       });
@@ -165,7 +202,7 @@ function buildGroupCards(orders) {
   return cards;
 }
 
-function applyGroupUpdate(orders, orderId, groupId, newStatus) {
+function applyGroupUpdate(orders, orderId, groupId, newStatus, wasRolledBack = false) {
   const now = new Date().toISOString();
   return orders.map(order => {
     if (String(order._id || order.id) !== String(orderId)) return order;
@@ -175,9 +212,8 @@ function applyGroupUpdate(orders, orderId, groupId, newStatus) {
         if (!item.servingGroupId || String(item.servingGroupId) !== groupId) return item;
         return { ...item, dishStatus: newStatus };
       }),
-      // Optimistically update statusChangedAt on the matching serving group
       servingGroups: (order.servingGroups || []).map(g =>
-        String(g._id) === groupId ? { ...g, statusChangedAt: now } : g
+        String(g._id) === groupId ? { ...g, statusChangedAt: now, wasRolledBack } : g
       ),
     };
   });
@@ -214,9 +250,16 @@ function applyGroupStatusEvent(orders, orderId, groupId, status) {
 export default function Cooking() {
   const { t } = useTranslation('cooking');
   const { t: tc } = useTranslation('components');
-  const [orders, setOrders] = useState([]);
+
+  // Kitchen orders live in the shared cache — lazy-loaded on first visit,
+  // kept fresh via WS. In-place status flips happen without a refetch.
+  const { kitchenOrders, setKitchenOrders, refreshKitchenOrders, ensureKitchenOrders } = useStaffData();
+  useEffect(() => { ensureKitchenOrders(); }, [ensureKitchenOrders]);
+  const orders  = Array.isArray(kitchenOrders) ? kitchenOrders : [];
+  const loading = kitchenOrders === null;
+  const setOrders = setKitchenOrders;
+
   const [view, setView] = useState('order');
-  const [loading, setLoading] = useState(true);
   const [confirmDialog, setConfirmDialog] = useState(null);
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
@@ -224,48 +267,24 @@ export default function Cooking() {
     return () => clearInterval(id);
   }, []);
 
-  const fetchOrders = useCallback(async () => {
-    try {
-      const data = await getKitchenOrders('order');
-      if (Array.isArray(data)) setOrders(data);
-    } catch (err) {
-      console.error('getKitchenOrders error:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   // ── WebSocket ──────────────────────────────────────────────────────────────
+  // ORDER_NEW / ORDER_UPDATED / ORDER_*_CANCELLED are handled by the cache layer.
+  // We only need to apply in-place DISH/GROUP status updates so column moves
+  // happen without a full refetch.
   const handleWsMessage = useCallback((msg) => {
     const { event, payload } = msg;
     if (!payload) return;
 
-    if (event === 'ORDER_NEW' || event === 'ORDER_UPDATED') {
-      // New/updated order — full refetch to get all item details
-      fetchOrders();
-      return;
-    }
-    if (event === 'ORDER_VOID' || event === 'ORDER_CANCELLED') {
-      setOrders(prev => prev.filter(o => String(o._id || o.id) !== String(payload.orderId)));
-      return;
-    }
     if (event === 'DISH_STATUS_UPDATED') {
-      setOrders(prev => applyDishStatusUpdate(prev, payload.orderId, payload.orderItemId, payload.dishStatus));
+      setOrders(prev => applyDishStatusUpdate(prev || [], payload.orderId, payload.orderItemId, payload.dishStatus));
       return;
     }
     if (event === 'GROUP_STATUS_UPDATED') {
-      setOrders(prev => applyGroupStatusEvent(prev, payload.orderId, payload.groupId, payload.status));
+      setOrders(prev => applyGroupStatusEvent(prev || [], payload.orderId, payload.groupId, payload.status));
     }
-  }, [fetchOrders]);
+  }, [setOrders]);
 
   const { status: wsStatus } = useWebSocket({ onMessage: handleWsMessage });
-
-  useEffect(() => {
-    fetchOrders();
-    // Fallback poll — fires if WS events are missed (network hiccup, proxy, etc.)
-    const interval = setInterval(fetchOrders, 60_000);
-    return () => clearInterval(interval);
-  }, [fetchOrders]);
 
   const groupCards = useMemo(() => buildGroupCards(orders), [orders]);
 
@@ -280,14 +299,14 @@ export default function Cooking() {
     return count;
   }, [orders]);
 
-  async function doStatusChange(card, newStatus) {
+  async function doStatusChange(card, newStatus, isRollback = false) {
     if (!card.groupId) return;
-    setOrders(prev => applyGroupUpdate(prev, card.orderId, card.groupId, newStatus));
+    setOrders(prev => applyGroupUpdate(prev || [], card.orderId, card.groupId, newStatus, isRollback));
     try {
       await updateGroupStatus(card.orderId, card.groupId, newStatus);
     } catch (err) {
       console.error('updateGroupStatus error:', err);
-      fetchOrders();
+      refreshKitchenOrders();
     }
   }
 
@@ -298,14 +317,37 @@ export default function Cooking() {
     const isBackward = (STATUS_LEVEL[newStatus] ?? 0) < (STATUS_LEVEL[card.status] ?? 0);
     const isForward  = (STATUS_LEVEL[newStatus] ?? 0) > (STATUS_LEVEL[card.status] ?? 0);
 
-    if (isBackward) { setConfirmDialog({ card, newStatus }); return; }
+    if (isBackward) {
+      // Only one step back at a time (e.g. cooking → waiting, not ready → waiting)
+      if ((STATUS_LEVEL[card.status] ?? 0) - (STATUS_LEVEL[newStatus] ?? 0) > 1) return;
+
+      const secsElapsed = card.statusChangedAt
+        ? Math.floor((Date.now() - new Date(card.statusChangedAt).getTime()) / 1000)
+        : Infinity;
+      const windowSecs   = Math.floor(ROLLBACK_WINDOW_MS / 1000);
+      const withinWindow = secsElapsed <= windowSecs;
+      const deadline     = card.statusChangedAt
+        ? new Date(card.statusChangedAt).getTime() + ROLLBACK_WINDOW_MS
+        : 0;
+
+      if (!withinWindow) {
+        setConfirmDialog({ card, newStatus, blocked: true, blockedReason: 'rollback_window_expired' });
+        return;
+      }
+      if (card.wasRolledBack) {
+        setConfirmDialog({ card, newStatus, blocked: true, blockedReason: 'rollback_already_used' });
+        return;
+      }
+      setConfirmDialog({ card, newStatus, blocked: false, deadline });
+      return;
+    }
     if (isForward && !card.canAdvance) return;
-    if (isForward) doStatusChange(card, newStatus);
+    if (isForward) doStatusChange(card, newStatus, false);
   }
 
   function confirmBackward() {
-    if (!confirmDialog) return;
-    doStatusChange(confirmDialog.card, confirmDialog.newStatus);
+    if (!confirmDialog || confirmDialog.blocked) return;
+    doStatusChange(confirmDialog.card, confirmDialog.newStatus, true);
     setConfirmDialog(null);
   }
 
@@ -364,6 +406,10 @@ export default function Cooking() {
             quantity: item.quantity || 1,
             categoryName:  item.categoryName  || null,
             categoryColor: item.categoryColor || null,
+            excludedIngredients:   item.excludedIngredients   || [],
+            addons:                item.addons                || [],
+            componentGroupChoices: item.componentGroupChoices || [],
+            comment:               item.comment               || null,
           })),
         };
       }).filter(g => g.status !== 'served' && g.items.length > 0);
@@ -382,9 +428,43 @@ export default function Cooking() {
     if (card) {
       doStatusChange(card, next);
     } else {
-      setOrders(prev => applyGroupUpdate(prev, group.orderId, group.groupId, next));
-      updateGroupStatus(group.orderId, group.groupId, next).catch(() => fetchOrders());
+      setOrders(prev => applyGroupUpdate(prev || [], group.orderId, group.groupId, next));
+      updateGroupStatus(group.orderId, group.groupId, next).catch(() => refreshKitchenOrders());
     }
+  }
+
+  if (loading) {
+    // Per-column card variety mimicking the real kanban load shown in the reference
+    const SKELETON_BY_STATUS = {
+      waiting: [
+        { withAction: true,  items: 2, withMods: true },
+        { withAction: true,  items: 2, withMods: true },
+      ],
+      cooking: [
+        { withAction: true,  items: 2, withMods: true },
+        { withAction: true,  items: 3, withMods: true },
+      ],
+      ready: [
+        { withAction: true,  items: 2, withMods: true },
+        { withAction: true,  items: 2, withMods: false },
+      ],
+      served: [
+        { withAction: false, items: 2, withMods: true },
+      ],
+    };
+    return (
+      <StaffShell title={<><MdLocalFireDepartment /> {t('title')}</>}>
+        <div className={styles.board}>
+          {STATUSES.map(status => (
+            <KanbanColumnSkeleton
+              key={status}
+              status={status}
+              cards={SKELETON_BY_STATUS[status]}
+            />
+          ))}
+        </div>
+      </StaffShell>
+    );
   }
 
   return (
@@ -466,24 +546,57 @@ export default function Cooking() {
                           </button>
                         )}
                       </div>
-                      {group.items.map(item => (
-                        <div key={item.id} className={styles.tableItemRow}>
-                          <span className={styles.tableItemDot} style={{ background: orderColor }} />
-                          <span className={styles.tableItemQty}>×{item.quantity}</span>
-                          <span className={styles.tableItemName}>{item.name}</span>
-                          {item.categoryName && (
-                            <span
-                              className={styles.tableCatTag}
-                              style={item.categoryColor ? {
-                                background: `${item.categoryColor}20`,
-                                color: item.categoryColor,
-                              } : undefined}
-                            >
-                              {item.categoryName}
-                            </span>
-                          )}
-                        </div>
-                      ))}
+                      {group.items.map(item => {
+                        const excluded = getExcluded(item);
+                        const addons   = getAddons(item);
+                        const choices  = getChoices(item);
+                        return (
+                          <div key={item.id} className={styles.tableItemRow}>
+                            <span className={styles.tableItemDot} style={{ background: orderColor }} />
+                            <span className={styles.tableItemQty}>×{item.quantity}</span>
+                            <div className={styles.tableItemContent}>
+                              <div className={styles.tableItemNameRow}>
+                                <span className={styles.tableItemName}>{item.name}</span>
+                                {item.categoryName && (
+                                  <span
+                                    className={styles.tableCatTag}
+                                    style={item.categoryColor ? {
+                                      background: `${item.categoryColor}20`,
+                                      color: item.categoryColor,
+                                    } : undefined}
+                                  >
+                                    {item.categoryName}
+                                  </span>
+                                )}
+                              </div>
+                              {excluded.length > 0 && (
+                                <div className={styles.tableItemMods}>
+                                  {excluded.map((name, i) => (
+                                    <span key={i} className={styles.tableExcludedTag}>−{name}</span>
+                                  ))}
+                                </div>
+                              )}
+                              {addons.length > 0 && (
+                                <div className={styles.tableItemMods}>
+                                  {addons.map((label, i) => (
+                                    <span key={i} className={styles.tableAddonTag}>+{label}</span>
+                                  ))}
+                                </div>
+                              )}
+                              {choices.length > 0 && (
+                                <div className={styles.tableItemMods}>
+                                  {choices.map((label, i) => (
+                                    <span key={i} className={styles.tableChoiceTag}>{label}</span>
+                                  ))}
+                                </div>
+                              )}
+                              {item.comment && (
+                                <p className={styles.tableItemComment}>«{item.comment}»</p>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   ))}
                 </div>
@@ -493,27 +606,61 @@ export default function Cooking() {
         </div>
       )}
 
-      {confirmDialog && (
-        <div className={styles.overlay} onClick={() => setConfirmDialog(null)}>
-          <div className={styles.dialog} onClick={e => e.stopPropagation()}>
-            <p className={styles.dialogTitle}>{t('confirm_backward_title')}</p>
-            <p className={styles.dialogSub}>
-              {t('confirm_backward_sub', {
-                from: tc(`status_${confirmDialog.card.status}`),
-                to:   tc(`status_${confirmDialog.newStatus}`),
-              })}
-            </p>
-            <div className={styles.dialogActions}>
-              <button className={styles.dialogCancel} onClick={() => setConfirmDialog(null)}>
-                {t('cancel')}
-              </button>
-              <button className={styles.dialogConfirm} onClick={confirmBackward}>
-                {t('confirm')}
-              </button>
+      {confirmDialog && (() => {
+        // Derive live countdown from the already-ticking `now` state
+        const secsLeft = confirmDialog.blocked
+          ? 0
+          : Math.max(0, Math.floor((confirmDialog.deadline - now) / 1000));
+
+        // Auto-dismiss when window expires while dialog is open
+        if (!confirmDialog.blocked && secsLeft === 0) {
+          setTimeout(() => setConfirmDialog(d =>
+            d && !d.blocked ? { ...d, blocked: true, blockedReason: 'rollback_window_expired' } : d
+          ), 0);
+        }
+
+        return (
+          <div className={styles.overlay} onClick={() => setConfirmDialog(null)}>
+            <div className={styles.dialog} onClick={e => e.stopPropagation()}>
+              {confirmDialog.blocked ? (
+                <>
+                  <p className={styles.dialogTitle}>{t('rollback_blocked_title')}</p>
+                  <p className={styles.dialogSub}>{t(confirmDialog.blockedReason)}</p>
+                  <div className={styles.dialogActions}>
+                    <button className={styles.dialogCancel} onClick={() => setConfirmDialog(null)}>
+                      {t('close')}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className={styles.dialogTitle}>{t('confirm_backward_title')}</p>
+                  <p className={styles.dialogSub}>
+                    {t('confirm_backward_sub', {
+                      from: tc(`status_${confirmDialog.card.status}`),
+                      to:   tc(`status_${confirmDialog.newStatus}`),
+                    })}
+                  </p>
+                  <p className={styles.dialogWindowHint}>
+                    {t('rollback_window_remaining', { secs: secsLeft })}
+                  </p>
+                  <p className={styles.dialogCorrectionNote}>
+                    {t('rollback_client_notified')}
+                  </p>
+                  <div className={styles.dialogActions}>
+                    <button className={styles.dialogCancel} onClick={() => setConfirmDialog(null)}>
+                      {t('cancel')}
+                    </button>
+                    <button className={styles.dialogConfirm} onClick={confirmBackward}>
+                      {t('confirm')}
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </StaffShell>
   );
 }

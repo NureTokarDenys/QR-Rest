@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '../../../context/AppContext';
 import ReviewItem from '../../../components/client/ReviewItem';
 import PrimaryButton from '../../../components/PrimaryButton';
-import { getDishDetail } from '../../../api/menu';
 import { getDishReviews } from '../../../api/reviews';
+import { useMenuContext } from '../../../context/MenuContext';
+import { DishDetailSkeleton } from '../../../components/client/Skeleton';
 import styles from './dishDetail.module.css';
 import { useToast } from '../../../context/ClientToastContext';
 import { useTranslation } from 'react-i18next';
@@ -15,6 +16,8 @@ const MAX_COMMENT = 300;
 
 function normaliseDish(raw) {
   if (!raw) return null;
+  const images = raw.images?.length ? raw.images : raw.imageUrl ? [raw.imageUrl] : [];
+  const selectedImageIdx = Math.min(raw.selectedImageIdx ?? 0, Math.max(0, images.length - 1));
   // Map API shape to internal shape used by addToCart and rendering
   return {
     id: raw._id || raw.id,
@@ -22,7 +25,9 @@ function normaliseDish(raw) {
     name_en: raw.name_en || raw.name,
     price: raw.basePrice !== undefined ? raw.basePrice : raw.price,
     weight: raw.weight || null,
-    image: raw.imageUrl || raw.image,
+    images,
+    selectedImageIdx,
+    image: images[selectedImageIdx] || null,
     description: raw.description,
     description_en: raw.description_en || raw.description,
     rating: raw.rating,
@@ -68,6 +73,7 @@ export default function DishDetail() {
   const navigate = useNavigate();
   const location = useLocation();
   const { addToCart, updateCartItem } = useApp();
+  const { fetchDish } = useMenuContext();
   const { showToast } = useToast();
 
   // If arriving from the cart via clicking the dish name, pre-fill with saved
@@ -79,6 +85,17 @@ export default function DishDetail() {
   const [loading, setLoading]   = useState(true);
   const [reviews, setReviews]   = useState([]);
   const [ratingSummary, setRatingSummary] = useState(null); // { averageRating, totalCount }
+
+  // trackIdx: position in the extended strip [cloneLast, img0…imgN-1, cloneFirst]
+  // real display index = (trackIdx - 1 + N) % N
+  const [trackIdx,   setTrackIdx]   = useState(1);
+  const [isAnimated, setIsAnimated] = useState(true);
+  const [dragX,      setDragX]      = useState(0);
+  const [dragging,   setDragging]   = useState(false);
+  const touchStartX    = useRef(null);
+  const containerRef   = useRef(null);
+  const transiting     = useRef(false);
+  const transitTimerRef = useRef(null);
 
   const [quantity, setQuantity] = useState(1);
   const [excludedIngredients, setExcludedIngredients] = useState(prefill?.excludedIngredients ?? []);
@@ -92,13 +109,15 @@ export default function DishDetail() {
 
     // Fetch dish details and reviews in parallel
     Promise.all([
-      getDishDetail(id),
+      fetchDish(id),
       getDishReviews(id).catch(() => null),
     ])
       .then(([dishData, reviewEnvelope]) => {
         if (cancelled) return;
         const dish = normaliseDish(dishData);
         setDish(dish);
+        const N = dish.images.length;
+        setTrackIdx(N <= 1 ? 0 : (dish.selectedImageIdx ?? 0) + 1);
 
         // Pre-select the isDefault option for any group that has no selection yet
         // (covers both fresh opens and prefill arriving from cart with missing groups)
@@ -132,9 +151,26 @@ export default function DishDetail() {
     return () => { cancelled = true; };
   }, [id, lang]); // re-fetch when language changes so backend returns fresh translations
 
-  if (loading) {
-    return <div className={styles.notFound}>Завантаження...</div>;
-  }
+  // Loop correction: after the transition into a clone finishes, silently jump to the real position
+  useEffect(() => {
+    if (!dish || dish.images.length <= 1) return;
+    const N = dish.images.length;
+    if (trackIdx !== N + 1 && trackIdx !== 0) return;
+    const timer = setTimeout(() => {
+      setIsAnimated(false);
+      setTrackIdx(trackIdx === N + 1 ? 1 : N);
+    }, 340); // slightly longer than the CSS transition
+    return () => clearTimeout(timer);
+  }, [trackIdx, dish]);
+
+  // Re-enable animation on the frame after the silent jump
+  useEffect(() => {
+    if (isAnimated) return;
+    const timer = setTimeout(() => setIsAnimated(true), 16);
+    return () => clearTimeout(timer);
+  }, [isAnimated]);
+
+  if (loading) return <DishDetailSkeleton />;
 
   if (!dish) return <div className={styles.notFound}>{t2('dish_not_found')}</div>;
 
@@ -203,15 +239,94 @@ export default function DishDetail() {
       }
     }
     navigate(-1);
-    showToast(`${t1('message_p1')} "${local(dish, 'name')}" ${t1('message_p2')}`);
+    showToast(
+      `${t1('message_p1')} "${local(dish, 'name')}" ${t1('message_p2')}`,
+      { onClick: () => navigate('/cart') },
+    );
   }
 
   return (
     <div className={styles.page}>
-      <div className={styles.imageWrapper}>
-        <img src={dish.image} alt={local(dish, 'name')} className={styles.image} />
-        <button className={styles.backBtn} onClick={() => navigate(-1)}>←</button>
-      </div>
+      {(() => {
+        const N = dish.images.length;
+        // Extended strip: [cloneOfLast, img0, …, imgN-1, cloneOfFirst]
+        const strip = N > 1
+          ? [dish.images[N - 1], ...dish.images, dish.images[0]]
+          : dish.images;
+        const realIdx = N > 1 ? (trackIdx - 1 + N) % N : 0;
+
+        function lockTransition() {
+          if (transiting.current) return false;
+          transiting.current = true;
+          clearTimeout(transitTimerRef.current);
+          transitTimerRef.current = setTimeout(() => { transiting.current = false; }, 400);
+          return true;
+        }
+
+        function go(dir) {
+          if (!lockTransition()) return;
+          setIsAnimated(true);
+          setTrackIdx(i => i + dir);
+        }
+
+        return (
+        <div
+          ref={containerRef}
+          className={styles.imageWrapper}
+          onTouchStart={e => {
+            if (N < 2 || transiting.current) return;
+            touchStartX.current = e.touches[0].clientX;
+            setDragging(true);
+            setDragX(0);
+          }}
+          onTouchMove={e => {
+            if (touchStartX.current === null) return;
+            setDragX(e.touches[0].clientX - touchStartX.current);
+          }}
+          onTouchEnd={e => {
+            if (touchStartX.current === null) return;
+            const dx = e.changedTouches[0].clientX - touchStartX.current;
+            const threshold = (containerRef.current?.offsetWidth ?? 300) * 0.25;
+            touchStartX.current = null;
+            setDragging(false);
+            setDragX(0);
+            if (Math.abs(dx) >= threshold) go(dx < 0 ? 1 : -1);
+          }}
+        >
+          {N > 0 ? (
+            <div
+              className={styles.imageTrack}
+              style={{
+                transform: `translateX(calc(-${trackIdx * 100}% + ${dragX}px))`,
+                transition: (dragging || !isAnimated) ? 'none' : 'transform 0.32s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+              }}
+            >
+              {strip.map((url, i) => (
+                <img key={i} src={url} alt={i === trackIdx ? local(dish, 'name') : ''} className={styles.imageSlide} />
+              ))}
+            </div>
+          ) : (
+            <div className={styles.imagePlaceholder} />
+          )}
+          <button className={styles.backBtn} onClick={() => navigate(-1)}>←</button>
+          {N > 1 && (
+            <>
+              <button className={`${styles.carouselArrow} ${styles.carouselPrev}`} onClick={() => go(-1)}>‹</button>
+              <button className={`${styles.carouselArrow} ${styles.carouselNext}`} onClick={() => go(1)}>›</button>
+              <div className={styles.dots}>
+                {dish.images.map((_, i) => (
+                  <button
+                    key={i}
+                    className={`${styles.dot} ${i === realIdx ? styles.dotActive : ''}`}
+                    onClick={() => { if (!lockTransition()) return; setIsAnimated(true); setTrackIdx(i + 1); }}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+        );
+      })()}
 
       <div className={styles.content}>
         <h1 className={styles.name}>

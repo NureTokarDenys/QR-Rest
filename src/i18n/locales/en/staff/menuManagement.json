@@ -15,5 +15,7 @@
   "delete": "Delete",
   "confirmDelete": "Delete dish?",
   "confirmDeleteSub": "Delete \"{{name}}\" from menu?",
-  "cancel": "Cancel"
+  "cancel": "Cancel",
+  "free_limit_categories": "{{count}}/{{max}} categories",
+  "free_limit_items": "{{count}}/{{max}} items"
 }

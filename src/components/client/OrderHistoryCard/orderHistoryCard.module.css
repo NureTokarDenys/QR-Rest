@@ -38,8 +38,8 @@
 .cooking { background: var(--order-status-cooking-bg); color: var(--order-status-cooking-text); }
 .ready   { background: var(--order-status-ready-bg);   color: var(--order-status-ready-text);   }
 .served  { background: var(--badge-done-bg);            color: var(--badge-done-text);            }
-.payment { background: #eff6ff; color: #1d7afc; }
-.void    { background: #fef2f2; color: #dc2626; }
+.payment { background: var(--info-bg);   color: var(--info-text);   }
+.void    { background: var(--danger-bg); color: var(--danger-text); }
 
 .restaurant {
   display: flex;

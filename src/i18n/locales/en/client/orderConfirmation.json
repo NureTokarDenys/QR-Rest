@@ -13,5 +13,23 @@
     "submit_error": "Failed to place order. Please try again.",
     "confirm_add": "Confirm and add",
     "locked_section_label": "Already ordered",
-    "adding_to_order": "Adding to order #{{id}}"
+    "adding_to_order": "Adding to order #{{id}}",
+
+    "order_locked_msg": "Another guest has already placed an order at this table.",
+    "view_order": "View order",
+
+    "changes_banner_title": "Your order has been updated",
+    "changes_banner_sub": "Some items were adjusted to match the current menu",
+
+    "tag_removed": "Removed",
+    "tag_unavailable": "Unavailable",
+    "tag_adjusted": "Adjusted",
+    "tag_price_changed": "Price changed",
+    "diff_item_removed": "This item has been removed from your order",
+
+    "base_price": "Base price",
+    "addon_removed": "add-on removed",
+    "option_removed": "option removed",
+    "group_removed": "option group removed",
+    "replaced_with": "→ replaced with"
 }

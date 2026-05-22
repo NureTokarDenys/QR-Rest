@@ -45,5 +45,13 @@
   "confirmDeleteItemSub": "Видалити \"{{name}}\"?",
   "noData": "Поки що нічого немає.",
   "confirm": "Підтвердити",
-  "cancel": "Скасувати"
+  "cancel": "Скасувати",
+  "titleNewIngredient": "Новий інгредієнт",
+  "titleEditIngredient": "Редагувати інгредієнт",
+  "titleNewAddon": "Нове доповнення",
+  "titleEditAddon": "Редагувати доповнення",
+  "titleNewComponentGroup": "Нова група компонентів",
+  "titleEditComponentGroup": "Редагувати групу компонентів",
+  "optionsSection": "Опції",
+  "defaultOption": "За замовчуванням"
 }

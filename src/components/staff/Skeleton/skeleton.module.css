@@ -1,0 +1,226 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   Shared staff loading skeleton.
+   The pulse cycles the block colour light-grey → dark-grey → light-grey.
+   Colours are theme-aware (see --skel-base / --skel-peak in global.css).
+   ──────────────────────────────────────────────────────────────────────────── */
+
+@keyframes skelPulse {
+  0%, 100% { background-color: var(--skel-base); }
+  50%      { background-color: var(--skel-peak); }
+}
+
+.skel {
+  display: block;
+  background-color: var(--skel-base);
+  border-radius: 8px;
+  animation: skelPulse 1.4s ease-in-out infinite;
+}
+
+/* Stagger nested blocks slightly so the page "breathes" instead of flashing
+   all at once — still a single shared rhythm. */
+.card .skel:nth-child(2) { animation-delay: 0.1s; }
+.card .skel:nth-child(3) { animation-delay: 0.2s; }
+.card .skel:nth-child(4) { animation-delay: 0.3s; }
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* ── Header row (title + action) ── */
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* ── Grid of cards ── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--surface-color);
+  border: 1px solid var(--separator-color);
+  border-radius: 14px;
+  padding: 16px;
+  min-height: 150px;
+}
+
+.cardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+/* ── Table ── */
+.tableWrap {
+  background: var(--surface-color);
+  border: 1px solid var(--separator-color);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.tableHeadRow,
+.tableRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--separator-color);
+}
+
+.tableHeadRow {
+  background: var(--bg-color);
+}
+
+.tableRow:last-child {
+  border-bottom: none;
+}
+
+.tableCell {
+  flex: 1;
+}
+
+.tableCellSmall {
+  width: 70px;
+  flex-shrink: 0;
+}
+
+.userCell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+/* ── Vertical list ── */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.listItem {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--surface-color);
+  border: 1px solid var(--separator-color);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.listItemTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.listItemLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ── Analytics ── */
+.kpiRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.kpiCard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--surface-color);
+  border: 1px solid var(--separator-color);
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.kpiCardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.chartsRow {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 14px;
+}
+
+.chartBox {
+  background: var(--surface-color);
+  border: 1px solid var(--separator-color);
+  border-radius: 14px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 160px;
+}
+
+.barWrap {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+}
+
+/* ── Settings form ── */
+.formCard {
+  background: var(--surface-color);
+  border: 1px solid var(--separator-color);
+  border-radius: 14px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.formField {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.formRow {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.formRow > * {
+  flex: 1;
+  min-width: 180px;
+}
+
+@media (max-width: 900px) {
+  .kpiRow { grid-template-columns: 1fr; }
+  .chartsRow { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  .grid { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
+  .tableCellSmall { width: 48px; }
+}

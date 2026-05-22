@@ -34,8 +34,8 @@
 }
 
 .served {
-  background: var(--primary-btn-disabled);
-  color: var(--accent-color);
+  background: var(--order-status-served-bg);
+  color: var(--order-status-served-text);
 }
 
 @media (max-width: 480px) {

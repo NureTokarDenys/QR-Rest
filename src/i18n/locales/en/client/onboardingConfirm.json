@@ -1,0 +1,18 @@
+{
+  "loading_msg": "Confirming your email address…",
+  "success_title": "Restaurant created!",
+  "success_msg_registered": "successfully registered.",
+  "success_congratulations": "Congratulations —",
+  "success_sub": "Login credentials (email and temporary password) have been sent to your email address. Check your inbox and sign in.",
+  "go_to_login": "Go to login",
+  "register_again": "Register again",
+  "already_confirmed_title": "Already confirmed",
+  "error_title": "Confirmation error",
+  "error_INVALID_TOKEN": "The link is invalid. You may have already used it or copied it incompletely.",
+  "error_ALREADY_CONFIRMED": "This link has already been used. Your restaurant is already created. Go to login.",
+  "error_TOKEN_EXPIRED": "The link has expired (24 hours). Please register again.",
+  "error_default": "An error occurred during confirmation. Please try again or contact support.",
+  "footer_home": "Home",
+  "footer_register": "Register",
+  "footer_login": "Login"
+}

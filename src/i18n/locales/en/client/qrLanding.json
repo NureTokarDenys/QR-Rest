@@ -1,0 +1,9 @@
+{
+  "session_closed_title": "Session closed",
+  "session_closed_body": "This session is already closed. If you want to place a new order, please ask a waiter.",
+  "session_recovery_claimed_title": "Recovery already used",
+  "session_recovery_claimed_body": "Someone has already used the session recovery. Please ask a waiter for a new recovery.",
+  "qr_error": "Failed to read QR code. Please try again.",
+  "try_again": "Try again",
+  "loading": "Loading menu…"
+}

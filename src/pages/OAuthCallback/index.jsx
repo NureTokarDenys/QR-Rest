@@ -31,8 +31,9 @@ export default function OAuthCallback() {
       try {
         const u = JSON.parse(decodeURIComponent(userParam));
         const user = loginFromOAuth(at, rt || null, u);
-        if (['admin', 'waiter', 'cook'].includes(user?.role)) {
-          navigate('/staff/map', { replace: true });
+        const STAFF_ROLES = ['admin', 'root_admin', 'waiter', 'cook', 'waiter_cook'];
+        if (STAFF_ROLES.includes(user?.role)) {
+          navigate(user.role === 'cook' ? '/staff/cooking' : '/staff/map', { replace: true });
         } else {
           navigate('/menu', { replace: true });
         }

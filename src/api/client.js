@@ -2,7 +2,8 @@ import axios from 'axios';
 import { toApiLang } from '../i18n/langs';
 
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  baseURL:         import.meta.env.VITE_API_URL || '/api',
+  withCredentials: true, // needed so Set-Cookie responses (e.g. google_link_nonce) are stored
 });
 
 /**

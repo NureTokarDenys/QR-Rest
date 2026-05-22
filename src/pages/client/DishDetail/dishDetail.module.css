@@ -13,12 +13,91 @@
   width: 100%;
   height: clamp(200px, 45vw, 340px);
   flex-shrink: 0;
+  overflow: hidden;
 }
 
+/* Horizontal strip containing all images side by side */
+.imageTrack {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  will-change: transform;
+}
+
+.imageSlide {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  flex-shrink: 0;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+
+/* Kept for backward compat (single image, no array) */
 .image {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
+}
+
+.imagePlaceholder {
+  width: 100%;
+  height: 100%;
+  background: var(--separator-color);
+}
+
+/* ── Carousel controls ── */
+.carouselArrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 34px;
+  height: 34px;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(4px);
+  border: none;
+  border-radius: 50%;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--primary-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.18);
+}
+
+.carouselPrev { left: 10px; }
+.carouselNext { right: 10px; }
+
+.dots {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  z-index: 10;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+}
+
+.dotActive {
+  background: #fff;
+  transform: scale(1.25);
 }
 
 .backBtn {
@@ -84,12 +163,14 @@
 
 .weightBadge {
   display: inline-block;
+  align-self: flex-start;
   font-size: 12px;
   font-weight: 600;
   color: var(--secondary-text);
-  background: var(--bg-color);
-  border-radius: 6px;
-  padding: 2px 8px;
+  background: transparent;
+  border: 1px solid var(--separator-color);
+  border-radius: 999px;
+  padding: 2px 10px;
   margin-bottom: 8px;
 }
 
@@ -119,8 +200,8 @@
   padding: 2px 8px;
   border-radius: 10px;
   margin-left: 8px;
-  background: #fff3e0;
-  color: #f57c00;
+  background: var(--badge-coocking-bg);
+  color: var(--badge-coocking-text);
   vertical-align: middle;
 }
 
@@ -153,7 +234,7 @@
 
 .optionBtnSelected {
   border-color: var(--primary-btn-active);
-  background: #e8f4ff;
+  background: var(--order-status-waiting-bg);
   color: var(--primary-btn-active);
   font-weight: 600;
 }

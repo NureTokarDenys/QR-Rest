@@ -1,27 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useApp } from '../../../context/AppContext';
 
-const SESSION_ERRORS = {
-  SESSION_CLOSED: {
-    icon:  '✅',
-    title: 'Сесію столика завершено',
-    body:  'Ця сесія вже закрита. Якщо хочете зробити нове замовлення — зверніться до офіціанта.',
-  },
-  SESSION_RECOVERY_CLAIMED: {
-    icon:  '🔄',
-    title: 'Відновлення вже використано',
-    body:  'Хтось вже скористався відновленням сесії. Зверніться до офіціанта для нового відновлення.',
-  },
-};
+const SESSION_ERROR_CODES = new Set(['SESSION_CLOSED', 'SESSION_RECOVERY_CLAIMED']);
 
 export default function QrLanding() {
   const { shortCode }   = useParams();
   const { initSession } = useApp();
-  const navigate         = useNavigate();
+  const navigate        = useNavigate();
+  const { t }           = useTranslation('qrLanding');
 
   const [errorCode, setErrorCode] = useState(null);
-  const [errorMsg,  setErrorMsg]  = useState('');
+  const [genericError, setGenericError] = useState(false);
 
   useEffect(() => {
     if (!shortCode) {
@@ -34,8 +25,6 @@ export default function QrLanding() {
     initSession(shortCode)
       .then((data) => {
         if (cancelled) return;
-        // If the table already has an active order and this guest didn't place it,
-        // redirect them directly to the order status view instead of the menu.
         if (data?.tableHasActiveOrder && data?.activeOrderId) {
           navigate(`/order-status/${data.activeOrderId}`, { replace: true });
         } else {
@@ -45,11 +34,11 @@ export default function QrLanding() {
       .catch(err => {
         if (cancelled) return;
         const code = err?.response?.data?.error?.code;
-        if (code && SESSION_ERRORS[code]) {
+        if (code && SESSION_ERROR_CODES.has(code)) {
           setErrorCode(code);
         } else {
           console.error('QR session init error:', err);
-          setErrorMsg('Не вдалося розпізнати QR-код. Спробуйте ще раз.');
+          setGenericError(true);
         }
       });
 
@@ -57,7 +46,9 @@ export default function QrLanding() {
   }, [shortCode]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (errorCode) {
-    const { icon, title, body } = SESSION_ERRORS[errorCode];
+    const titleKey = `${errorCode.toLowerCase()}_title`;
+    const bodyKey  = `${errorCode.toLowerCase()}_body`;
+    const icon = errorCode === 'SESSION_CLOSED' ? '✅' : '🔄';
     return (
       <div style={{
         display: 'flex', flexDirection: 'column', alignItems: 'center',
@@ -65,13 +56,13 @@ export default function QrLanding() {
         fontFamily: 'inherit', textAlign: 'center', maxWidth: 400, margin: '0 auto',
       }}>
         <p style={{ fontSize: 52, margin: 0 }}>{icon}</p>
-        <p style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>{title}</p>
-        <p style={{ fontSize: 15, color: '#555', margin: 0, lineHeight: 1.5 }}>{body}</p>
+        <p style={{ fontSize: 20, fontWeight: 700, margin: 0 }}>{t(titleKey)}</p>
+        <p style={{ fontSize: 15, color: '#555', margin: 0, lineHeight: 1.5 }}>{t(bodyKey)}</p>
       </div>
     );
   }
 
-  if (errorMsg) {
+  if (genericError) {
     return (
       <div style={{
         display: 'flex', flexDirection: 'column', alignItems: 'center',
@@ -79,7 +70,7 @@ export default function QrLanding() {
         fontFamily: 'inherit', textAlign: 'center',
       }}>
         <p style={{ fontSize: 48 }}>⚠️</p>
-        <p style={{ fontSize: 18, fontWeight: 700 }}>{errorMsg}</p>
+        <p style={{ fontSize: 18, fontWeight: 700 }}>{t('qr_error')}</p>
         <button
           onClick={() => window.location.reload()}
           style={{
@@ -87,7 +78,7 @@ export default function QrLanding() {
             background: '#1d7afc', color: '#fff', fontSize: 15, fontWeight: 700, cursor: 'pointer',
           }}
         >
-          Спробувати ще раз
+          {t('try_again')}
         </button>
       </div>
     );
@@ -100,7 +91,7 @@ export default function QrLanding() {
       fontFamily: 'inherit',
     }}>
       <p style={{ fontSize: 32 }}>🍽</p>
-      <p style={{ fontSize: 16, color: '#555' }}>Завантаження меню…</p>
+      <p style={{ fontSize: 16, color: '#555' }}>{t('loading')}</p>
     </div>
   );
 }

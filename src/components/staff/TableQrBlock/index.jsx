@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import QRCode from 'qrcode';
 import { jsPDF } from 'jspdf';
 import { SOURCE_LANG, fromApiLang } from '../../../i18n/langs';
-import { getRestaurant } from '../../../api/admin';
+import { useStaffData } from '../../../context/StaffDataContext';
 import styles from './tableQrBlock.module.css';
 
 // ── Static per-language strings used in the PDF ────────────────────────────────
@@ -59,17 +59,12 @@ function resolveRestaurantName(restaurant, langCode) {
 export default function TableQrBlock({ tableId, shortCode, tableName }) {
   const { t }     = useTranslation('tableDetail');
   const canvasRef = useRef(null);
-  const [qrUrl, setQrUrl]           = useState('');
-  const [loading, setLoading]       = useState(false);
-  const [error, setError]           = useState('');
-  const [restaurant, setRestaurant] = useState(null);
+  const [qrUrl, setQrUrl]     = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError]     = useState('');
 
-  // Fetch restaurant metadata (languages + name translations) once on mount
-  useEffect(() => {
-    getRestaurant()
-      .then(data => setRestaurant(data))
-      .catch(err => console.warn('TableQrBlock: could not load restaurant meta', err));
-  }, []);
+  // Restaurant metadata comes from the shared cache — no extra fetch.
+  const { restaurant } = useStaffData();
 
   // Render QR onto the visible canvas
   useEffect(() => {
@@ -81,7 +76,7 @@ export default function TableQrBlock({ tableId, shortCode, tableName }) {
       width:  180,
       margin: 2,
       color:  { dark: '#111111', light: '#ffffff' },
-    }).catch(() => setError('Не вдалося згенерувати QR'));
+    }).catch(() => setError(t('qrGenerateError')));
   }, [shortCode]);
 
   // ── Derive active languages from the restaurant model ────────────────────────
@@ -200,7 +195,7 @@ export default function TableQrBlock({ tableId, shortCode, tableName }) {
       doc.save(`qr-table-${tableId}.pdf`);
     } catch (err) {
       console.error('PDF generation error:', err);
-      setError('Помилка генерації PDF');
+      setError(t('pdfGenerateError'));
     } finally {
       setLoading(false);
     }
@@ -214,7 +209,7 @@ export default function TableQrBlock({ tableId, shortCode, tableName }) {
 
       <div className={styles.canvasWrap}>
         <canvas ref={canvasRef} className={noQr ? styles.hidden : ''} />
-        {noQr && <div className={styles.placeholder}>Немає QR</div>}
+        {noQr && <div className={styles.placeholder}>{t('noQr')}</div>}
       </div>
 
       {qrUrl && <p className={styles.url}>{shortCode}</p>}

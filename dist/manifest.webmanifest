@@ -1,0 +1,20 @@
+{
+  "name": "Waitless · QR Rest",
+  "short_name": "Waitless",
+  "description": "QR-based restaurant ordering",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f2f2f7",
+  "theme_color": "#1d7afc",
+  "lang": "uk",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

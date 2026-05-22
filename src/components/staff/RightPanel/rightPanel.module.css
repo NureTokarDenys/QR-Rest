@@ -50,6 +50,49 @@
   color: #CE9A3A;
 }
 
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.headerActions {
+  display: flex;
+  gap: 4px;
+}
+
+.actionBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  color: var(--secondary-text);
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  transition: color 0.1s, background 0.1s;
+}
+
+.actionBtn:hover {
+  color: var(--primary-text);
+  background: var(--bg-color);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.empty {
+  font-size: 13px;
+  color: var(--secondary-text);
+  padding: 4px 0;
+}
+
 .chartIcon {
   font-size: 20px;
   color: var(--accent-color);

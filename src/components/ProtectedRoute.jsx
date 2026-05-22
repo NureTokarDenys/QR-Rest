@@ -3,6 +3,16 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 /**
+ * ClientOnlyRoute — redirects authenticated staff users to their dashboard.
+ * Unauthenticated guests pass through freely.
+ */
+export function ClientOnlyRoute({ children }) {
+  const { isStaff } = useAuth();
+  if (isStaff) return <Navigate to="/staff/map" replace />;
+  return children;
+}
+
+/**
  * ProtectedRoute — wraps a route and redirects to /forbidden if the user
  * does not have one of the allowed roles.
  *
@@ -18,12 +28,14 @@ export default function ProtectedRoute({ requiredRoles = [], children }) {
   const { user, isAuthenticated } = useAuth();
   const location = useLocation();
 
-  const roles = requiredRoles.length > 0 ? requiredRoles : ['admin', 'waiter', 'cook'];
+  const baseRoles = requiredRoles.length > 0 ? requiredRoles : ['admin', 'waiter', 'cook'];
+  // root_admin inherits all admin permissions
+  const roles = baseRoles.includes('admin') ? [...baseRoles, 'root_admin'] : baseRoles;
 
   // Not logged in at all
   if (!isAuthenticated || !user) {
     const q = new URLSearchParams({
-      required: roles.join(','),
+      required: baseRoles.join(','),
       from: location.pathname,
     });
     return <Navigate to={`/forbidden?${q}`} replace />;

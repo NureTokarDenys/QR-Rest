@@ -13,6 +13,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function RequestStep() {
   const { t } = useTranslation('forgotPassword');
+  const { t: tErr } = useTranslation('errors');
   const [email,   setEmail]   = useState('');
   const [error,   setError]   = useState('');
   const [loading, setLoading] = useState(false);
@@ -26,7 +27,7 @@ function RequestStep() {
       await forgotPassword(email);
       setSent(true);
     } catch {
-      setError(t('error_generic'));
+      setError(tErr('generic'));
     } finally {
       setLoading(false);
     }
@@ -77,6 +78,7 @@ function RequestStep() {
 
 function ResetStep({ token }) {
   const { t } = useTranslation('forgotPassword');
+  const { t: tErr } = useTranslation('errors');
   const navigate = useNavigate();
   const [password,  setPassword]  = useState('');
   const [confirm,   setConfirm]   = useState('');
@@ -95,9 +97,7 @@ function ResetStep({ token }) {
       setTimeout(() => navigate('/login'), 3000);
     } catch (err) {
       const code = err?.response?.data?.error?.code;
-      if (code === 'TOKEN_EXPIRED') setError(t('error_expired'));
-      else if (code === 'INVALID_TOKEN') setError(t('error_invalid'));
-      else setError(t('error_generic'));
+      setError(tErr(`code.${code}`, { defaultValue: tErr('generic') }));
     } finally {
       setLoading(false);
     }

@@ -105,6 +105,7 @@ export default function RestaurantPicker() {
       nameEn:           restaurant.name_en,
       defaultLanguage:  restaurant.defaultLanguage,
       enabledLanguages: restaurant.enabledLanguages,
+      plan:             restaurant.plan,
     });
     navigate('/menu');
   }

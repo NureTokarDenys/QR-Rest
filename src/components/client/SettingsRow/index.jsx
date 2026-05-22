@@ -191,6 +191,21 @@ export function ThemeSettingsRow({ icon, theme, onThemeChange }) {
   );
 }
 
+export function SettingsRowToggle({ icon, label, value, onChange }) {
+  return (
+    <div className={styles.row} style={{ cursor: 'default' }}>
+      {icon && <span className={styles.icon}>{icon}</span>}
+      <span className={styles.label}>{label}</span>
+      <button
+        role="switch"
+        aria-checked={value}
+        className={`${styles.toggle} ${value ? styles.toggleOn : ''}`}
+        onClick={() => onChange(!value)}
+      />
+    </div>
+  );
+}
+
 function ChevronIcon({ className }) {
   return (
     <svg className={className} width="14" height="14" viewBox="0 0 16 16" fill="none">

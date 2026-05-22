@@ -1,7 +1,8 @@
 import React, { useCallback, useState, useEffect, useRef } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useApp } from '../../../context/AppContext';
 import { normalizeApiOrder } from '../../../context/AppContext';
+import { usePlan } from '../../../hooks/usePlan';
 import { getOrder, cancelGuestOrder, cancelGuestServingGroup, waiterCall, waiterCallCash, initiatePayment } from '../../../api/orders';
 import Header from '../../../components/client/Header';
 import OrderStatusItem from '../../../components/client/OrderStatusItem';
@@ -9,28 +10,45 @@ import WsStatusBanner from '../../../components/WsStatusBanner';
 import WsStatusChip from '../../../components/WsStatusChip';
 import SecondaryButton from '../../../components/SecondaryButton';
 import Footer from '../../../components/client/Footer';
+import OrderReviews from '../../../components/client/OrderReviews';
 import styles from './orderStatus.module.css';
 import { useLocalField } from '../../../i18n/useLang';
 import { useTranslation } from 'react-i18next';
 
-import { MdNotificationsActive, MdInfoOutline, MdLocalFireDepartment, MdCheck, MdCheckCircle, MdPayments, MdCreditCard, MdNotifications, MdExpandMore, MdExpandLess } from "react-icons/md";
+import { MdNotificationsActive, MdInfoOutline, MdLocalFireDepartment, MdCheck, MdCheckCircle, MdPayments, MdCreditCard, MdNotifications, MdExpandMore, MdExpandLess, MdStorefront } from "react-icons/md";
 
 const DISH_STATUSES = ['waiting', 'cooking', 'ready', 'served'];
+// 5-step progress bar shown to the guest: dish-progression + final paid step.
+// 'completed' is an order-level state, NOT a dish status — it lights up when
+// the order is open_paid (paid-in-advance) or in any terminal completed_* state.
+const STEPPER_KEYS = [...DISH_STATUSES, 'completed'];
 const TERMINAL_STATUSES = ['cancelled', 'completed_cash', 'completed_epay'];
 
 export default function OrderStatus() {
   const { t, i18n } = useTranslation('orderStatus');
   const local = useLocalField();
+  const { isFree } = usePlan();
   const { orderId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const {
     currentOrder, setCurrentOrder, tableNumber, orderHistory, sessionToken, startEditingOrder,
     addWsListener, removeWsListener, wsStatus, wsLatency,
-    notifications, unreadCount, markAllRead,
+    notifications, unreadCount, markAllRead, refreshNotifications,
+    restaurantName, restaurantName_en, restaurantId,
   } = useApp();
 
+  // ── Waiter call state ─────────────────────────────────────────────────────
+  // 'idle' | 'pending' | 'answered' | 'cooldown'
+  const [callState, setCallState]             = useState('idle');
+  const [callInfo, setCallInfo]               = useState(null); // { callId, startedAt, answeredAt }
+  const [callCooldownMsg, setCallCooldownMsg] = useState(false);
+  const callStateRef = useRef('idle');
+  callStateRef.current = callState; // always current, no stale-closure risk
+  const [callElapsed, setCallElapsed] = useState(0);
+
   // ── Payment state ──────────────────────────────────────────────────────────
-  const [callSent, setCallSent]               = useState(null);
+  const [callSent, setCallSent]               = useState(null); // cash only
   const [liqpayLoading, setLiqpayLoading]     = useState(false);
   const [showPayWarning, setShowPayWarning]   = useState(false);
   const [showCashExpand, setShowCashExpand]   = useState(false);
@@ -72,11 +90,29 @@ export default function OrderStatus() {
 
   async function handleWaiterCall() {
     if (!activeOrder) return;
+    const cs = callStateRef.current;
+    if (cs === 'pending') return;
+    if (cs === 'answered' || cs === 'cooldown') {
+      setCallCooldownMsg(true);
+      setTimeout(() => setCallCooldownMsg(false), 3500);
+      return;
+    }
     try {
-      await waiterCall(activeOrder.id);
-      setCallSent('general');
-      setTimeout(() => setCallSent(null), 4000);
-    } catch (_) {}
+      const data = await waiterCall(activeOrder.id);
+      const startedAt = Date.now();
+      const callId = data?.callId ?? null;
+      setCallState('pending');
+      setCallInfo({ callId, startedAt, answeredAt: null });
+      localStorage.setItem(`wcPending_${activeOrder.id}`, JSON.stringify({ callId, startedAt }));
+    } catch (err) {
+      const code = err?.response?.data?.error?.code;
+      if (code === 'ACTIVE_CALL_EXISTS') {
+        const startedAt = Date.now();
+        setCallState('pending');
+        setCallInfo({ callId: null, startedAt, answeredAt: null });
+        localStorage.setItem(`wcPending_${activeOrder.id}`, JSON.stringify({ callId: null, startedAt }));
+      }
+    }
   }
 
   // ── Cancel state ───────────────────────────────────────────────────────────
@@ -110,19 +146,38 @@ export default function OrderStatus() {
   const [showNotifs, setShowNotifs] = useState(false);
   const isEn = i18n.language === 'en';
 
+  // activeOrderId is resolved after the early-return guard below, so we store
+  // it in a ref that toggleNotifs / item clicks can reach without prop-drilling.
+  const activeOrderIdRef = useRef(null);
+
+  // Auto-open + mark-read when navigated here from a toast tap.
+  // Uses a small timeout so activeOrderIdRef is populated on the first render.
+  useEffect(() => {
+    if (!location.state?.openNotifs) return;
+    const t = setTimeout(() => {
+      setShowNotifs(true);
+      markAllRead(activeOrderIdRef.current);
+    }, 0);
+    return () => clearTimeout(t);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   function toggleNotifs() {
-    if (!showNotifs) markAllRead();
+    if (!showNotifs) markAllRead(activeOrderIdRef.current);
     setShowNotifs(v => !v);
   }
 
   // ── Fetch order when navigating to /order-status/:id from history ──────────
+  // The order may belong to a DIFFERENT restaurant than the one currently
+  // stored — history can span any place the user has ordered from. The
+  // history card passes the order's restaurantId via navigation state so we
+  // hit the right scoped endpoint instead of falling back to the stored one.
   const [fetchedOrder, setFetchedOrder] = useState(null);
   useEffect(() => {
     if (!orderId) return;
     if (currentOrder?.id === orderId) return;
     if (orderHistory?.some(o => o.id === orderId)) return;
-    getOrder(orderId)
+    const historicalRestaurantId = location.state?.restaurantId;
+    getOrder(orderId, historicalRestaurantId)
       .then(data => { if (data) setFetchedOrder(normalizeApiOrder(data)); })
       .catch(() => {});
   }, [orderId]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -131,6 +186,18 @@ export default function OrderStatus() {
   const handleWsMessage = useCallback((msg) => {
     const { event, payload } = msg;
     if (!payload) return;
+
+    if (event === 'WAITER_CALL_RESOLVED') {
+      const answeredAt = Date.now();
+      setCallState('answered');
+      setCallInfo(prev => ({ ...(prev || {}), answeredAt }));
+      const oid = activeOrderIdRef.current;
+      if (oid) {
+        localStorage.removeItem(`wcPending_${oid}`);
+        localStorage.setItem(`wcAnswered_${oid}`, JSON.stringify({ callId: payload.callId, answeredAt }));
+      }
+      return;
+    }
 
     function applyEvent(prev) {
       if (!prev) return prev;
@@ -174,12 +241,72 @@ export default function OrderStatus() {
 
     setCurrentOrder(applyEvent);
     setFetchedOrder(applyEvent);
-  }, [setCurrentOrder, setFetchedOrder]);
+  }, [setCurrentOrder, setFetchedOrder, setCallState, setCallInfo]);
 
   useEffect(() => {
     addWsListener(handleWsMessage);
     return () => removeWsListener(handleWsMessage);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [handleWsMessage, addWsListener, removeWsListener]);
+
+  // Load notifications for this order when they haven't been fetched yet.
+  // Guests need this: after a page reload currentOrder is null so the AppContext
+  // effect never fires, but the orderId is known from the URL param.
+  // For history navigation, prefer the historical order's restaurantId — the
+  // stored one points to the *current* session's place which may not match.
+  const resolvedOrderId = orderId || currentOrder?.id;
+  const resolvedRestaurantId = location.state?.restaurantId || restaurantId;
+  useEffect(() => {
+    if (!resolvedOrderId || !resolvedRestaurantId || notifications.length > 0) return;
+    refreshNotifications(resolvedOrderId, resolvedRestaurantId);
+  }, [resolvedOrderId, resolvedRestaurantId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Restore answered/cooldown or pending state after a page reload
+  useEffect(() => {
+    if (!resolvedOrderId) return;
+
+    const answeredRaw = localStorage.getItem(`wcAnswered_${resolvedOrderId}`);
+    if (answeredRaw) {
+      try {
+        const { callId, answeredAt } = JSON.parse(answeredRaw);
+        if (Date.now() - answeredAt < 60_000) {
+          setCallState('cooldown');
+          setCallInfo({ callId, startedAt: null, answeredAt });
+          return;
+        } else {
+          localStorage.removeItem(`wcAnswered_${resolvedOrderId}`);
+        }
+      } catch { localStorage.removeItem(`wcAnswered_${resolvedOrderId}`); }
+    }
+
+    const pendingRaw = localStorage.getItem(`wcPending_${resolvedOrderId}`);
+    if (pendingRaw) {
+      try {
+        const { callId, startedAt } = JSON.parse(pendingRaw);
+        setCallState('pending');
+        setCallInfo({ callId, startedAt, answeredAt: null });
+      } catch { localStorage.removeItem(`wcPending_${resolvedOrderId}`); }
+    }
+  }, [resolvedOrderId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Live elapsed timer — only runs while a call is pending
+  useEffect(() => {
+    if (callState !== 'pending' || !callInfo?.startedAt) { setCallElapsed(0); return; }
+    const tick = () => setCallElapsed(Math.floor((Date.now() - callInfo.startedAt) / 1000));
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [callState, callInfo?.startedAt]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Auto-expire answered/cooldown state after the 60-second window
+  useEffect(() => {
+    if (callState !== 'answered' && callState !== 'cooldown') return;
+    const answeredAt = callInfo?.answeredAt;
+    if (!answeredAt) return;
+    const remaining = 60_000 - (Date.now() - answeredAt);
+    if (remaining <= 0) { setCallState('idle'); setCallInfo(null); return; }
+    const tid = setTimeout(() => { setCallState('idle'); setCallInfo(null); }, remaining);
+    return () => clearTimeout(tid);
+  }, [callState, callInfo?.answeredAt]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Resolve active order ───────────────────────────────────────────────────
   const activeOrder = !orderId
@@ -189,6 +316,15 @@ export default function OrderStatus() {
         : (orderHistory?.find(order => order.id === orderId) ?? fetchedOrder));
 
   if (!activeOrder) {
+    // Guest has no URL param but has a stored orderId — redirect so the fetch
+    // effect can load the order properly (and the URL becomes shareable/reloadable).
+    if (!orderId) {
+      const storedId = localStorage.getItem('orderId');
+      if (storedId) {
+        navigate(`/order-status/${storedId}`, { replace: true });
+        return null;
+      }
+    }
     const isFetching = orderId && !fetchedOrder;
     return (
       <div className={styles.page}>
@@ -200,6 +336,9 @@ export default function OrderStatus() {
       </div>
     );
   }
+
+  // Keep ref in sync so async callbacks (toggleNotifs, item clicks) use the right id.
+  activeOrderIdRef.current = activeOrder.id;
 
   const allItems = (activeOrder.items || []).map(item => ({
     ...item,
@@ -226,14 +365,23 @@ export default function OrderStatus() {
     : 0;
 
   const currentStatus = DISH_STATUSES[worstStatusIndex] || 'waiting';
-  const activeStep    = worstStatusIndex;
-  const stepsLabels   = DISH_STATUSES.map(key => t(`status_${key}`));
+  const stepsLabels   = STEPPER_KEYS.map(key => t(`status_${key}`));
 
   const isOrderTerminal = TERMINAL_STATUSES.includes(activeOrder.status);
   const isOpenPaid      = activeOrder.status === 'open_paid';
   const isOrderDone     = currentStatus === 'served' || isOrderTerminal || isOpenPaid;
   const allServed       = allItems.length > 0 && allItems.every(i => i.status === 'served');
   const showPayment     = allServed && !isOrderTerminal && !isOpenPaid;
+
+  // Stepper indices follow STEPPER_KEYS (0..4). The first 4 steps mirror
+  // dish progression (worstStatusIndex). The 5th step "Completed" is forced
+  // done whenever the order is paid-in-advance or in a terminal completed_*
+  // state — even if dishes haven't been served yet.
+  const completedStepDone = isOpenPaid || activeOrder.status === 'completed_cash' || activeOrder.status === 'completed_epay';
+  // When everything is finished, advance the active step into the Completed slot.
+  const activeStep = completedStepDone && (allServed || isOrderTerminal)
+    ? STEPPER_KEYS.length - 1
+    : worstStatusIndex;
 
   const bannerConfig = {
     waiting: { icon: <MdInfoOutline />,         title: t('snipet_waiting_title'), subtitle: t('snipet_waiting_subtitle') },
@@ -272,6 +420,17 @@ export default function OrderStatus() {
       <div className={styles.content}>
         {/* ── Order meta ── */}
         <div className={styles.orderMeta}>
+          {(() => {
+            const name = local(activeOrder, 'restaurantName')
+              || (i18n.language === 'en' ? restaurantName_en : restaurantName)
+              || restaurantName;
+            return name ? (
+              <p className={styles.restaurantName}>
+                <MdStorefront className={styles.restaurantIcon} />
+                {name}
+              </p>
+            ) : null;
+          })()}
           <p className={styles.orderLabel}>{t('order')}</p>
           <p className={styles.orderId}>#{activeOrder.id}</p>
           <p className={styles.tableInfo}>{t('table_number')}{tableNumber}</p>
@@ -281,22 +440,31 @@ export default function OrderStatus() {
         {showNotifs && (
           <div className={styles.notifPanel}>
             <div className={styles.notifPanelHeader}>
-              <span>{t('notifications') ?? 'Сповіщення'}</span>
+              <span>{t('notifications')}</span>
               <button className={styles.notifClose} onClick={() => setShowNotifs(false)}>✕</button>
             </div>
             {notifications.length === 0 ? (
-              <p className={styles.notifEmpty}>{t('no_notifications') ?? 'Немає сповіщень'}</p>
+              <p className={styles.notifEmpty}>{t('no_notifications')}</p>
             ) : (
               <ul className={styles.notifList}>
                 {notifications.map(n => (
-                  <li key={n._id} className={`${styles.notifItem} ${n.readAt ? styles.notifRead : ''}`}>
+                  <li
+                    key={n._id}
+                    className={`${styles.notifItem} ${n.readAt ? styles.notifRead : ''}`}
+                    onClick={() => markAllRead(activeOrderIdRef.current)}
+                  >
                     <span className={styles.notifTitle}>{isEn ? n.title_en : n.title_uk}</span>
                     {(isEn ? n.body_en : n.body_uk) ? (
                       <span className={styles.notifBody}>{isEn ? n.body_en : n.body_uk}</span>
                     ) : null}
                     <span className={styles.notifTime}>
-                      {new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {t('notif_sent')} {new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                     </span>
+                    {n.readAt && (
+                      <span className={`${styles.notifTime} ${styles.notifReadTime}`}>
+                        {t('notif_read')} {new Date(n.readAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                      </span>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -309,8 +477,8 @@ export default function OrderStatus() {
           <div className={styles.paidBanner}>
             <MdCheckCircle className={styles.paidBannerIcon} />
             <div>
-              <p className={styles.paidBannerTitle}>{t('paid_banner_title') ?? 'Оплату отримано'}</p>
-              <p className={styles.paidBannerSub}>{t('paid_banner_sub') ?? 'Кухня ще готує — стіл буде закрито офіціантом'}</p>
+              <p className={styles.paidBannerTitle}>{t('paid_banner_title')}</p>
+              <p className={styles.paidBannerSub}>{t('paid_banner_sub')}</p>
             </div>
           </div>
         )}
@@ -318,25 +486,33 @@ export default function OrderStatus() {
         {/* ── Progress tracker ── */}
         <div className={styles.stepsCard}>
           <div className={styles.steps}>
-            {stepsLabels.map((stepLabel, i) => (
-              <React.Fragment key={DISH_STATUSES[i]}>
-                <div className={styles.stepItem}>
-                  <div className={`${styles.stepCircle} ${
-                    i < activeStep  ? styles.done   :
-                    i === activeStep ? styles.active :
-                                       styles.idle
-                  }`}>
-                    {i < activeStep ? '✓' : i + 1}
+            {stepsLabels.map((stepLabel, i) => {
+              // The final "Completed" step is forced done whenever the order
+              // is paid-in-advance, even though dishes may still be cooking.
+              const isCompletedSlot = i === STEPPER_KEYS.length - 1;
+              const forceDone       = isCompletedSlot && completedStepDone;
+              const cls =
+                forceDone        ? styles.done   :
+                i < activeStep   ? styles.done   :
+                i === activeStep ? styles.active :
+                                   styles.idle;
+              const showCheck = forceDone || i < activeStep;
+              return (
+                <React.Fragment key={STEPPER_KEYS[i]}>
+                  <div className={styles.stepItem}>
+                    <div className={`${styles.stepCircle} ${cls}`}>
+                      {showCheck ? '✓' : i + 1}
+                    </div>
+                    <span className={`${styles.stepLabel} ${(i <= activeStep || forceDone) ? styles.stepLabelActive : ''}`}>
+                      {stepLabel}
+                    </span>
                   </div>
-                  <span className={`${styles.stepLabel} ${i <= activeStep ? styles.stepLabelActive : ''}`}>
-                    {stepLabel}
-                  </span>
-                </div>
-                {i < stepsLabels.length - 1 && (
-                  <div className={`${styles.line} ${i < activeStep ? styles.lineDone : ''}`} />
-                )}
-              </React.Fragment>
-            ))}
+                  {i < stepsLabels.length - 1 && (
+                    <div className={`${styles.line} ${(i < activeStep || (isCompletedSlot && forceDone)) ? styles.lineDone : ''}`} />
+                  )}
+                </React.Fragment>
+              );
+            })}
           </div>
 
           <div className={styles.statusBanner}>
@@ -423,6 +599,15 @@ export default function OrderStatus() {
           )}
         </div>
 
+        {/* ── Reviews (completed orders, premium restaurants only) ── */}
+        <OrderReviews
+          orderId={activeOrder.id}
+          restaurantId={activeOrder.restaurantId}
+          restaurantPlan={activeOrder.restaurantPlan}
+          items={allItems}
+          status={activeOrder.status}
+        />
+
         {/* ── Actions ── */}
         {showPayment ? (
           <>
@@ -443,7 +628,7 @@ export default function OrderStatus() {
               </div>
             )}
 
-            {!showPayWarning && (
+            {!showPayWarning && !isFree && (
               <button
                 className={styles.payLiqpayBtn}
                 onClick={() => setShowPayWarning(true)}
@@ -500,8 +685,23 @@ export default function OrderStatus() {
           </>
         ) : !isOrderDone ? (
           <>
-            {callSent === 'general' ? (
-              <div className={styles.callSentMsg}>{t('waiter_call_sent')}</div>
+            {callCooldownMsg && (
+              <div className={styles.callCooldownMsg}>{t('waiter_call_cooldown_msg')}</div>
+            )}
+            {(callState === 'answered' || callState === 'cooldown') ? (
+              <div className={styles.callAnsweredMsg}>
+                <MdCheckCircle /> {t('waiter_call_answered')}
+              </div>
+            ) : callState === 'pending' ? (
+              <button className={styles.callPendingBtn} disabled>
+                <span className={styles.callSpinner} />
+                <span className={styles.callPendingContent}>
+                  <span>{t('waiter_call_pending')}</span>
+                  <span className={styles.callPendingTimer}>
+                    {Math.floor(callElapsed / 60)}:{String(callElapsed % 60).padStart(2, '0')}
+                  </span>
+                </span>
+              </button>
             ) : (
               <SecondaryButton
                 label={<><MdNotificationsActive /> {t('waiter_call')}</>}

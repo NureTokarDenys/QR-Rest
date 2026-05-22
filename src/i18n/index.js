@@ -1,6 +1,9 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
+import uaErrors from './locales/ua/errors.json';
+import enErrors from './locales/en/errors.json';
+
 import uaMenu from './locales/ua/client/menu.json';
 import uaCategory from './locales/ua/client/category.json';
 import uaFooter from './locales/ua/client/footer.json';
@@ -19,6 +22,8 @@ import uaRestaurantPicker from './locales/ua/client/restaurantPicker.json';
 import uaForgotPassword from './locales/ua/client/forgotPassword.json';
 import uaRegister from './locales/ua/client/register.json';
 import uaConfirmEmailChange from './locales/ua/client/confirmEmailChange.json';
+import uaQrLanding from './locales/ua/client/qrLanding.json';
+import uaOnboardingConfirm from './locales/ua/client/onboardingConfirm.json';
 
 import uaTableMap from './locales/ua/staff/tableMap.json';
 import uaTableDetail from './locales/ua/staff/tableDetails.json';
@@ -54,6 +59,8 @@ import enRestaurantPicker from './locales/en/client/restaurantPicker.json';
 import enForgotPassword from './locales/en/client/forgotPassword.json';
 import enRegister from './locales/en/client/register.json';
 import enConfirmEmailChange from './locales/en/client/confirmEmailChange.json';
+import enQrLanding from './locales/en/client/qrLanding.json';
+import enOnboardingConfirm from './locales/en/client/onboardingConfirm.json';
 
 import enTableMap from './locales/en/staff/tableMap.json';
 import enTableDetail from './locales/en/staff/tableDetails.json';
@@ -74,6 +81,7 @@ import enReviewsManagement from './locales/en/staff/reviewsManagement.json';
 i18n.use(initReactI18next).init({
   resources: {
     ua: {
+      errors: uaErrors,
       menu: uaMenu, category: uaCategory, footer: uaFooter,
       clientToast: uaClientToast, login: uaLogin, notFound: uaNotFound, forbidden: uaForbidden,
       dishDetails: uaDishDetails, cart: uaCart, profile: uaProfile,
@@ -84,6 +92,8 @@ i18n.use(initReactI18next).init({
       forgotPassword: uaForgotPassword,
       register: uaRegister,
       confirmEmailChange: uaConfirmEmailChange,
+      qrLanding: uaQrLanding,
+      onboardingConfirm: uaOnboardingConfirm,
       tableMap: uaTableMap, tableDetail: uaTableDetail, cooking: uaCooking,
       orderDetail: uaOrderDetail, menuManagement: uaMenuManagement,
       dishEdit: uaDishEdit, pdfGenerator: uaPdfGenerator,
@@ -95,6 +105,7 @@ i18n.use(initReactI18next).init({
       reviewsManagement: uaReviewsManagement,
     },
     en: {
+      errors: enErrors,
       menu: enMenu, category: enCategory, footer: enFooter,
       clientToast: enClientToast, login: enLogin, notFound: enNotFound, forbidden: enForbidden,
       dishDetails: enDishDetails, cart: enCart, profile: enProfile,
@@ -105,6 +116,8 @@ i18n.use(initReactI18next).init({
       forgotPassword: enForgotPassword,
       register: enRegister,
       confirmEmailChange: enConfirmEmailChange,
+      qrLanding: enQrLanding,
+      onboardingConfirm: enOnboardingConfirm,
       tableMap: enTableMap, tableDetail: enTableDetail, cooking: enCooking,
       orderDetail: enOrderDetail, menuManagement: enMenuManagement,
       dishEdit: enDishEdit, pdfGenerator: enPdfGenerator,

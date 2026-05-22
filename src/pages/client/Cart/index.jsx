@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../../context/AppContext';
@@ -19,18 +19,29 @@ export default function Cart() {
   const local = useLocalField();
   const navigate = useNavigate();
   const {
-    cart, cartTotal, orderComment, setOrderComment,
+    cart, cartTotal,
     tableId, tableHasActiveOrder,
     servingGroups, addServingGroup, removeServingGroup, renameServingGroup, moveToGroup,
-    editingOrder, cancelEditingOrder,
+    editingOrder,
     currentOrder, startEditingOrder,
   } = useApp();
 
-  const TERMINAL = new Set(['completed', 'void', 'voided', 'cancelled', 'paid', 'closed']);
+  // Real backend order statuses are open / open_paid / cancelled /
+  // completed_cash / completed_epay. Anything else is treated as terminal
+  // (defensive against legacy data). Only `open` and `open_paid` orders
+  // accept further dishes.
+  const ACTIVE_STATUSES = new Set(['open', 'open_paid']);
   // True when there is a live order and we are NOT already in the "add-to-order" flow
-  const hasActiveOrder = !editingOrder && currentOrder && !TERMINAL.has(currentOrder.status);
+  const hasActiveOrder = !editingOrder && currentOrder && ACTIVE_STATUSES.has(currentOrder.status);
 
   const canOrder = Boolean(tableId) && !tableHasActiveOrder;
+
+  // Auto-enter editing mode whenever an active order becomes known.
+  // Deps on hasActiveOrder so this fires after async order restoration on reload.
+  // Once startEditingOrder runs, editingOrder is set → hasActiveOrder flips false → stops.
+  useEffect(() => {
+    if (hasActiveOrder) startEditingOrder(currentOrder);
+  }, [hasActiveOrder]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [editingGroupId, setEditingGroupId] = useState(null);
   const [editGroupName, setEditGroupName] = useState('');
@@ -133,24 +144,6 @@ export default function Cart() {
           <div className={styles.activeOrderBanner}>
             <p className={styles.activeOrderTitle}>⚠ {t('table_occupied')}</p>
             <p className={styles.activeOrderHint}>{t('table_occupied_hint')}</p>
-          </div>
-        )}
-
-        {/* ── Active-order guard ── */}
-        {hasActiveOrder && (
-          <div className={styles.activeOrderBanner}>
-            <p className={styles.activeOrderTitle}>⚠ {t('active_order_exists')}</p>
-            <p className={styles.activeOrderHint}>{t('active_order_hint')}</p>
-            <div className={styles.activeOrderActions}>
-              <PrimaryButton
-                label={t('view_active_order')}
-                onClick={() => navigate(`/order-status/${currentOrder.id}`)}
-              />
-              <SecondaryButton
-                label={`+ ${t('add_to_active_order')}`}
-                onClick={() => { startEditingOrder(currentOrder); }}
-              />
-            </div>
           </div>
         )}
 
@@ -284,15 +277,6 @@ export default function Cart() {
               <MdAdd /> {t('add_group')}
             </button>
 
-            <div className={styles.commentBox}>
-              <p className={styles.commentLabel}>{t('order_comment')}</p>
-              <textarea
-                className={styles.textarea}
-                placeholder={t('order_comment_placeholder')}
-                value={orderComment}
-                onChange={e => setOrderComment(e.target.value)}
-              />
-            </div>
           </>
         )}
       </div>
@@ -305,7 +289,7 @@ export default function Cart() {
                 ? `${t('confirm_add')} ${cartTotal}₴`
                 : `${t('confirm_offer')} ${cartTotal}₴`}
               onClick={() => navigate('/confirm')}
-              disabled={!canOrder || hasActiveOrder}
+              disabled={!canOrder}
             />
             {!canOrder && (
               <p className={styles.noTableHint}>
@@ -318,12 +302,6 @@ export default function Cart() {
           label={t('back_to_menu')}
           onClick={() => navigate('/menu')}
         />
-        {editingOrder && (
-          <SecondaryButton
-            label={`✕ ${t('cancel_editing')}`}
-            onClick={() => { cancelEditingOrder(); navigate(`/order-status/${editingOrder.id}`); }}
-          />
-        )}
       </div>
 
       <Footer />

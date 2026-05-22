@@ -63,5 +63,40 @@
   "timeAgoDayAgo": "{{n}} дн тому",
   "openScanWindow": "Відкрити вікно сканування",
   "scanWindowOpen": "Вікно відкрите — гості можуть сканувати",
-  "scanWindowExpired": "Вікно сканування закрито"
+  "scanWindowExpired": "Вікно сканування закрито",
+
+  "openRecoveryWindow": "Відновити сесію",
+  "recoveryWindowOpen": "Вікно відновлення відкрито",
+  "recoveryWindowHint": "Відкриває 1-хвилинне вікно для повторного сканування QR-коду",
+
+  "servingGroup": "Подача",
+  "groupStatus_waiting": "Очікує",
+  "groupStatus_cooking": "Готується",
+  "groupStatus_ready": "Готово",
+  "groupStatus_served": "Подано",
+  "markServed": "Позначити як подано",
+
+  "addDishDetail": "Додати страву",
+  "editDishDetail": "Редагувати страву",
+  "dishIngredients": "Інгредієнти",
+  "dishAddons": "Додатки",
+  "dishComponentGroups": "Варіанти",
+  "dishComment": "Коментар",
+  "removeIngredient": "Прибрати",
+  "chooseOption": "Оберіть варіант",
+  "itemTotal": "Разом",
+  "callInitiated": "Виклик о",
+  "callAnswered": "Виклик прийнято",
+  "callAnsweredAt": "Прийнято о",
+
+  "qrGenerateError": "Не вдалося згенерувати QR-код",
+  "pdfGenerateError": "Помилка генерації PDF",
+  "noQr": "Немає QR",
+
+  "editTableInfo": "Редагувати стіл",
+  "editTableNumber": "Номер столу",
+  "editTableLabel": "Назва (необов'язково)",
+  "saveTableInfo": "Зберегти",
+  "duplicateTableNumber": "Стіл з таким номером вже існує",
+  "tableInfoSaved": "Стіл оновлено"
 }

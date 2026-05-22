@@ -1,16 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Logo from '../../Logo';
 import { useAuth } from '../../../context/AuthContext';
 import { useApp } from '../../../context/AppContext';
+import { usePlan } from '../../../hooks/usePlan';
+import UpgradeModal from '../../UpgradeModal';
 import WsStatusChip from '../../WsStatusChip';
 import styles from './sidebar.module.css';
 
 import {
   MdMap, MdLocalFireDepartment, MdRestaurant, MdBarChart, MdSettings,
-  MdReceiptLong, MdTune, MdPeople, MdRateReview, MdStorefront,
+  MdReceiptLong, MdTune, MdPeople, MdRateReview, MdStorefront, MdLock,
 } from 'react-icons/md';
+
+const PREMIUM_ITEMS = new Set(['analytics', 'reviews']);
 
 const ALL_NAV = {
   map:        { path: '/staff/map',                 icon: <MdMap />,                labelKey: 'nav_tableMap' },
@@ -25,6 +29,7 @@ const ALL_NAV = {
 };
 
 const NAV_BY_ROLE = {
+  root_admin:  ['map', 'orders', 'cooking', 'menu', 'extras', 'analytics', 'staff', 'reviews', 'restaurant'],
   admin:       ['map', 'orders', 'cooking', 'menu', 'extras', 'analytics', 'staff', 'reviews', 'restaurant'],
   waiter:      ['map', 'orders'],
   cook:        ['cooking', 'menu', 'extras'],
@@ -32,6 +37,7 @@ const NAV_BY_ROLE = {
 };
 
 function getRoleName(role, t) {
+  if (role === 'root_admin')  return t('role_root_admin');
   if (role === 'admin')       return t('role_admin');
   if (role === 'waiter')      return t('role_waiter');
   if (role === 'cook')        return t('role_cook');
@@ -46,6 +52,8 @@ export default function Sidebar({ isOpen = false, onClose = () => {} }) {
   const { user } = useAuth();
 
   const { wsStatus, wsLatency } = useApp();
+  const { isFree } = usePlan();
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   const role     = user?.role ?? 'waiter';
   const initials = user?.name
@@ -54,44 +62,88 @@ export default function Sidebar({ isOpen = false, onClose = () => {} }) {
   const roleName = getRoleName(role, t);
 
   const navKeys  = NAV_BY_ROLE[role] ?? NAV_BY_ROLE.waiter;
-  const navItems = navKeys.map(k => ALL_NAV[k]);
+  // Same two-group layout for both plans:
+  //   • top group   = always-available items
+  //   • bottom group (below divider) = premium-tier items
+  // The only difference between free and premium is the lock icon — on free
+  // those bottom items are shown locked; on premium they're just rendered
+  // without the lock badge (no relocation, identical order/positions).
+  const navItems = navKeys.map(k => ({
+    ...ALL_NAV[k],
+    key:       k,
+    isPremium: PREMIUM_ITEMS.has(k),         // determines POSITION (bottom group)
+    locked:    isFree && PREMIUM_ITEMS.has(k), // determines DISPLAY (lock icon)
+  }));
+  const baseItems    = navItems.filter(i => !i.isPremium);
+  const premiumItems = navItems.filter(i =>  i.isPremium);
 
   function goTo(path) {
     navigate(path);
     onClose();
   }
 
+  function handleNavClick(item, navKey) {
+    if (isFree && PREMIUM_ITEMS.has(navKey)) {
+      setUpgradeOpen(true);
+      return;
+    }
+    goTo(item.path);
+  }
+
   return (
+    <>
+    <UpgradeModal open={upgradeOpen} onClose={() => setUpgradeOpen(false)} ns="components" />
     <aside className={`${styles.sidebar} ${isOpen ? styles.sidebarMobileOpen : ''}`}>
       <div className={styles.logoWrap}>
         <Logo compact />
       </div>
 
       <nav className={styles.nav}>
-        {navItems.map(item => {
-          const active = location.pathname.startsWith(item.path);
-          return (
-            <button
-              key={item.path}
-              className={`${styles.navItem} ${active ? styles.active : ''}`}
-              onClick={() => goTo(item.path)}
-            >
-              <span className={styles.navIcon}>{item.icon}</span>
-              <span className={styles.navLabel}>{t(item.labelKey)}</span>
-            </button>
-          );
-        })}
+        {baseItems.map(item => (
+          <button
+            key={item.path}
+            className={`${styles.navItem} ${location.pathname.startsWith(item.path) ? styles.active : ''}`}
+            onClick={() => handleNavClick(item, item.key)}
+          >
+            <span className={styles.navIcon}>{item.icon}</span>
+            <span className={styles.navLabel}>{t(item.labelKey)}</span>
+          </button>
+        ))}
+
+        {premiumItems.length > 0 && (
+          <>
+            <div className={styles.navDivider} />
+            {premiumItems.map(item => (
+              <button
+                key={item.path}
+                className={[
+                  styles.navItem,
+                  item.locked ? styles.navItemLocked : '',
+                  location.pathname.startsWith(item.path) ? styles.active : '',
+                ].filter(Boolean).join(' ')}
+                onClick={() => handleNavClick(item, item.key)}
+              >
+                <span className={styles.navIcon}>{item.icon}</span>
+                <span className={styles.navLabel}>{t(item.labelKey)}</span>
+                {item.locked && <MdLock className={styles.lockIcon} />}
+              </button>
+            ))}
+          </>
+        )}
       </nav>
 
-      <button
-        className={`${styles.user} ${styles.userBtn}`}
-        onClick={() => goTo('/staff/settings')}
-        title={t('nav_profile')}
-      >
-        <div className={styles.avatar}>{initials}</div>
-        <span className={styles.roleName}>{roleName}</span>
+      <div className={styles.user}>
+        <button
+          className={styles.userBtn}
+          onClick={() => goTo('/staff/settings')}
+          title={t('nav_profile')}
+        >
+          <div className={styles.avatar}>{initials}</div>
+          <span className={styles.roleName}>{roleName}</span>
+        </button>
         <WsStatusChip status={wsStatus} latency={wsLatency} compact preferTop />
-      </button>
+      </div>
     </aside>
+    </>
   );
 }

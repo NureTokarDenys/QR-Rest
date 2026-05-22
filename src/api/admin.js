@@ -12,6 +12,16 @@ export async function updateRestaurant(data, restaurantId = getStoredRestaurantI
   return res.data?.data;
 }
 
+export async function getLiqpayStatus(restaurantId = getStoredRestaurantId()) {
+  const res = await apiClient.get(`/${restaurantId}/admin/restaurant/liqpay`);
+  return res.data?.data;
+}
+
+export async function saveLiqpayKeys(publicKey, privateKey, restaurantId = getStoredRestaurantId()) {
+  const res = await apiClient.put(`/${restaurantId}/admin/restaurant/liqpay`, { publicKey, privateKey });
+  return res.data?.data;
+}
+
 export async function uploadRestaurantLogo(file, restaurantId = getStoredRestaurantId()) {
   const form = new FormData();
   form.append('image', file);
@@ -60,6 +70,10 @@ export async function getAdminReviews(params = {}, restaurantId = getStoredResta
   return res.data;
 }
 
+export async function deleteAdminReview(reviewId, type, restaurantId = getStoredRestaurantId()) {
+  await apiClient.delete(`/${restaurantId}/admin/reviews/${reviewId}`, { params: { type } });
+}
+
 // ─── Tables ───────────────────────────────────────────────────────────────────
 
 export async function getTables(restaurantId = getStoredRestaurantId()) {
@@ -69,6 +83,22 @@ export async function getTables(restaurantId = getStoredRestaurantId()) {
 
 export async function createTable(data, restaurantId = getStoredRestaurantId()) {
   const res = await apiClient.post(`/${restaurantId}/admin/tables`, data);
+  return res.data?.data;
+}
+
+export async function updateTable(tableId, data, restaurantId = getStoredRestaurantId()) {
+  const res = await apiClient.put(`/${restaurantId}/admin/tables/${tableId}`, data);
+  return res.data?.data;
+}
+
+export async function deleteTable(tableId, restaurantId = getStoredRestaurantId()) {
+  const res = await apiClient.delete(`/${restaurantId}/admin/tables/${tableId}`);
+  return res.data?.data;
+}
+
+export async function reorderTables(order, restaurantId = getStoredRestaurantId()) {
+  // order: [{ id, mapOrder }]
+  const res = await apiClient.patch(`/${restaurantId}/admin/tables/reorder`, { order });
   return res.data?.data;
 }
 
@@ -87,6 +117,20 @@ export async function createCategory(data, restaurantId = getStoredRestaurantId(
 
 export async function updateCategory(id, data, restaurantId = getStoredRestaurantId()) {
   const res = await apiClient.put(`/${restaurantId}/admin/menu/categories/${id}`, data);
+  return res.data?.data;
+}
+
+export async function uploadCategoryImage(categoryId, file, restaurantId = getStoredRestaurantId()) {
+  const form = new FormData();
+  form.append('image', file);
+  const res = await apiClient.post(`/${restaurantId}/admin/menu/categories/${categoryId}/image`, form, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return res.data?.data; // { imageUrl, images, selectedImageIdx }
+}
+
+export async function setCategoryImages(categoryId, { images, selectedImageIdx }, restaurantId = getStoredRestaurantId()) {
+  const res = await apiClient.put(`/${restaurantId}/admin/menu/categories/${categoryId}/images`, { images, selectedImageIdx });
   return res.data?.data;
 }
 
@@ -176,8 +220,11 @@ export async function setComponentGroupAvailability(id, isAvailable, restaurantI
   return res.data?.data;
 }
 
+const EXTRA_TYPE_PLURAL = { ingredient: 'ingredients', addon: 'addons', componentgroup: 'componentGroups' };
+
 export async function removeExtraRelation(type, extraId, menuItemId, restaurantId = getStoredRestaurantId()) {
-  await apiClient.delete(`/${restaurantId}/admin/menu/extras/${type}/${extraId}/dishes/${menuItemId}`);
+  const apiType = EXTRA_TYPE_PLURAL[type] || type;
+  await apiClient.delete(`/${restaurantId}/admin/menu/extras/${apiType}/${extraId}/dishes/${menuItemId}`);
 }
 
 export async function getAdminMenuItem(id, restaurantId = getStoredRestaurantId()) {
@@ -186,7 +233,7 @@ export async function getAdminMenuItem(id, restaurantId = getStoredRestaurantId(
 }
 
 export async function getMenuItems(categoryId, restaurantId = getStoredRestaurantId()) {
-  const params = categoryId ? { categoryId } : {};
+  const params = { limit: 9999, ...(categoryId ? { categoryId } : {}) };
   const res = await apiClient.get(`/${restaurantId}/admin/menu/items`, { params });
   return res.data?.data;
 }
@@ -203,6 +250,20 @@ export async function updateMenuItem(id, data, restaurantId = getStoredRestauran
 
 export async function deleteMenuItem(id, restaurantId = getStoredRestaurantId()) {
   const res = await apiClient.delete(`/${restaurantId}/admin/menu/items/${id}`);
+  return res.data?.data;
+}
+
+export async function uploadMenuItemImage(itemId, file, restaurantId = getStoredRestaurantId()) {
+  const form = new FormData();
+  form.append('image', file);
+  const res = await apiClient.post(`/${restaurantId}/admin/menu/items/${itemId}/image`, form, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+  return res.data?.data; // { imageUrl, images, selectedImageIdx }
+}
+
+export async function setMenuItemImages(itemId, { images, selectedImageIdx }, restaurantId = getStoredRestaurantId()) {
+  const res = await apiClient.put(`/${restaurantId}/admin/menu/items/${itemId}/images`, { images, selectedImageIdx });
   return res.data?.data;
 }
 
@@ -243,4 +304,23 @@ export async function getPopularDishes(from, to, restaurantId = getStoredRestaur
   if (to)   params.to   = to;
   const res = await apiClient.get(`/${restaurantId}/admin/analytics/popular-dishes`, { params });
   return res.data?.data;
+}
+
+export async function getTopCategories(from, to, restaurantId = getStoredRestaurantId()) {
+  const params = {};
+  if (from) params.from = from;
+  if (to)   params.to   = to;
+  const res = await apiClient.get(`/${restaurantId}/admin/analytics/top-categories`, { params });
+  return res.data?.data;
+}
+
+export async function exportAnalyticsCsv(from, to, restaurantId = getStoredRestaurantId()) {
+  const params = {};
+  if (from) params.from = from;
+  if (to)   params.to   = to;
+  const res = await apiClient.get(`/${restaurantId}/admin/analytics/export`, {
+    params,
+    responseType: 'blob',
+  });
+  return res.data;
 }

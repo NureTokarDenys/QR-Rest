@@ -5,6 +5,25 @@
   "cancel": "Cancel",
   "saved": "Saved",
 
+  "subscriptionSuccess": "🎉 Subscription activated! Your restaurant is now on the Premium plan.",
+  "subscriptionVerifying": "Verifying payment…",
+  "subscriptionTimeout": "Could not confirm payment automatically. If funds were charged, your status will update within a few minutes.",
+  "subscriptionTimeoutRetry": "Refresh page",
+
+  "celebrationTitle": "Welcome to Premium!",
+  "celebrationSubtitle": "Your restaurant now has access to all premium features.",
+  "celebrationCta": "Let's go!",
+  "celebrationFeature1": "Unlimited dishes & categories",
+  "celebrationFeature2": "Unlimited staff accounts",
+  "celebrationFeature3": "Online payments via LiqPay",
+  "celebrationFeature4": "Analytics & reports",
+  "celebrationFeature5": "Review management",
+  "celebrationFeature6": "PDF receipts & invoices",
+  "celebrationFeature7": "Auto-translate menu",
+
+  "paymentFailedBanner": "Payment failed or was cancelled. Please try again.",
+  "paymentFailedRetry": "Try again",
+
   "basicInfo": "Basic Information",
   "name": "Name",
   "namePlaceholder": "Restaurant name",
@@ -42,5 +61,15 @@
   "lang_sk": "Slovak",
 
   "srcHintPrefix": "Source",
-  "fallback_tooltip": "Displayed in original language"
+  "fallback_tooltip": "Displayed in original language",
+
+  "liqpayTitle": "LiqPay (online payments)",
+  "liqpayHint": "Enter your LiqPay public and private keys to accept online payments from clients. Keys are stored encrypted.",
+  "liqpayConnected": "Keys saved. Online payments are active.",
+  "liqpayPublicKey": "Public key",
+  "liqpayPrivateKey": "Private key",
+  "liqpayStored": "saved",
+  "liqpaySave": "Save payment keys",
+  "liqpayBothRequired": "Both public and private keys are required.",
+  "liqpaySaveError": "Failed to save keys. Please try again."
 }

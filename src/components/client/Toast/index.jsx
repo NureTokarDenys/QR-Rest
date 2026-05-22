@@ -1,14 +1,12 @@
-import { useNavigate } from "react-router-dom";
 import styles from "./clientToast.module.css";
 
-const ClientToast = ({ message, onClose }) => {
-  const navigate = useNavigate();
-
+// onClose: dismisses the toast (called after onClick, or when onClick is omitted)
+// onClick: optional click handler (e.g. navigate to /cart). Receives no args.
+const ClientToast = ({ message, onClose, onClick }) => {
   const handleClick = () => {
-    onClose();
-    navigate("/cart");
+    if (onClick) onClick();
+    onClose?.();
   };
-
   return (
     <div className={styles.toast} onClick={handleClick}>
       <div className={styles.progress} />

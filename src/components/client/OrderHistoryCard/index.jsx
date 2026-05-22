@@ -60,7 +60,7 @@ export default function OrderHistoryCard({ order }) {
         <span className={styles.total}>{t2('total_sum')}: {order.total ?? 0} {"₴"}</span>
         <button
           className={styles.link}
-          onClick={() => navigate(`/order-status/${order.id}`)}
+          onClick={() => navigate(`/order-status/${order.id}`, { state: { restaurantId: order.restaurantId } })}
         >
           {t2('order_details')} ›
         </button>

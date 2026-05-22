@@ -19,7 +19,8 @@
 }
 
 .count {
-  background: rgba(0, 0, 0, 0.05);
+  background: var(--separator-color);
+  color: var(--secondary-text);
   padding: 2px 8px;
   border-radius: 12px;
   font-size: 12px;
@@ -36,6 +37,46 @@
 
 .cards > * {
   pointer-events: auto;
+}
+
+/* ── Order cluster (groups multiple serving-group cards from the same order) ── */
+
+.orderCluster {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--surface-color);
+  border-radius: 10px;
+  padding: 6px;
+}
+
+.orderClusterHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  border-left: 3px solid transparent;
+  border-radius: 4px;
+  background: var(--bg-color);
+}
+
+.clusterDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.clusterTable {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--primary-text);
+}
+
+.clusterOrderId {
+  font-size: 10px;
+  color: var(--secondary-text);
+  font-family: monospace;
 }
 
 @media (max-width: 768px) {

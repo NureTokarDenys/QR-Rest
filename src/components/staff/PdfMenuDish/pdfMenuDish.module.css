@@ -1,68 +1,187 @@
+/* All sizing here is driven by --pdf-scale (font-size multiplier) so a single
+   user toggle scales the whole dish row consistently. All colours read from
+   doc-level CSS variables so templates and pickers feed the same surface. */
+
 .row {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 0;
-  border-bottom: 1px solid;
+  align-items: flex-start;
+  gap: calc(10px * var(--pdf-scale, 1));
+  padding: calc(8px * var(--pdf-scale, 1)) 0;
+  border-bottom: 1px solid var(--pdf-separator);
+  break-inside: avoid;
+  font-size: calc(14px * var(--pdf-scale, 1));
+  color: var(--pdf-text);
 }
 
 .row:last-child {
   border-bottom: none;
 }
 
+/* ── Image variants ─────────────────────────────────────────────────────── */
+
 .img {
-  width: 52px;
-  height: 52px;
+  width: calc(64px * var(--pdf-scale, 1));
+  height: calc(64px * var(--pdf-scale, 1));
   object-fit: cover;
   flex-shrink: 0;
+  border-radius: 6px;
 }
 
 .imgPlaceholder {
-  width: 52px;
-  height: 52px;
+  width: calc(64px * var(--pdf-scale, 1));
+  height: calc(64px * var(--pdf-scale, 1));
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
+  font-size: calc(22px * var(--pdf-scale, 1));
+  flex-shrink: 0;
+  border-radius: 6px;
+  background: rgba(127, 127, 127, 0.12);
+}
+
+.imgThumbsBlock {
+  display: flex;
+  gap: 4px;
   flex-shrink: 0;
 }
+
+.thumbsCol {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.thumb {
+  width: calc(30px * var(--pdf-scale, 1));
+  height: calc(30px * var(--pdf-scale, 1));
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.imgStripBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.imgLarge {
+  width: calc(96px * var(--pdf-scale, 1));
+  height: calc(64px * var(--pdf-scale, 1));
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.thumbsStrip {
+  display: flex;
+  gap: 3px;
+}
+
+.thumbStrip {
+  width: calc(26px * var(--pdf-scale, 1));
+  height: calc(26px * var(--pdf-scale, 1));
+  object-fit: cover;
+  border-radius: 3px;
+}
+
+/* ── Text block ──────────────────────────────────────────────────────────── */
 
 .info {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: calc(3px * var(--pdf-scale, 1));
 }
 
 .top {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: baseline;
   gap: 8px;
 }
 
 .name {
-  font-size: 14px;
+  font-size: calc(14px * var(--pdf-scale, 1));
   font-weight: 600;
+  color: var(--pdf-text);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.catBadge {
+  font-size: calc(9px * var(--pdf-scale, 1));
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  border: 1px solid var(--pdf-separator);
+  border-radius: 4px;
+  padding: 1px 5px;
+  color: var(--pdf-desc);
 }
 
 .price {
-  font-size: 14px;
+  font-size: calc(14px * var(--pdf-scale, 1));
   font-weight: 700;
   flex-shrink: 0;
+  color: var(--pdf-price);
+}
+
+.weight {
+  font-size: calc(11px * var(--pdf-scale, 1));
+  color: var(--pdf-desc);
+}
+
+.rating {
+  font-size: calc(12px * var(--pdf-scale, 1));
+  letter-spacing: 0.5px;
+  color: var(--pdf-price);
+}
+
+.ratingMeta {
+  color: var(--pdf-desc);
 }
 
 .desc {
-  font-size: 12px;
-  margin-top: 3px;
+  font-size: calc(12px * var(--pdf-scale, 1));
   line-height: 1.4;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  margin: 0;
+  color: var(--pdf-desc);
 }
 
-@media (max-width: 768px) {
-  .img,
-  .imgPlaceholder {
-    width: 44px;
-    height: 44px;
-  }
+.meta {
+  font-size: calc(11px * var(--pdf-scale, 1));
+  line-height: 1.4;
+  font-style: italic;
+  margin: 0;
+  color: var(--pdf-desc);
+}
+
+.addonList {
+  margin: 0;
+  padding-left: 14px;
+  font-size: calc(11px * var(--pdf-scale, 1));
+  line-height: 1.5;
+  color: var(--pdf-desc);
+}
+
+.addonList li {
+  list-style: none;
+}
+
+.addonPrice {
+  color: var(--pdf-price);
+}
+
+.groupBlock {
+  font-size: calc(11px * var(--pdf-scale, 1));
+  line-height: 1.5;
+  color: var(--pdf-desc);
+}
+
+.groupName {
+  font-weight: 600;
+  color: var(--pdf-text);
 }

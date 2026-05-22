@@ -63,5 +63,40 @@
   "timeAgoDayAgo": "{{n}} d ago",
   "openScanWindow": "Open scan window",
   "scanWindowOpen": "Scan window is open — guests may scan",
-  "scanWindowExpired": "Scan window closed"
+  "scanWindowExpired": "Scan window closed",
+
+  "openRecoveryWindow": "Restore session",
+  "recoveryWindowOpen": "Recovery window open",
+  "recoveryWindowHint": "Opens a 1-minute window for guests to re-scan the QR code",
+
+  "servingGroup": "Course",
+  "groupStatus_waiting": "Waiting",
+  "groupStatus_cooking": "Cooking",
+  "groupStatus_ready": "Ready",
+  "groupStatus_served": "Served",
+  "markServed": "Mark as served",
+
+  "addDishDetail": "Add dish",
+  "editDishDetail": "Edit dish",
+  "dishIngredients": "Ingredients",
+  "dishAddons": "Add-ons",
+  "dishComponentGroups": "Options",
+  "dishComment": "Comment",
+  "removeIngredient": "Remove",
+  "chooseOption": "Choose option",
+  "itemTotal": "Total",
+  "callInitiated": "Called at",
+  "callAnswered": "Call accepted",
+  "callAnsweredAt": "Accepted at",
+
+  "qrGenerateError": "Failed to generate QR code",
+  "pdfGenerateError": "Failed to generate PDF",
+  "noQr": "No QR",
+
+  "editTableInfo": "Edit table",
+  "editTableNumber": "Table number",
+  "editTableLabel": "Name (optional)",
+  "saveTableInfo": "Save",
+  "duplicateTableNumber": "A table with this number already exists",
+  "tableInfoSaved": "Table updated"
 }

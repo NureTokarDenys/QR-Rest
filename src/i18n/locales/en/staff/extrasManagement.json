@@ -44,5 +44,13 @@
   "confirmDeleteItemSub": "Delete \"{{name}}\"?",
   "noData": "Nothing here yet.",
   "confirm": "Confirm",
-  "cancel": "Cancel"
+  "cancel": "Cancel",
+  "titleNewIngredient": "New ingredient",
+  "titleEditIngredient": "Edit ingredient",
+  "titleNewAddon": "New add-on",
+  "titleEditAddon": "Edit add-on",
+  "titleNewComponentGroup": "New component group",
+  "titleEditComponentGroup": "Edit component group",
+  "optionsSection": "Options",
+  "defaultOption": "Default"
 }

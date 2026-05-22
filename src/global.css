@@ -16,6 +16,9 @@
   --separator-color: #e5e5ea;
   --icon-color: #080808;
 
+  --skel-base: #e4e7eb;
+  --skel-peak: #c5cad2;
+
   --value-text: #8e8e93;
   --chevron-color: #c7c7cc;
 
@@ -46,11 +49,49 @@
   --order-status-cooking-text: #f57c00;
   --order-status-ready-bg: #e8f5e9;
   --order-status-ready-text: #2e7d32;
+  --order-status-served-bg: #f0f9ff;
+  --order-status-served-text: #0369a1;
 
   --order-state-completed: #308d37;
 
   --success-bg: #e8f5e9;
   --success-text: #1b5e20;
+
+  --warn-bg: #fffbeb;
+  --warn-border: #f0ad00;
+  --warn-text: #7a4f00;
+  --warn-text-soft: #92400e;
+  --warn-accent: #d97706;
+
+  --danger-bg: #fee2e2;
+  --danger-text: #dc2626;
+  --danger-soft-bg: #fff0f0;
+  --danger-soft-border: #f5c2c2;
+  --danger-soft-text: #c0392b;
+
+  --info-bg: #eff6ff;
+  --info-text: #1d7afc;
+
+  --addon-bg: #d1fae5;
+  --addon-text: #059669;
+  --excluded-bg: #fee2e2;
+  --excluded-text: #dc2626;
+  --choice-bg: #eff6ff;
+  --choice-text: #1d7afc;
+  --comment-text: #d97706;
+
+  --kanban-waiting-bg: #fef2f2;
+  --kanban-waiting-border: #f87171;
+  --kanban-waiting-text: #dc2626;
+  --kanban-cooking-bg: #fff3e0;
+  --kanban-cooking-border: #fbbf24;
+  --kanban-cooking-text: #d97706;
+  --kanban-ready-bg: #f0fdf4;
+  --kanban-ready-border: #4ade80;
+  --kanban-ready-text: #16a34a;
+  --kanban-served-bg: #f0f9ff;
+  --kanban-served-border: #7dd3fc;
+  --kanban-served-text: #0369a1;
 
   --dropdown-bg: #ffffff;
   --dropdown-border: #e5e5ea;
@@ -86,6 +127,12 @@
   --separator-color: #38383a;
   --icon-color: #ebebeb99;
 
+  /* Skeleton sits on --surface-color cards. Keep both base and peak slightly
+     lighter than the surface so the shimmer reads on the card without flaring
+     against the dark background. */
+  --skel-base: #303032;
+  --skel-peak: #3a3a3c;
+
   --value-text: #8e8e93;
   --chevron-color: #48484a;
 
@@ -105,22 +152,63 @@
   --client-toast-text: #000000;
   --client-toast-progress-bar: #4caf50;
 
-  --badge-coocking-bg: #fff3e0;
-  --badge-coocking-text: #f57c00;
-  --badge-done-bg: #e8f5e9;
-  --badge-done-text: #2e7d32;
+  /* Status badges — dark theme: translucent accent backgrounds with lighter,
+     desaturated text so chips read clearly against dark cards without
+     "glowing" the way light-mode swatches do. */
+  --badge-coocking-bg: rgba(245, 124, 0, 0.16);
+  --badge-coocking-text: #ffb74d;
+  --badge-done-bg: rgba(46, 125, 50, 0.18);
+  --badge-done-text: #81c784;
 
-  --order-status-waiting-bg: #e8f4ff;
-  --order-status-waiting-text: #1d7afc;
-  --order-status-cooking-bg: #fff3e0;
-  --order-status-cooking-text: #f57c00;
-  --order-status-ready-bg: #e8f5e9;
-  --order-status-ready-text: #2e7d32;
+  --order-status-waiting-bg: rgba(29, 122, 252, 0.16);
+  --order-status-waiting-text: #4ea1ff;
+  --order-status-cooking-bg: rgba(245, 124, 0, 0.16);
+  --order-status-cooking-text: #ffb74d;
+  --order-status-ready-bg: rgba(46, 125, 50, 0.18);
+  --order-status-ready-text: #81c784;
+  --order-status-served-bg: rgba(3, 105, 161, 0.18);
+  --order-status-served-text: #7dd3fc;
 
-  --order-state-completed: #308d37;
+  --order-state-completed: #4caf50;
 
-  --success-bg: #1a3a1a;
-  --success-text: #4caf50;
+  --success-bg: rgba(46, 125, 50, 0.18);
+  --success-text: #81c784;
+
+  --warn-bg: rgba(240, 173, 0, 0.12);
+  --warn-border: #c08400;
+  --warn-text: #fbcb6b;
+  --warn-text-soft: #f0c068;
+  --warn-accent: #f0ad00;
+
+  --danger-bg: rgba(220, 38, 38, 0.18);
+  --danger-text: #ff7676;
+  --danger-soft-bg: rgba(220, 38, 38, 0.14);
+  --danger-soft-border: rgba(220, 38, 38, 0.45);
+  --danger-soft-text: #ff7676;
+
+  --info-bg: rgba(29, 122, 252, 0.16);
+  --info-text: #4ea1ff;
+
+  --addon-bg: rgba(5, 150, 105, 0.18);
+  --addon-text: #34d399;
+  --excluded-bg: rgba(220, 38, 38, 0.18);
+  --excluded-text: #ff7676;
+  --choice-bg: rgba(29, 122, 252, 0.18);
+  --choice-text: #4ea1ff;
+  --comment-text: #fbbf24;
+
+  --kanban-waiting-bg: rgba(220, 38, 38, 0.10);
+  --kanban-waiting-border: #b53b3b;
+  --kanban-waiting-text: #ff7676;
+  --kanban-cooking-bg: rgba(245, 124, 0, 0.10);
+  --kanban-cooking-border: #c87a17;
+  --kanban-cooking-text: #ffb74d;
+  --kanban-ready-bg: rgba(22, 163, 74, 0.10);
+  --kanban-ready-border: #2f8a4d;
+  --kanban-ready-text: #66bb6a;
+  --kanban-served-bg: rgba(3, 105, 161, 0.10);
+  --kanban-served-border: #2b7aa6;
+  --kanban-served-text: #7dd3fc;
 
   --dropdown-bg: #2c2c2e;
   --dropdown-border: #38383a;
@@ -132,8 +220,55 @@
 
   --rating-text:#f5a623;
 
-  --waiter--notification-bg: #fef2f2;
-  --waiter-notification-border: #dc2626;
-  --order--notification-bg: #eff6ff;
-  --order-notification-border: #2563eb;
+  --waiter--notification-bg: rgba(220, 38, 38, 0.10);
+  --waiter-notification-border: #b53b3b;
+  --order--notification-bg: rgba(37, 99, 235, 0.10);
+  --order-notification-border: #3a6cc9;
+}
+
+/* ── PDF print mode ──────────────────────────────────────────────────────────
+   Triggered by adding `pdf-printing` to <body> before calling window.print().
+   We hide everything in the staff app chrome so the print preview shows only
+   the menu pages. The PDF generator's CSS module is responsible for handling
+   actual page sizing / page-breaks (each `.page` element starts a new physical
+   page).  We target globals here only because CSS Modules would scope
+   `body.pdf-printing` and break the matcher. */
+@media print {
+  @page {
+    /* Padding lives inside each .page; let the physical paper edge meet the
+       .page edge so user-controlled margins are exact. */
+    margin: 0;
+  }
+
+  /* Print-color-adjust keeps coloured backgrounds + text in the printed
+     output (browsers default to "economy" otherwise). */
+  body.pdf-printing,
+  body.pdf-printing * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Hide everything except the PDF root. Using display:none on direct body
+     children is more reliable than visibility:hidden when paginating. */
+  body.pdf-printing > *:not(#pdfPrintRoot):not(script):not(style) {
+    display: none !important;
+  }
+
+  /* #pdfPrintRoot is moved out of its container at print start (see
+     pdfGenerator/index.jsx handleGenerate) so it sits directly under <body>
+     and the rule above can match. */
+  body.pdf-printing #pdfPrintRoot {
+    display: block;
+    margin: 0;
+    padding: 0;
+    border: none;
+    box-shadow: none;
+    background: none;
+    width: 100%;
+    max-width: none;
+  }
+
+  body.pdf-printing .pdf-no-print {
+    display: none !important;
+  }
 }

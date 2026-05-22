@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStaffLayout } from '../../../context/StaffLayoutContext';
+import { useStaffNotifications } from '../../../context/StaffNotificationsContext';
 import styles from './staffHeader.module.css';
 
-import { MdNotifications, MdAccessTime, MdMenu } from "react-icons/md";
+import { MdNotifications, MdAccessTime, MdMenu } from 'react-icons/md';
 
 export default function StaffHeader({ title, backTo, rightActions, onMenuToggle }) {
   const navigate = useNavigate();
   const { panelOpen, togglePanel } = useStaffLayout();
+  const { unreadCount } = useStaffNotifications();
   const [time, setTime] = useState('');
 
   useEffect(() => {
@@ -19,8 +21,6 @@ export default function StaffHeader({ title, backTo, rightActions, onMenuToggle 
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, []);
-
-  const unread = 0; // live notifications not yet implemented
 
   return (
     <header className={styles.header}>
@@ -35,13 +35,17 @@ export default function StaffHeader({ title, backTo, rightActions, onMenuToggle 
       </div>
       <div className={styles.right}>
         {rightActions}
-        <span className={styles.time}> <MdAccessTime className={styles.timeIcon} /> {time}</span>
+        <span className={styles.time}><MdAccessTime className={styles.timeIcon} /> {time}</span>
         <button
           className={`${styles.bell} ${panelOpen ? styles.bellActive : ''}`}
           onClick={togglePanel}
         >
           <MdNotifications className={styles.bellIcon} />
-          {unread > 0 && <span className={styles.badge}>{unread}</span>}
+          {unreadCount > 0 && (
+            <span className={`${styles.badge} ${styles.badgePulse}`}>
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </span>
+          )}
         </button>
       </div>
     </header>

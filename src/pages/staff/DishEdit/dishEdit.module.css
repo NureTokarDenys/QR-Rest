@@ -36,10 +36,14 @@
 
 /* ── Language bar ───────────────────────────────────────────────────────────── */
 .langBar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
   background: var(--surface-color);
   border: 1px solid var(--separator-color);
   border-radius: 14px;
   padding: 12px 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 /* ── Basic-info grid (name | price ; category | — ; description full) ───────── */
@@ -134,17 +138,6 @@
   padding: 8px 0;
 }
 
-.listRow {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px;
-  background: var(--bg-color);
-  border-radius: 10px;
-}
-
-/* .listRowFields replaced by .rowName + .fieldWrap above */
-
 .checkLabel {
   display: flex;
   align-items: center;
@@ -187,6 +180,22 @@
   padding: 10px;
   background: var(--bg-color);
   border-bottom: 1px solid var(--separator-color);
+}
+
+/* Same layout as groupBlockHeader but no bottom separator — used for
+   ingredients and addons which have no sub-panel beneath them */
+.groupBlockRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px;
+  background: var(--bg-color);
+}
+
+/* Push checkbox/button down to sit level with the input control, not the label */
+.groupBlockRow .checkLabel,
+.groupBlockRow .deleteRowBtn {
+  margin-top: 20px;
 }
 
 .groupOptions {
@@ -325,10 +334,9 @@
   color: var(--secondary-text);
 }
 
-.ingName {
-  font-size: 13px;
-  color: var(--primary-text);
-  padding: 4px 0;
+.photoCount {
+  font-size: 12px;
+  color: var(--secondary-text);
 }
 
 .cancelBtn {

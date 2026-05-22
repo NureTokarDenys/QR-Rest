@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../../context/AppContext';
 import { useTranslation } from 'react-i18next';
 import styles from './notificationToast.module.css';
 
 export default function NotificationToast() {
-  const { notifications } = useApp();
+  const { notifications, currentOrder, markAllRead } = useApp();
   const { i18n } = useTranslation();
+  const navigate = useNavigate();
   const isEn = i18n.language === 'en';
 
   const latest = notifications[0] ?? null;
@@ -13,13 +15,15 @@ export default function NotificationToast() {
   const [visible, setVisible]   = useState(false);
   const [exiting, setExiting]   = useState(false);
 
-  // Show toast whenever a new notification arrives
+  // Show toast only for unread notifications
   useEffect(() => {
     if (!latest) return;
     if (latest._id !== shownId) {
       setShownId(latest._id);
-      setExiting(false);
-      setVisible(true);
+      if (!latest.readAt) {
+        setExiting(false);
+        setVisible(true);
+      }
     }
   }, [latest?._id]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -45,6 +49,15 @@ export default function NotificationToast() {
     setTimeout(() => setVisible(false), 280);
   }
 
+  function handleTap() {
+    markAllRead();
+    dismiss();
+    const target = currentOrder?.id
+      ? `/order-status/${currentOrder.id}`
+      : '/order-status';
+    navigate(target, { state: { openNotifs: true } });
+  }
+
   if (!visible || !latest) return null;
 
   const title = isEn ? latest.title_en : latest.title_uk;
@@ -55,8 +68,10 @@ export default function NotificationToast() {
       className={`${styles.toast} ${exiting ? styles.exit : styles.enter}`}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
+      onClick={handleTap}
       role="status"
       aria-live="polite"
+      style={{ cursor: 'pointer' }}
     >
       <div className={styles.inner}>
         <span className={styles.dot} />
@@ -64,7 +79,7 @@ export default function NotificationToast() {
           {title && <p className={styles.title}>{title}</p>}
           {body  && <p className={styles.body}>{body}</p>}
         </div>
-        <button className={styles.close} onClick={dismiss} aria-label="Dismiss">✕</button>
+        <button className={styles.close} onClick={e => { e.stopPropagation(); dismiss(); }} aria-label="Dismiss">✕</button>
       </div>
     </div>
   );

@@ -4,8 +4,12 @@
   "logout": "Вийти",
   
   "online": "В мережі",
+  "role_root_admin": "Власник",
   "role_admin": "Адміністратор",
   "role_waiter": "Офіціант",
+  "role_cook": "Кухар",
+  "role_waiter_cook": "Офіціант і кухар",
+  "role_guest": "Гість",
   
   "personalData": "Особисті дані",
   "name": "Ім'я",
@@ -52,5 +56,23 @@
   "resetSendError": "Не вдалося надіслати посилання. Спробуйте ще раз.",
 
   "back": "Назад",
-  "cancel": "Скасувати"
+  "cancel": "Скасувати",
+
+  "nameEdit": "Редагувати",
+  "nameSaveBtn": "Зберегти",
+  "nameCancelBtn": "Скасувати",
+
+  "emailChangeConfirmTitle": "Змінити пошту?",
+  "emailChangeConfirmMessage": "Ми попросимо вас ввести нову адресу та надішлемо посилання для підтвердження.",
+
+  "passwordConfirmTitle": "Скинути пароль?",
+  "passwordConfirmMessage": "Ми надішлемо посилання для скидання на {{email}}. Продовжити?",
+  "passwordConfirm": "Надіслати посилання",
+
+  "integrationsSection": "Інтеграції",
+  "google_connect": "Підключити Google",
+  "google_connected": "Google",
+  "google_connected_value": "Підключено",
+  "google_add": "Підключити",
+  "google_no_password": "Ваш акаунт використовує лише Google — зверніться до адміністратора для встановлення пароля."
 }

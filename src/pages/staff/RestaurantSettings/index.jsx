@@ -1,12 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useSearchParams } from 'react-router-dom';
+import PremiumCelebrationModal from '../../../components/PremiumCelebrationModal';
+import UpgradeModal from '../../../components/UpgradeModal';
 import StaffShell from '../../../components/staff/StaffShell';
+import PageSkeleton from '../../../components/staff/Skeleton';
 import InputField from '../../../components/InputField';
 import ReadonlyField from '../../../components/staff/ReadonlyField';
 import PrimaryButton from '../../../components/PrimaryButton';
 import LangTabs from '../../../components/staff/LangTabs';
 import { Dropdown } from '../../../components/Dropdown';
-import { getRestaurant, updateRestaurant, uploadRestaurantLogo, translateText } from '../../../api/admin';
+import { updateRestaurant, uploadRestaurantLogo, translateText, saveLiqpayKeys } from '../../../api/admin';
+import { usePlan } from '../../../hooks/usePlan';
+import { useStaffData } from '../../../context/StaffDataContext';
+import { MdPayment, MdCheckCircle, MdLock } from 'react-icons/md';
 import { SUPPORTED_LANGS, SOURCE_LANG, fieldFor, emptyI18n, toApiLang } from '../../../i18n/langs';
 import styles from './restaurantSettings.module.css';
 import { MdStorefront } from 'react-icons/md';
@@ -20,6 +27,65 @@ const EMPTY_FIELDS = emptyI18n('name', 'address', 'cuisine');
 
 export default function RestaurantSettings() {
   const { t } = useTranslation('restaurantSettings');
+  const { isPremium } = usePlan();
+  const [searchParams, setSearchParams] = useSearchParams();
+  // Restaurant is already in the cache (loaded eagerly for PlanContext).
+  // LiqPay is lazy — only requested when an admin opens this page.
+  const { restaurant: cachedRestaurant, liqpay: cachedLiqpay, refreshRestaurant, refreshLiqpay, ensureLiqpay } = useStaffData();
+  useEffect(() => { if (isPremium) ensureLiqpay(); }, [isPremium, ensureLiqpay]);
+
+  // ── Subscription upgrade flow ─────────────────────────────────────────────
+  const [upgradeModalOpen,    setUpgradeModalOpen]    = useState(false);
+  const [celebrationOpen,     setCelebrationOpen]     = useState(false);
+  const [verifying,           setVerifying]           = useState(false);
+  const [verifyTimeout,       setVerifyTimeout]       = useState(false);
+  const pollingRef = useRef(null);
+
+  function stopPolling() {
+    if (pollingRef.current) { clearInterval(pollingRef.current); pollingRef.current = null; }
+  }
+
+  // LiqPay redirects back with ?subscribed=1 on success or ?payment_failed=1 on failure.
+  // Poll refreshRestaurant() every 2 s for up to 30 s waiting for the webhook to fire.
+  useEffect(() => {
+    // Check both the legacy URL param and the sessionStorage flag set by UpgradeModal.
+    // sessionStorage is used because localhost result_urls are rejected by LiqPay,
+    // so we can't rely on LiqPay appending ?payment_return=1 to the redirect URL.
+    const fromUrl     = searchParams.get('payment_return') === '1';
+    const fromStorage = sessionStorage.getItem('payment_pending') === '1';
+    setSearchParams({}, { replace: true });
+    sessionStorage.removeItem('payment_pending');
+
+    if (!fromUrl && !fromStorage) return;
+
+    // Webhook may have already fired before the redirect arrived — check immediately.
+    refreshRestaurant().then(() => {});
+
+    setVerifying(true);
+    const start = Date.now();
+    pollingRef.current = setInterval(async () => {
+      await refreshRestaurant();
+      if (Date.now() - start >= 30_000) {
+        stopPolling();
+        setVerifying(false);
+        setVerifyTimeout(true);
+      }
+    }, 2000);
+
+    return stopPolling;
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // When plan becomes premium while we're verifying — show celebration.
+  // Also fires if plan was already premium on the first refresh.
+  useEffect(() => {
+    if (!verifying) return;
+    if (cachedRestaurant?.plan === 'premium') {
+      stopPolling();
+      setVerifying(false);
+      setVerifyTimeout(false);
+      setCelebrationOpen(true);
+    }
+  }, [cachedRestaurant?.plan, verifying]);
 
   const [activeLang,  setActiveLang]  = useState(SOURCE_LANG);
   const [translating, setTranslating] = useState(false);
@@ -35,7 +101,16 @@ export default function RestaurantSettings() {
   const [createdAt,   setCreatedAt]   = useState('');
   const [saving,      setSaving]      = useState(false);
   const [savedOk,     setSavedOk]     = useState(false);
+  const [loading,     setLoading]     = useState(true);
   const fileRef = useRef(null);
+
+  // LiqPay keys state
+  const [lqPublicKey,    setLqPublicKey]    = useState('');
+  const [lqPrivateKey,   setLqPrivateKey]   = useState('');
+  const [lqHasPrivate,   setLqHasPrivate]   = useState(false);
+  const [lqSaving,       setLqSaving]       = useState(false);
+  const [lqSavedOk,      setLqSavedOk]      = useState(false);
+  const [lqError,        setLqError]        = useState('');
 
   const lf = (base) => fieldFor(base, activeLang);
   const srcHint = (base) => {
@@ -44,31 +119,38 @@ export default function RestaurantSettings() {
   };
   const srcLang = SUPPORTED_LANGS.find(l => l.code === SOURCE_LANG);
 
+  // LiqPay — read from shared cache (loaded once for the admin session)
   useEffect(() => {
-    getRestaurant()
-      .then(r => {
-        if (!r) return;
-        const loaded = { ...EMPTY_FIELDS };
-        SUPPORTED_LANGS.forEach(l => {
-          ['name', 'address', 'cuisine'].forEach(base => {
-            const key = fieldFor(base, l.code);
-            if (l.code === SOURCE_LANG) {
-              loaded[key] = r[base] || '';
-            } else {
-              loaded[key] = r.translations?.[l.apiCode]?.[base]?.value || '';
-            }
-          });
-        });
-        setFields(loaded);
-        setSlug(r.slug || '');
-        const allowed = new Set(BACKEND_LANGUAGES.map(l => l.code));
-        setDefaultLang(allowed.has(r.defaultLanguage) ? r.defaultLanguage : 'uk');
-        setEnabledLangs((r.enabledLanguages || []).filter(code => allowed.has(code)));
-        setLogoUrl(r.logoUrl || '');
-        setCreatedAt(r.createdAt ? new Date(r.createdAt).toLocaleDateString() : '');
-      })
-      .catch(err => console.error('RestaurantSettings load error:', err));
-  }, []);
+    if (!isPremium || !cachedLiqpay) return;
+    setLqPublicKey(cachedLiqpay.publicKey || '');
+    setLqHasPrivate(!!cachedLiqpay.hasPrivateKey);
+  }, [isPremium, cachedLiqpay]);
+
+  // Restaurant fields — hydrate the editable form from the shared cache.
+  // Re-runs when the cache refreshes (e.g. after another admin saves changes).
+  useEffect(() => {
+    if (!cachedRestaurant) return;
+    const r = cachedRestaurant;
+    const loaded = { ...EMPTY_FIELDS };
+    SUPPORTED_LANGS.forEach(l => {
+      ['name', 'address', 'cuisine'].forEach(base => {
+        const key = fieldFor(base, l.code);
+        if (l.code === SOURCE_LANG) {
+          loaded[key] = r[base] || '';
+        } else {
+          loaded[key] = r.translations?.[l.apiCode]?.[base]?.value || '';
+        }
+      });
+    });
+    setFields(loaded);
+    setSlug(r.slug || '');
+    const allowed = new Set(BACKEND_LANGUAGES.map(l => l.code));
+    setDefaultLang(allowed.has(r.defaultLanguage) ? r.defaultLanguage : 'uk');
+    setEnabledLangs((r.enabledLanguages || []).filter(code => allowed.has(code)));
+    setLogoUrl(r.logoUrl || '');
+    setCreatedAt(r.createdAt ? new Date(r.createdAt).toLocaleDateString() : '');
+    setLoading(false);
+  }, [cachedRestaurant]);
 
   useEffect(() => {
     return () => {
@@ -116,6 +198,27 @@ export default function RestaurantSettings() {
     setHasLogoChanged(false);
   }
 
+  async function handleSaveLiqpay() {
+    if (!lqPublicKey.trim() || !lqPrivateKey.trim()) {
+      setLqError(t('liqpayBothRequired'));
+      return;
+    }
+    setLqSaving(true);
+    setLqError('');
+    setLqSavedOk(false);
+    try {
+      await saveLiqpayKeys(lqPublicKey.trim(), lqPrivateKey.trim());
+      setLqHasPrivate(true);
+      setLqPrivateKey('');
+      setLqSavedOk(true);
+      setTimeout(() => setLqSavedOk(false), 3000);
+    } catch (err) {
+      setLqError(t('liqpaySaveError'));
+    } finally {
+      setLqSaving(false);
+    }
+  }
+
   async function handleSave() {
     setSaving(true);
     setSavedOk(false);
@@ -160,6 +263,14 @@ export default function RestaurantSettings() {
   const defaultLangOptions = BACKEND_LANGUAGES.map(l => ({ value: l.code, label: l.name }));
   const displayedLogo = pendingLogoPreview || logoUrl;
 
+  if (loading) {
+    return (
+      <StaffShell title={<><MdStorefront /> {t('title')}</>}>
+        <PageSkeleton variant="settings" sections={3} />
+      </StaffShell>
+    );
+  }
+
   return (
     <StaffShell
       title={<><MdStorefront /> {t('title')}</>}
@@ -175,6 +286,34 @@ export default function RestaurantSettings() {
       }
     >
       <div className={styles.page}>
+
+        <PremiumCelebrationModal open={celebrationOpen} onClose={() => setCelebrationOpen(false)} />
+        <UpgradeModal open={upgradeModalOpen} onClose={() => setUpgradeModalOpen(false)} />
+
+        {verifying && (
+          <div className={styles.verifyingBanner}>
+            <span className={styles.verifyingSpinner} />
+            {t('subscriptionVerifying')}
+          </div>
+        )}
+
+        {verifyTimeout && (
+          <div className={styles.timeoutBanner}>
+            <span>{t('subscriptionTimeout')}</span>
+            <button className={styles.bannerAction} onClick={() => window.location.reload()}>
+              {t('subscriptionTimeoutRetry')}
+            </button>
+          </div>
+        )}
+
+        {verifyTimeout && (
+          <div className={styles.timeoutBanner}>
+            <span>{t('subscriptionTimeout')}</span>
+            <button className={styles.bannerAction} onClick={() => { setVerifyTimeout(false); setUpgradeModalOpen(true); }}>
+              {t('paymentFailedRetry')}
+            </button>
+          </div>
+        )}
 
         {/* ── Translatable fields ── */}
         <div className={styles.section}>
@@ -336,6 +475,74 @@ export default function RestaurantSettings() {
             </div>
           </div>
         </div>
+
+        {/* ── LiqPay integration (premium only) ── */}
+        {isPremium && (
+          <div className={styles.section}>
+            <p className={styles.sectionTitle}>
+              <MdPayment style={{ verticalAlign: 'middle', marginRight: 6 }} />
+              {t('liqpayTitle')}
+            </p>
+            <p className={styles.fieldHint}>
+              {t('liqpayHint')}
+            </p>
+
+            {lqHasPrivate && (
+              <div className={styles.liqpayStatus}>
+                <MdCheckCircle className={styles.liqpayStatusIcon} />
+                {t('liqpayConnected')}
+              </div>
+            )}
+
+            <div className={styles.grid2}>
+              <div className={styles.fieldWrap}>
+                <label className={styles.dropLabel}>
+                  {t('liqpayPublicKey')}
+                </label>
+                <input
+                  className={styles.liqpayInput}
+                  type="text"
+                  value={lqPublicKey}
+                  onChange={e => setLqPublicKey(e.target.value)}
+                  placeholder="sandbox_i..."
+                  autoComplete="off"
+                />
+              </div>
+              <div className={styles.fieldWrap}>
+                <label className={styles.dropLabel}>
+                  {t('liqpayPrivateKey')}
+                  {lqHasPrivate && (
+                    <span className={styles.liqpayStoredBadge}>
+                      <MdLock size={11} /> {t('liqpayStored')}
+                    </span>
+                  )}
+                </label>
+                <input
+                  className={styles.liqpayInput}
+                  type="password"
+                  value={lqPrivateKey}
+                  onChange={e => setLqPrivateKey(e.target.value)}
+                  placeholder={lqHasPrivate ? '••••••••••••' : 'sandbox_...'}
+                  autoComplete="new-password"
+                />
+              </div>
+            </div>
+
+            {lqError && <p className={styles.liqpayError}>{lqError}</p>}
+
+            <button
+              className={styles.liqpaySaveBtn}
+              onClick={handleSaveLiqpay}
+              disabled={lqSaving}
+            >
+              {lqSaving
+                ? t('saving')
+                : lqSavedOk
+                ? `✓ ${t('saved')}`
+                : t('liqpaySave')}
+            </button>
+          </div>
+        )}
 
       </div>
     </StaffShell>

@@ -4,6 +4,8 @@ import { createOrder, getOrder, addGuestOrderItems, getMyOrders, getOrderNotific
 import { getRestaurantInfo } from '../api/restaurants';
 import { useAuth } from './AuthContext';
 import { SUPPORTED_LANGS, SOURCE_LANG, fromApiLang } from '../i18n/langs';
+import { useNotificationSound } from '../hooks/useNotificationSound';
+import { enqueueOrder, dequeueOrder, readQueue } from '../utils/offlineOrderQueue';
 
 // ─── Global WS constants ──────────────────────────────────────────────────────
 const WS_MAX_RETRIES    = 5;
@@ -108,11 +110,18 @@ export function normalizeApiOrder(raw) {
   const computedTotal = items.reduce((s, i) => s + (i.price ?? 0) * (i.quantity ?? 1), 0);
 
   return {
-    id:           orderData._id || orderData.id,
-    publicId:     orderData.publicId || null,
-    tableId:      orderData.tableId   || null,
-    tableNumber:  orderData.tableNumber ?? orderData.table?.number,
-    restaurantId: orderData.restaurantId || null,
+    id:               orderData._id || orderData.id,
+    publicId:         orderData.publicId || null,
+    tableId:          orderData.tableId   || null,
+    tableNumber:      orderData.tableNumber ?? orderData.table?.number,
+    restaurantId:     orderData.restaurantId || null,
+    restaurantName:   orderData.restaurantName    || '',
+    restaurantName_en: orderData.restaurantName_en || orderData.restaurantName || '',
+    // Plan of the order's restaurant — drives whether the review UI shows.
+    // Free-plan restaurants don't offer reviews; the backend rejects the
+    // POST anyway via requirePlan('premium'), but knowing the plan up front
+    // lets us hide the entry point.
+    restaurantPlan:   orderData.restaurantPlan || null,
     servingGroups,
     items,
     total:  orderData.totalAmount ?? orderData.total ?? computedTotal,
@@ -168,6 +177,9 @@ function isOrderActive(raw) {
 export function AppProvider({ children }) {
   // AppProvider is rendered inside AuthProvider so useAuth() is safe here.
   const { accessToken, user } = useAuth();
+  const playSound    = useNotificationSound();
+  const playSoundRef = useRef(playSound);
+  playSoundRef.current = playSound;
 
   // True while the async order-restore effect is running after login.
   // Consumers (RootRedirect) wait for this to be false before deciding where to navigate.
@@ -207,6 +219,7 @@ export function AppProvider({ children }) {
   // Additional variants are stored as restaurantName_<langCode>, e.g. restaurantName_en.
   const [restaurantName, setRestaurantName] = useState(() => localStorage.getItem('restaurantName') || '');
   const [restaurantName_en, setRestaurantName_en] = useState(() => localStorage.getItem('restaurantName_en') || '');
+  const [restaurantPlan, setRestaurantPlan] = useState(() => localStorage.getItem('restaurantPlan') || 'free');
 
   // ── Restaurant language metadata ──────────────────────────────────────────
   // Populated whenever the restaurant object is available (QR scan, picker,
@@ -305,8 +318,9 @@ export function AppProvider({ children }) {
   // Strategy 0: user-scoped localStorage cache (fastest — no API call)
   // Strategy 1: GET /orders/:orderId stored after the last checkout
   // Strategy 2: GET /user/orders → find first non-terminal order → GET /orders/:id
+  const STAFF_ROLES = new Set(['admin', 'root_admin', 'cook', 'waiter', 'waiter_cook']);
   useEffect(() => {
-    if (!accessToken) {
+    if (!accessToken || STAFF_ROLES.has(user?.role)) {
       setCurrentOrder(null);
       setRestoringOrder(false);
       localStorage.removeItem('orderId');
@@ -332,7 +346,22 @@ export function AppProvider({ children }) {
             const DONE_ITEM = ['served', 'completed', 'void', 'cancelled', 'delivered'];
             const stillActive = savedOrder?.items?.some(i => !DONE_ITEM.includes(i.status));
             if (stillActive) {
-              if (!cancelled) setCurrentOrder(savedOrder);
+              if (!cancelled) {
+                setCurrentOrder(savedOrder);
+                // Sync standalone context states that components read directly
+                if (savedOrder.tableNumber != null) {
+                  setTableNumber(String(savedOrder.tableNumber));
+                  localStorage.setItem('tableNumber', String(savedOrder.tableNumber));
+                }
+                if (savedOrder.tableId) {
+                  setTableId(savedOrder.tableId);
+                  localStorage.setItem('tableId', String(savedOrder.tableId));
+                }
+                if (savedOrder.restaurantId) {
+                  setRestaurantId(savedOrder.restaurantId);
+                  localStorage.setItem('restaurantId', savedOrder.restaurantId);
+                }
+              }
               return; // done — no API call needed
             } else {
               localStorage.removeItem('activeOrder'); // stale, clean up
@@ -364,7 +393,7 @@ export function AppProvider({ children }) {
       if (!raw) {
         try {
           const recentOrders = await getMyOrders();
-          const DONE = new Set(['completed', 'void', 'voided', 'cancelled', 'paid', 'closed']);
+          const DONE = new Set(['completed', 'completed_cash', 'completed_epay', 'void', 'voided', 'cancelled', 'paid', 'closed']);
           const active = Array.isArray(recentOrders)
             ? recentOrders.find(o => !DONE.has(o.status))
             : null;
@@ -389,12 +418,11 @@ export function AppProvider({ children }) {
         if (normalized.restaurantId) {
           setRestaurantId(normalized.restaurantId);
           localStorage.setItem('restaurantId', normalized.restaurantId);
-          if (!localStorage.getItem('restaurantName')) {
-            getRestaurantInfo(normalized.restaurantId).then(info => {
-              if (info?.name) { setRestaurantName(info.name); localStorage.setItem('restaurantName', info.name); }
-              if (info?.name_en) { setRestaurantName_en(info.name_en); localStorage.setItem('restaurantName_en', info.name_en); }
-            }).catch(() => {});
-          }
+          getRestaurantInfo(normalized.restaurantId).then(info => {
+            if (info?.name && !localStorage.getItem('restaurantName')) { setRestaurantName(info.name); localStorage.setItem('restaurantName', info.name); }
+            if (info?.name_en && !localStorage.getItem('restaurantName_en')) { setRestaurantName_en(info.name_en); localStorage.setItem('restaurantName_en', info.name_en); }
+            if (info?.plan) { setRestaurantPlan(info.plan); localStorage.setItem('restaurantPlan', info.plan); }
+          }).catch(() => {});
         }
         if (normalized.tableId) {
           setTableId(normalized.tableId);
@@ -412,6 +440,23 @@ export function AppProvider({ children }) {
     restore().finally(() => { if (!cancelled) setRestoringOrder(false); });
     return () => { cancelled = true; };
   }, [accessToken, user?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Restore active order for guests (sessionToken only, no account) ───────
+  useEffect(() => {
+    if (accessToken || !sessionToken || currentOrder) return;
+    const storedId = localStorage.getItem('orderId');
+    const storedRestaurantId = localStorage.getItem('restaurantId');
+    if (!storedId || !storedRestaurantId) return;
+    getOrder(storedId, storedRestaurantId)
+      .then(raw => {
+        if (raw && isOrderActive(raw)) {
+          setCurrentOrder(normalizeApiOrder(raw));
+        } else {
+          localStorage.removeItem('orderId');
+        }
+      })
+      .catch(() => {});
+  }, [sessionToken]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Global WS connect ─────────────────────────────────────────────────────
   const wsConnect = useCallback(() => {
@@ -463,7 +508,14 @@ export function AppProvider({ children }) {
         }
 
         if (msg.event === 'NOTIFICATION_NEW' && msg.payload?.notification) {
-          setNotifications(prev => [msg.payload.notification, ...prev]);
+          const incoming = msg.payload.notification;
+          setNotifications(prev => {
+            if (prev.some(n => n._id === incoming._id)) return prev;
+            const merged = [incoming, ...prev];
+            merged.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            return merged;
+          });
+          playSoundRef.current?.();
         }
 
         wsListenersRef.current.forEach(fn => { try { fn(msg); } catch {} });
@@ -533,11 +585,14 @@ export function AppProvider({ children }) {
 
   // Load notifications when active order is set
   useEffect(() => {
-    if (!currentOrder?.id || !sessionToken) return;
-    getOrderNotifications(currentOrder.id).then(data => {
-      if (Array.isArray(data)) setNotifications(data);
+    if (!currentOrder?.id || !sessionToken || !restaurantId) return;
+    getOrderNotifications(currentOrder.id, restaurantId).then(data => {
+      if (Array.isArray(data)) {
+        const sorted = [...data].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        setNotifications(sorted);
+      }
     }).catch(() => {});
-  }, [currentOrder?.id, sessionToken]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [currentOrder?.id, sessionToken, restaurantId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function wsSubscribe(room) {
     wsRoomsRef.current.add(room);
@@ -550,12 +605,28 @@ export function AppProvider({ children }) {
   function addWsListener(fn)    { wsListenersRef.current.add(fn); }
   function removeWsListener(fn) { wsListenersRef.current.delete(fn); }
 
-  async function markAllRead() {
-    if (!currentOrder?.id) return;
+  async function refreshNotifications(orderId, rid) {
+    if (!orderId) return;
+    const resolvedRid = rid || restaurantId || undefined;
     try {
-      await markNotificationsRead(currentOrder.id);
-      setNotifications(prev => prev.map(n => n.readAt ? n : { ...n, readAt: new Date().toISOString() }));
+      const data = await getOrderNotifications(orderId, resolvedRid);
+      if (Array.isArray(data)) {
+        const sorted = [...data].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        setNotifications(sorted);
+      }
     } catch {}
+  }
+
+  async function markAllRead(orderId) {
+    const id = orderId || currentOrder?.id;
+    if (!id) return;
+    try {
+      await markNotificationsRead(id);
+    } catch (err) {
+      console.warn('markAllRead failed:', err?.response?.status, err?.message);
+    }
+    // Update local state regardless so the badge clears immediately.
+    setNotifications(prev => prev.map(n => n.readAt ? n : { ...n, readAt: new Date().toISOString() }));
   }
 
   // ─── session ─────────────────────────────────────────────────────────────
@@ -570,6 +641,7 @@ export function AppProvider({ children }) {
         tableNumber:  tn,
         restaurantId: rid,          // publicId
         restaurantName: rname = '',
+        restaurantPlan: rplan = 'free',
         tableHasActiveOrder: occupied = false,
         // Language meta (may be nested under restaurant object or at top level)
         restaurant:   restaurantObj,
@@ -580,11 +652,13 @@ export function AppProvider({ children }) {
       localStorage.setItem('tableId',        String(tid));
       localStorage.setItem('tableNumber',    String(tn));
       localStorage.setItem('restaurantId',   String(rid));   // publicId
+      localStorage.setItem('restaurantPlan', rplan);
       if (rname) localStorage.setItem('restaurantName', rname);
       setSessionToken(st);
       setTableId(String(tid));
       setTableNumber(String(tn));
       setRestaurantId(String(rid));
+      setRestaurantPlan(rplan);
       if (rname) setRestaurantName(rname);
       setTableHasActiveOrder(occupied);
       // Extract language meta from QR response (may be top-level or in restaurant sub-object)
@@ -593,6 +667,19 @@ export function AppProvider({ children }) {
         defaultLanguage:  defaultLanguage  || meta.defaultLanguage,
         enabledLanguages: enabledLanguages || meta.enabledLanguages,
       });
+
+      // Restore the active order if the backend reports one on this table.
+      // On a recovery scan the same session token is handed back, so the
+      // ownership check on GET /orders/:id passes and the FAB will appear.
+      const activeOrderId = data.activeOrderId;
+      if (activeOrderId) {
+        localStorage.setItem('orderId', String(activeOrderId));
+        try {
+          const raw = await getOrder(String(activeOrderId), String(rid));
+          if (raw && isOrderActive(raw)) setCurrentOrder(normalizeApiOrder(raw));
+        } catch {}
+      }
+
       return data;
     } catch (err) {
       console.error('initSession error:', err);
@@ -622,11 +709,13 @@ export function AppProvider({ children }) {
     localStorage.removeItem('tableNumber');
     localStorage.setItem('restaurantId', String(id));
     if (name) localStorage.setItem('restaurantName', name);
+    localStorage.removeItem('restaurantPlan');
     setSessionToken(null);
     setTableId(null);
     setTableNumber('');
     setRestaurantId(String(id));
     setRestaurantName(name);
+    if (meta?.plan) { setRestaurantPlan(meta.plan); localStorage.setItem('restaurantPlan', meta.plan); }
     // Store language metadata when available (including nameEn if provided)
     setRestaurantMeta(meta);
     // Clear any cart items that belonged to a previously selected restaurant
@@ -722,6 +811,12 @@ export function AppProvider({ children }) {
     setCart(prev => prev.filter(item => item.cartItemId !== cartItemId));
   }
 
+  // Replaces the entire cart with a pre-computed adjusted array.
+  // Used by ConfirmOrder change detection to apply auto-fixes in one shot.
+  function replaceCart(items) {
+    setCart(items);
+  }
+
   function updateQuantity(cartItemId, delta) {
     setCart(prev =>
       prev
@@ -731,6 +826,27 @@ export function AppProvider({ children }) {
         )
         .filter(item => item.quantity > 0)
     );
+  }
+
+  function duplicateCartItem(cartItemId) {
+    setCart(prev => {
+      const idx = prev.findIndex(i => i.cartItemId === cartItemId);
+      if (idx === -1) return prev;
+      const original = prev[idx];
+      const clone = {
+        ...original,
+        cartItemId: `${original.id}-${Date.now()}-${Math.random()}`,
+      };
+      const next = [...prev];
+      next.splice(idx + 1, 0, clone);
+      return next;
+    });
+  }
+
+  function updateItemComment(cartItemId, comment) {
+    setCart(prev => prev.map(item =>
+      item.cartItemId === cartItemId ? { ...item, comment } : item
+    ));
   }
 
   function moveToGroup(cartItemId, groupId) {
@@ -790,11 +906,9 @@ export function AppProvider({ children }) {
 
   function startEditingOrder(order) {
     setEditingOrder(order);
-    // Clear any items from a previous cart so the user starts fresh
-    setCart([]);
-    setServingGroups([DEFAULT_MAIN_GROUP]);
+    // Preserve the existing cart — items the user already added should be
+    // submitted to the active order, not discarded.
     setOrderComment('');
-    localStorage.removeItem('cartState');
 
     // Restore table + restaurant context so canOrder passes and new items can be submitted
     if (order.tableId) {
@@ -858,12 +972,21 @@ export function AppProvider({ children }) {
     const currentSessionToken = sessionToken || localStorage.getItem('sessionToken');
 
     // ── Add dishes to an existing order ────────────────────────────────────
-    if (editingOrder) {
+    // Prefer the explicit editing target; if it's been lost (e.g. page reload
+    // on /confirm-order), fall back to currentOrder when it's still active.
+    // Without this, submitOrder would try to createOrder for a table that
+    // already has an active order and crash with 400 / 409.
+    const ACTIVE_STATUSES = new Set(['open', 'open_paid']);
+    const addToOrder = editingOrder
+      || (currentOrder && ACTIVE_STATUSES.has(currentOrder.status) ? currentOrder : null);
+
+    if (addToOrder) {
       const apiItems = cart.map(item => {
         const groupChoices = Object.entries(item.componentGroupSelections || {}).map(([groupId, optionId]) => ({ groupId, optionId }));
         return {
           menuItemId: item.id,
           qty: item.quantity,
+          expectedUnitPrice: item.price,
           excludedIngredients: (item.excludedIngredients || []).map(i => typeof i === 'object' ? i.id : i),
           addons: (item.selectedAddons || []).map(a => ({ addOnId: typeof a === 'object' ? a.id : a, quantity: 1 })),
           componentGroupChoices: groupChoices,
@@ -872,8 +995,8 @@ export function AppProvider({ children }) {
       });
 
       try {
-        await addGuestOrderItems(editingOrder.id, apiItems, currentSessionToken);
-        const fresh = await getOrder(editingOrder.id);
+        await addGuestOrderItems(addToOrder.id, apiItems, currentSessionToken);
+        const fresh = await getOrder(addToOrder.id);
         const normalized = fresh ? normalizeApiOrder(fresh) : null;
         if (normalized) {
           normalized.restaurantId      = restaurantId      || normalized.restaurantId || null;
@@ -912,6 +1035,7 @@ export function AppProvider({ children }) {
       return {
         menuItemId: item.id,
         qty: item.quantity,
+        expectedUnitPrice: item.price,
         servingGroupId: item.groupId && item.groupId !== DEFAULT_GROUP_ID
           ? servingGroupNameById[item.groupId]
           : undefined,
@@ -934,6 +1058,18 @@ export function AppProvider({ children }) {
       items: apiItems,
     };
 
+    // ── Offline path ───────────────────────────────────────────────────────
+    // navigator.onLine is the only platform-level signal; it can return false
+    // positives on captive portals but that's acceptable here — the queue is
+    // resilient to immediate online retries.
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+      enqueueOrder({ restaurantId, payload });
+      clearCart();
+      // Returning null tells the caller "no normalized order yet" — the order
+      // will appear via the WS flow once the queue flushes on reconnect.
+      return null;
+    }
+
     try {
       const result = await createOrder(payload, restaurantId);
       // result shape: { order, servingGroups, items }
@@ -952,10 +1088,70 @@ export function AppProvider({ children }) {
       clearCart();
       return normalized;
     } catch (err) {
+      // Network-level failure (axios with no response) — queue the order so
+      // the user doesn't lose work just because the request died in flight.
+      if (!err?.response) {
+        enqueueOrder({ restaurantId, payload });
+        clearCart();
+        return null;
+      }
       console.error('submitOrder error:', err);
       throw err;
     }
   }
+
+  // ── Offline queue auto-flush ───────────────────────────────────────────────
+  // When the browser reports we're back online, drain the queue one entry at a
+  // time. We deliberately POST sequentially (not in parallel) so the server
+  // never sees duplicate-table races for the same offline-submitted order.
+  const flushingRef = useRef(false);
+  const flushQueue = useCallback(async () => {
+    if (flushingRef.current) return;
+    if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
+    const items = readQueue();
+    if (!items.length) return;
+    flushingRef.current = true;
+    try {
+      for (const entry of items) {
+        try {
+          const result = await createOrder(entry.payload, entry.restaurantId);
+          const orderId = result?.order?._id || result?.order?.id || result?._id || result?.id;
+          if (orderId) localStorage.setItem('orderId', String(orderId));
+          const normalized = normalizeApiOrder(result);
+          if (normalized) {
+            normalized.restaurantId      = entry.restaurantId || normalized.restaurantId || null;
+            normalized.restaurantName    = restaurantName     || '';
+            normalized.restaurantName_en = restaurantName_en  || '';
+            setCurrentOrder(normalized);
+            setTableHasActiveOrder(false);
+          }
+          dequeueOrder(entry.id);
+        } catch (err) {
+          // If this entry fails with a server error (4xx/5xx), drop it — the
+          // payload is bad and retrying won't help. If it's a network failure,
+          // bail out of the whole flush and try again on the next `online`
+          // event.
+          if (err?.response) {
+            console.warn('[offline-queue] dropping bad entry', entry.id, err.response.status);
+            dequeueOrder(entry.id);
+            continue;
+          }
+          break;
+        }
+      }
+    } finally {
+      flushingRef.current = false;
+    }
+  }, [restaurantName, restaurantName_en]);
+
+  useEffect(() => {
+    // Try once on mount (a tab opened back up after the user closed it while
+    // offline might already be online).
+    flushQueue();
+    const onOnline = () => flushQueue();
+    window.addEventListener('online', onOnline);
+    return () => window.removeEventListener('online', onOnline);
+  }, [flushQueue]);
 
   // ─── derived ──────────────────────────────────────────────────────────────
 
@@ -964,10 +1160,10 @@ export function AppProvider({ children }) {
 
   return (
     <AppContext.Provider value={{
-      cart, addToCart, updateCartItem, removeFromCart, updateQuantity, clearCart, moveToGroup,
+      cart, addToCart, updateCartItem, removeFromCart, updateQuantity, duplicateCartItem, updateItemComment, clearCart, moveToGroup, replaceCart,
       cartTotal, cartCount,
       tableNumber,
-      sessionToken, tableId, restaurantId, restaurantName, restaurantName_en,
+      sessionToken, tableId, restaurantId, restaurantName, restaurantName_en, restaurantPlan,
       tableHasActiveOrder, setTableHasActiveOrder,
       restoringOrder,
       restaurantLangs, restaurantDefaultLang, setRestaurantMeta,
@@ -979,7 +1175,7 @@ export function AppProvider({ children }) {
       editingOrder, startEditingOrder, cancelEditingOrder,
       servingGroups, addServingGroup, removeServingGroup, renameServingGroup,
       wsStatus, wsLatency, wsSubscribe, addWsListener, removeWsListener,
-      notifications, unreadCount, markAllRead,
+      notifications, unreadCount, markAllRead, refreshNotifications,
     }}>
       {children}
     </AppContext.Provider>

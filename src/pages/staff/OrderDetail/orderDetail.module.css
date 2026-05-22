@@ -1,121 +1,632 @@
-.headerActions {
-  display: flex;
-  gap: 10px;
-}
-
 .page {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
+/* ── Stats row ───────────────────────────────────────────────────────────── */
+
 .statsRow {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
+  align-items: stretch;
 }
 
-.tableBox {
+.orderStatusChip {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  min-width: 160px;
+  flex: 1;
+}
+
+.chipLabel {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.chipDesc {
+  font-size: 11px;
+  opacity: 0.75;
+  line-height: 1.3;
+}
+
+/* ── Action bar ──────────────────────────────────────────────────────────── */
+
+.actionBar {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.actionBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: none;
+  background: var(--accent-color);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.actionBtn:hover { opacity: 0.85; }
+
+.actionBtnDanger {
+  background: #ef4444;
+}
+
+/* ── Void form ───────────────────────────────────────────────────────────── */
+
+.voidForm {
+  background: var(--surface-color);
+  border: 1px solid var(--separator-color);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.voidReasonInput {
+  width: 100%;
+  border: 1px solid var(--separator-color);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  resize: vertical;
+  background: var(--bg-color);
+  color: var(--primary-text);
+  box-sizing: border-box;
+}
+
+.voidReasonInput:focus {
+  outline: none;
+  border-color: var(--accent-color);
+}
+
+.voidError {
+  font-size: 12px;
+  color: #ef4444;
+}
+
+.voidActions {
+  display: flex;
+  gap: 8px;
+}
+
+.voidConfirmBtn {
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: none;
+  background: #ef4444;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.voidConfirmBtn:disabled { opacity: 0.5; }
+
+.voidCancelBtn {
+  padding: 8px 18px;
+  border-radius: 8px;
+  border: 1px solid var(--separator-color);
+  background: transparent;
+  color: var(--secondary-text);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* ── Serving group card ──────────────────────────────────────────────────── */
+
+.groupCard {
   background: var(--surface-color);
   border: 1px solid var(--separator-color);
   border-radius: 14px;
   overflow: hidden;
 }
 
-.table {
-  width: 100%;
-  border-collapse: collapse;
+.groupHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--separator-color);
+  background: var(--bg-color);
+  flex-wrap: wrap;
 }
 
-.thead th {
-  padding: 10px 14px;
-  text-align: left;
-  font-size: 12px;
+.groupLabel {
+  font-size: 13px;
   font-weight: 700;
-  color: var(--secondary-text);
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-  background: var(--bg-color);
+  color: var(--primary-text);
+  flex: 1;
+  min-width: 0;
+}
+
+.groupStatusBadge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.markServedBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
+  border-radius: 8px;
+  border: none;
+  background: #16a34a;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.markServedBtn:hover { opacity: 0.85; }
+
+/* ── Dish list ───────────────────────────────────────────────────────────── */
+
+.dishList {
+  display: flex;
+  flex-direction: column;
+}
+
+.dishRow {
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   border-bottom: 1px solid var(--separator-color);
 }
 
-.addRow {
-  padding: 12px 14px;
-  border-top: 1px solid var(--separator-color);
+.dishRow:last-child {
+  border-bottom: none;
 }
 
-.addBtn {
-  background: none;
-  border: none;
-  color: var(--accent-color);
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  padding: 0;
-}
-
-.bottom {
+.dishMain {
   display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  justify-content: space-between;
 }
+
+.dishInfo {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.dishQty {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--secondary-text);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dishName {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--primary-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dishPrice {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--secondary-text);
+  white-space: nowrap;
+}
+
+/* ── Extras ──────────────────────────────────────────────────────────────── */
+
+.dishExtras {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+
+.extraTag {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+
+.extraExcluded {
+  background: var(--excluded-bg);
+  color: var(--excluded-text);
+}
+
+.extraAddon {
+  background: var(--addon-bg);
+  color: var(--addon-text);
+}
+
+.extraChoice {
+  background: var(--choice-bg);
+  color: var(--choice-text);
+}
+
+.dishComment {
+  font-size: 11px;
+  color: var(--secondary-text);
+  font-style: italic;
+}
+
+/* ── Inline edit inputs ──────────────────────────────────────────────────── */
+
+.qtyInlineInput {
+  width: 48px;
+  padding: 1px 4px;
+  border: 1px solid var(--separator-color);
+  border-radius: 4px;
+  font-size: 12px;
+  text-align: center;
+  background: var(--bg-color);
+  color: var(--primary-text);
+}
+
+.commentEditInput {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--separator-color);
+  border-radius: 8px;
+  font-size: 13px;
+  background: var(--bg-color);
+  color: var(--primary-text);
+  box-sizing: border-box;
+}
+
+.commentEditInput:focus {
+  outline: none;
+  border-color: var(--accent-color);
+}
+
+/* ── Dish bottom row (status + actions) ──────────────────────────────────── */
+
+.dishBottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.dishActions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.iconBtn {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid var(--separator-color);
+  background: var(--bg-color);
+  color: var(--secondary-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background 0.12s, color 0.12s;
+}
+
+.iconBtn:hover {
+  background: var(--separator-color);
+  color: var(--primary-text);
+}
+
+.iconBtnDanger:hover {
+  background: var(--danger-soft-bg);
+  color: var(--danger-text);
+  border-color: var(--danger-soft-border);
+}
+
+.iconBtnCancel:hover {
+  background: var(--bg-color);
+}
+
+/* ── 4-dot status component ──────────────────────────────────────────────── */
+
+.statusDots {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 2px 0;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--separator-color);
+  background: transparent;
+  padding: 0;
+  cursor: default;
+  position: relative;
+  flex-shrink: 0;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.dotDone {
+  width: 10px;
+  height: 10px;
+  opacity: 0.65;
+}
+
+.dotCurrent {
+  width: 14px;
+  height: 14px;
+}
+
+.dotNext {
+  border-color: var(--secondary-text);
+  border-style: dashed;
+}
+
+.dotClickable {
+  cursor: pointer;
+}
+
+.dotClickable:hover {
+  transform: scale(1.3);
+  border-style: solid;
+  border-color: var(--primary-text);
+}
+
+/* Animated glow ring on current dot */
+.dotGlow {
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  background: var(--dot-color, #1d7afc);
+  opacity: 0;
+  pointer-events: none;
+  animation: dotPulse 2.4s ease-in-out infinite;
+}
+
+@keyframes dotPulse {
+  0%, 100% { opacity: 0;    transform: scale(0.8); }
+  40%       { opacity: 0.25; transform: scale(1.5); }
+  70%       { opacity: 0;    transform: scale(1.8); }
+}
+
+.dotConnector {
+  height: 2px;
+  width: 22px;
+  background: var(--separator-color);
+  flex-shrink: 0;
+  border-radius: 1px;
+  transition: background 0.2s;
+}
+
+.dotConnectorFilled {
+  /* color set via inline style per-segment */
+  opacity: 0.55;
+}
+
+/* ── Comment box ─────────────────────────────────────────────────────────── */
 
 .commentBox {
   background: var(--surface-color);
   border: 1px solid var(--separator-color);
   border-radius: 14px;
-  padding: 16px;
-  flex: 1;
-  min-width: 200px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .commentLabel {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
   color: var(--secondary-text);
-  margin-bottom: 6px;
 }
 
 .commentVal {
   font-size: 14px;
-  color: var(--secondary-text);
+  color: var(--primary-text);
 }
 
-.totalBox {
+/* ── Add items panel ─────────────────────────────────────────────────────── */
+
+.addPanel {
   background: var(--surface-color);
   border: 1px solid var(--separator-color);
   border-radius: 14px;
-  padding: 16px 24px;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  justify-content: center;
-  gap: 4px;
-  min-width: 160px;
 }
 
-.totalLabel {
+.addPanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--separator-color);
+  background: var(--bg-color);
+}
+
+.addPanelTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--primary-text);
+}
+
+.closePanelBtn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: var(--separator-color);
+  color: var(--secondary-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.searchRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--separator-color);
+}
+
+.searchIcon {
+  color: var(--secondary-text);
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.searchInput {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  color: var(--primary-text);
+  outline: none;
+}
+
+.menuList {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.menuRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--separator-color);
+}
+
+.menuRow:last-child { border-bottom: none; }
+
+.menuName {
+  flex: 1;
+  font-size: 14px;
+  color: var(--primary-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.menuPrice {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--secondary-text);
+  white-space: nowrap;
+}
+
+.qtyControl {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.qtyBtn {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  border: 1px solid var(--separator-color);
+  background: var(--bg-color);
+  color: var(--primary-text);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qtyBtn:hover { background: var(--separator-color); }
+
+.qtyVal {
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 18px;
+  text-align: center;
+  color: var(--primary-text);
+}
+
+.noResults {
+  padding: 20px 16px;
   font-size: 13px;
   color: var(--secondary-text);
+  text-align: center;
 }
 
-.totalVal {
-  font-size: 28px;
-  font-weight: 800;
-  color: var(--accent-color);
+.addPanelFooter {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--separator-color);
+  background: var(--bg-color);
 }
 
-@media (max-width: 768px) {
-  .statsRow {
-    flex-wrap: wrap;
-  }
+.submitAddBtn {
+  flex: 1;
+  padding: 9px;
+  border-radius: 10px;
+  border: none;
+  background: var(--accent-color);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
 
-  .bottom {
-    flex-direction: column;
-  }
+.submitAddBtn:disabled { opacity: 0.45; cursor: default; }
 
-  .totalBox {
-    align-items: flex-start;
-    min-width: unset;
-  }
+.cancelAddBtn {
+  padding: 9px 18px;
+  border-radius: 10px;
+  border: 1px solid var(--separator-color);
+  background: transparent;
+  color: var(--secondary-text);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* ── Mobile ──────────────────────────────────────────────────────────────── */
+
+@media (max-width: 600px) {
+  .statsRow { flex-direction: column; }
+  .orderStatusChip { min-width: unset; }
+  .actionBar { flex-direction: column; }
+  .actionBtn { justify-content: center; }
+  .dishName { white-space: normal; }
 }

@@ -55,6 +55,14 @@
 
 .navLabel {
   font-size: 14px;
+  flex: 1;
+}
+
+.lockIcon {
+  font-size: 13px;
+  color: #f59e0b;
+  opacity: 0.8;
+  flex-shrink: 0;
 }
 
 .user {
@@ -69,9 +77,16 @@
   background: none;
   border: none;
   cursor: pointer;
-  width: 100%;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
   text-align: left;
   transition: background 0.15s;
+  border-radius: 6px;
+  padding: 2px 4px;
+  margin: -2px -4px;
 }
 
 .userBtn:hover {
@@ -100,6 +115,29 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+
+.navDivider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 8px 12px;
+  flex-shrink: 0;
+}
+
+.navItemLocked {
+  opacity: 0.6;
+}
+
+.navItemLocked:hover {
+  opacity: 0.85;
+}
+
+.lockIcon {
+  margin-left: auto;
+  font-size: 14px;
+  flex-shrink: 0;
+  color: var(--menu-secondary-text);
 }
 
 /* Mobile: hidden by default, shown as overlay drawer */

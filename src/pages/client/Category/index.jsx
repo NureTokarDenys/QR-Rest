@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import Header from '../../../components/client/Header';
+import MenuHeader from '../../../components/client/MenuHeader';
 import SearchBar from '../../../components/SearchBar';
 import DishCard from '../../../components/client/DishCard';
 import Footer from '../../../components/client/Footer';
 import { useMenu } from '../../../hooks/useMenu';
+import { CategorySkeleton } from '../../../components/client/Skeleton';
 import styles from './category.module.css';
 import { useTranslation } from 'react-i18next';
 import { useLocalField } from '../../../i18n/useLang';
@@ -25,13 +26,16 @@ export default function Category() {
 
   const allDishes = apiCat
     ? (apiCat.items || []).map(item => ({
-        id:      item._id || item.id,
-        name:    item.name,
-        name_en: item.name_en || item.name,
-        price:   item.basePrice ?? item.price,
-        image:   item.imageUrl  || item.image,
-        rating:       item.rating,
-        reviewCount:  item.reviewCount,
+        id:         item._id || item.id,
+        name:       item.name,
+        name_en:    item.name_en || item.name,
+        price:      item.basePrice ?? item.price,
+        image: (() => {
+          const imgs = item.images?.length ? item.images : item.imageUrl ? [item.imageUrl] : [];
+          return imgs[item.selectedImageIdx ?? 0] || imgs[0] || null;
+        })(),
+        rating:      item.rating,
+        reviewCount: item.reviewCount,
       }))
     : [];
 
@@ -41,20 +45,25 @@ export default function Category() {
 
   return (
     <div className={styles.page}>
-      <Header title={local(category, 'name') || t('fallback_title')} showBack />
+      <MenuHeader title={local(category, 'name') || t('fallback_title')} showBack />
 
       <div className={styles.content}>
-        {loading && <p style={{ textAlign: 'center', padding: '1rem' }}>Завантаження…</p>}
-        <SearchBar
-          placeholder={t('search_placeholder')}
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-        />
-        <div className={styles.grid}>
-          {filtered.map(dish => (
-            <DishCard key={dish.id} dish={dish} />
-          ))}
-        </div>
+        {loading ? (
+          <CategorySkeleton />
+        ) : (
+          <>
+            <SearchBar
+              placeholder={t('search_placeholder')}
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+            />
+            <div className={styles.grid}>
+              {filtered.map(dish => (
+                <DishCard key={dish.id} dish={dish} />
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
       <Footer />

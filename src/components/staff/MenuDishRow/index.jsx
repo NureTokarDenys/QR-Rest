@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useLocalField } from '../../../i18n/useLang';
+import { Skel } from '../Skeleton';
 import styles from './menuDishRow.module.css';
 import { MdEdit } from "react-icons/md";
 import { MdDelete } from "react-icons/md";
@@ -58,6 +59,39 @@ export default function MenuDishRow({ dish, dish_category, onToggle, onDelete })
           >
           <MdDelete className={styles.deleteIcon} />
           </button>
+        </div>
+      </td>
+    </tr>
+  );
+}
+
+/**
+ * Skeleton row — mirrors the real <MenuDishRow> structure (image + name,
+ * category badge, price, toggle, edit/delete) so every grey block lands in
+ * the same cell as its real counterpart.
+ */
+export function MenuDishRowSkeleton({ nameWidth = 140 }) {
+  return (
+    <tr className={styles.row}>
+      <td className={styles.dishCell}>
+        <div className={styles.dishInfo}>
+          <Skel w={36} h={36} r={8} />
+          <Skel w={nameWidth} h={14} />
+        </div>
+      </td>
+      <td className={styles.cell}>
+        <Skel w={120} h={22} r={6} />
+      </td>
+      <td className={`${styles.cell} ${styles.price}`}>
+        <Skel w={50} h={16} />
+      </td>
+      <td className={styles.cell}>
+        <Skel w={36} h={20} r={10} />
+      </td>
+      <td className={styles.cell}>
+        <div className={styles.actions}>
+          <Skel w={24} h={24} r={6} />
+          <Skel w={24} h={24} r={6} />
         </div>
       </td>
     </tr>

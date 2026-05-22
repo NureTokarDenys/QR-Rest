@@ -1,0 +1,153 @@
+/* ── Shimmer animation ── */
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+.block {
+  border-radius: 8px;
+  background: linear-gradient(
+    90deg,
+    var(--separator-color) 0px,
+    var(--bg-color)        80px,
+    var(--separator-color) 160px
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.6s infinite linear;
+  flex-shrink: 0;
+}
+
+/* ─────────────────────────────────────────────────────
+   Menu skeleton — mirrors menu.module.css .grid exactly
+   ───────────────────────────────────────────────────── */
+.menuGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+@media (min-width: 600px) {
+  .menuGrid { grid-template-columns: repeat(3, 1fr); gap: 14px; }
+}
+
+@media (min-width: 768px) {
+  .menuGrid { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+}
+
+@media (min-width: 1024px) {
+  .menuGrid { grid-template-columns: repeat(4, 1fr); gap: 18px; }
+}
+
+@media (max-width: 360px) {
+  .menuGrid { grid-template-columns: 1fr; }
+}
+
+/* Square card — mirrors CategoryCard aspect-ratio: 1 */
+.categoryCard {
+  border-radius: 16px;
+  aspect-ratio: 1;
+}
+
+@media (min-width: 1024px) {
+  .categoryCard { border-radius: 20px; }
+}
+
+/* ─────────────────────────────────────────────────────
+   Category skeleton — mirrors category.module.css .grid
+   ───────────────────────────────────────────────────── */
+.dishGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+@media (min-width: 600px) {
+  .dishGrid { grid-template-columns: repeat(3, 1fr); gap: 14px; }
+}
+
+@media (min-width: 768px) {
+  .dishGrid { grid-template-columns: repeat(3, 1fr); gap: 16px; }
+}
+
+@media (min-width: 1024px) {
+  .dishGrid { grid-template-columns: repeat(4, 1fr); gap: 18px; }
+}
+
+@media (max-width: 360px) {
+  .dishGrid { grid-template-columns: 1fr; }
+}
+
+/* Card shell — mirrors DishCard */
+.dishCard {
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--surface-color);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+@media (min-width: 600px) {
+  .dishCard { border-radius: 18px; }
+}
+
+@media (min-width: 1024px) {
+  .dishCard { border-radius: 20px; }
+}
+
+/* Square image area — mirrors DishCard .image aspect-ratio: 1/1 */
+.dishCardImage {
+  aspect-ratio: 1 / 1;
+  border-radius: 0;
+}
+
+/* Text lines area — mirrors DishCard .body */
+.dishCardBody {
+  padding: 10px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+@media (min-width: 600px) {
+  .dishCardBody { padding: 12px 14px 14px; }
+}
+
+@media (min-width: 1024px) {
+  .dishCardBody { padding: 14px 16px 16px; }
+}
+
+/* ─────────────────────────────────────────────────────
+   DishDetail skeleton
+   ───────────────────────────────────────────────────── */
+.dishDetailPage {
+  width: 100%;
+  min-height: 100dvh;
+  background: var(--surface-color);
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 84px;
+}
+
+.dishDetailImage {
+  width: 100%;
+  height: clamp(200px, 45vw, 340px);
+  flex-shrink: 0;
+  border-radius: 0;
+}
+
+.dishDetailBody {
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex: 1;
+}
+
+.dishDetailFooter {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 12px 16px;
+  background: var(--surface-color);
+  border-top: 1px solid var(--separator-color);
+}

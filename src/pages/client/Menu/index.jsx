@@ -7,9 +7,15 @@ import Footer from '../../../components/client/Footer';
 import MenuHeader from '../../../components/client/MenuHeader';
 import { useMenu } from '../../../hooks/useMenu';
 import { searchMenu } from '../../../api/menu';
+import { MenuSkeleton } from '../../../components/client/Skeleton';
 import styles from './menu.module.css';
 import { useTranslation } from 'react-i18next';
 import { useLocalField } from '../../../i18n/useLang';
+
+function previewImage(item) {
+  const imgs = item?.images?.length ? item.images : item?.imageUrl ? [item.imageUrl] : [];
+  return imgs[item?.selectedImageIdx ?? 0] || imgs[0] || null;
+}
 
 export default function Menu() {
   const { t } = useTranslation('menu');
@@ -60,7 +66,7 @@ export default function Menu() {
     name:    cat.name,
     name_en: cat.name_en || cat.name,
     count:   (cat.items || []).length,
-    image:   cat.imageUrl || cat.image || null,
+    image: previewImage(cat),
   }));
 
   return (
@@ -87,7 +93,7 @@ export default function Menu() {
                 onClick={() => navigate(`/dish/${dish._id || dish.id}`)}
               >
                 <img
-                  src={dish.imageUrl || dish.image}
+                  src={previewImage(dish)}
                   alt={local(dish, 'name')}
                   className={styles.searchThumb}
                 />
@@ -100,7 +106,7 @@ export default function Menu() {
           </div>
         ) : (
           <>
-            {loading && <p className={styles.empty}>Завантаження…</p>}
+            {loading && <MenuSkeleton />}
             {!loading && (
               <>
                 <p className={styles.sectionTitle}>{t('categories')}</p>

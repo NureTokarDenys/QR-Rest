@@ -37,6 +37,12 @@ export async function changePassword(currentPassword, newPassword) {
   return res.data;
 }
 
+/** First-time password setup for Google-only accounts (no current password required). */
+export async function setPassword(newPassword) {
+  const res = await apiClient.post('/auth/set-password', { newPassword });
+  return res.data?.data;
+}
+
 /** Request a password-reset email. Always resolves (server never confirms email existence). */
 export async function forgotPassword(email) {
   const res = await apiClient.post('/auth/forgot-password', { email });
@@ -69,6 +75,25 @@ export async function deleteAccount() {
 
 export function initiateGoogleOAuth() {
   const base = import.meta.env.VITE_API_URL || '/api';
-  const callback = encodeURIComponent(`${window.location.origin}/auth/callback`);
-  window.location.href = `${base}/auth/google?redirect=${callback}`;
+  window.location.href = `${base}/auth/google`;
+}
+
+/** Remove the Google account link (only allowed when the user also has a password). */
+export async function unlinkGoogle() {
+  const res = await apiClient.delete('/auth/google/unlink');
+  return res.data;
+}
+
+/**
+ * Prepare a Google account link for the currently-authenticated user.
+ * Sets a short-lived httpOnly cookie on the backend, then navigates to Google.
+ * Must be called while the user is signed in (access token required).
+ */
+export async function initiateGoogleLink() {
+  const base = import.meta.env.VITE_API_URL || '/api';
+  // The backend sets the google_link_nonce cookie and returns 200
+  await apiClient.post('/auth/google/prepare-link');
+  // ?link=1 tells the backend this is a link flow, not a plain login,
+  // so it won't clear the google_link_nonce cookie we just set.
+  window.location.href = `${base}/auth/google?link=1`;
 }

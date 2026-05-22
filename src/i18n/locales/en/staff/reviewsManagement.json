@@ -15,5 +15,11 @@
 
   "page": "Page {{page}} of {{pages}}",
   "prevPage": "← Previous",
-  "nextPage": "Next →"
+  "nextPage": "Next →",
+
+  "deleteReview": "Delete review",
+  "confirmDelete": "This action cannot be undone. The review will be permanently deleted.",
+  "deleteConfirm": "Delete",
+  "cancel": "Cancel",
+  "deleteError": "Failed to delete review"
 }

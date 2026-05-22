@@ -1,58 +1,46 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Logo from '../../../components/Logo';
 import { confirmOnboarding } from '../../../api/onboarding';
 import { MdCheckCircle, MdError, MdSchedule } from 'react-icons/md';
 import styles from './confirm.module.css';
 
-// ── Error message map ───────────────────────────────────────────────────────
-const ERROR_MESSAGES = {
-  INVALID_TOKEN:     'Посилання недійсне. Можливо, ви вже використали його або скопіювали неповністю.',
-  ALREADY_CONFIRMED: 'Це посилання вже було використано. Ваш ресторан вже створено. Перейдіть до входу.',
-  TOKEN_EXPIRED:     'Термін дії посилання минув (24 години). Зареєструйтесь ще раз.',
-};
-
-const DEFAULT_ERROR = 'Сталась помилка при підтвердженні. Спробуйте ще раз або зверніться до підтримки.';
-
-function getErrorMessage(code) {
-  return ERROR_MESSAGES[code] ?? DEFAULT_ERROR;
-}
-
 // ── Sub-components ──────────────────────────────────────────────────────────
-function LoadingView() {
+function LoadingView({ t }) {
   return (
     <div className={styles.stateWrap}>
       <span className={styles.spinner} />
-      <p className={styles.stateMsg}>Підтверджуємо вашу email-адресу…</p>
+      <p className={styles.stateMsg}>{t('loading_msg')}</p>
     </div>
   );
 }
 
-function SuccessView({ data }) {
+function SuccessView({ data, t }) {
   return (
     <div className={styles.stateWrap}>
       <MdCheckCircle className={`${styles.stateIcon} ${styles.iconSuccess}`} />
-      <h2 className={styles.stateTitle}>Ресторан створено!</h2>
+      <h2 className={styles.stateTitle}>{t('success_title')}</h2>
       <p className={styles.stateMsg}>
-        Вітаємо —{' '}
+        {t('success_congratulations')}{' '}
         {data?.restaurantName && <strong>{data.restaurantName}</strong>}
         {data?.restaurantId && <> ({data.restaurantId})</>}
-        {' '}успішно зареєстровано.
+        {' '}{t('success_msg_registered')}
       </p>
-      <p className={styles.stateSub}>
-        Дані для входу (логін і тимчасовий пароль) надіслано на вашу email-адресу.
-        Перевірте пошту й увійдіть у систему.
-      </p>
+      <p className={styles.stateSub}>{t('success_sub')}</p>
       <Link to="/login" className={styles.btnPrimary}>
-        Перейти до входу
+        {t('go_to_login')}
       </Link>
     </div>
   );
 }
 
-function ErrorView({ code }) {
+function ErrorView({ code, t }) {
   const isAlreadyDone = code === 'ALREADY_CONFIRMED';
   const isExpired     = code === 'TOKEN_EXPIRED';
+
+  const errorKey = `error_${code}`;
+  const message  = t(errorKey, { defaultValue: t('error_default') });
 
   return (
     <div className={styles.stateWrap}>
@@ -61,13 +49,13 @@ function ErrorView({ code }) {
         : <MdError    className={`${styles.stateIcon} ${styles.iconError}`}   />
       }
       <h2 className={styles.stateTitle}>
-        {isAlreadyDone ? 'Вже підтверджено' : 'Помилка підтвердження'}
+        {isAlreadyDone ? t('already_confirmed_title') : t('error_title')}
       </h2>
-      <p className={styles.stateMsg}>{getErrorMessage(code)}</p>
+      <p className={styles.stateMsg}>{message}</p>
 
       {isAlreadyDone
-        ? <Link to="/login"      className={styles.btnPrimary}>Перейти до входу</Link>
-        : <Link to="/onboarding" className={styles.btnPrimary}>Зареєструватись знову</Link>
+        ? <Link to="/login"      className={styles.btnPrimary}>{t('go_to_login')}</Link>
+        : <Link to="/onboarding" className={styles.btnPrimary}>{t('register_again')}</Link>
       }
     </div>
   );
@@ -76,19 +64,16 @@ function ErrorView({ code }) {
 // ── Main page ───────────────────────────────────────────────────────────────
 export default function ConfirmPage() {
   const [searchParams] = useSearchParams();
+  const { t } = useTranslation('onboardingConfirm');
 
-  // Option A: backend already resolved (redirected here with status=...)
   const statusParam = searchParams.get('status');
-
-  // Option B: frontend makes the API call using the token
   const tokenParam  = searchParams.get('token');
 
-  const [state, setState]       = useState('loading'); // 'loading' | 'success' | 'error'
-  const [data, setData]         = useState(null);
+  const [state, setState]         = useState('loading');
+  const [data, setData]           = useState(null);
   const [errorCode, setErrorCode] = useState(null);
 
   useEffect(() => {
-    // ── Option A: backend redirected with result in query params ───────────
     if (statusParam === 'success') {
       setData({
         restaurantId:   searchParams.get('restaurantId'),
@@ -104,7 +89,6 @@ export default function ConfirmPage() {
       return;
     }
 
-    // ── Option B: token in query param — frontend makes the API call ───────
     if (!tokenParam) {
       setErrorCode('INVALID_TOKEN');
       setState('error');
@@ -136,16 +120,16 @@ export default function ConfirmPage() {
           <Logo />
         </div>
 
-        {state === 'loading' && <LoadingView />}
-        {state === 'success' && <SuccessView data={data} />}
-        {state === 'error'   && <ErrorView code={errorCode} />}
+        {state === 'loading' && <LoadingView t={t} />}
+        {state === 'success' && <SuccessView data={data} t={t} />}
+        {state === 'error'   && <ErrorView code={errorCode} t={t} />}
 
         <div className={styles.footerLinks}>
-          <Link to="/"           className={styles.footerLink}>Головна</Link>
+          <Link to="/"           className={styles.footerLink}>{t('footer_home')}</Link>
           <span className={styles.footerDot}>·</span>
-          <Link to="/onboarding" className={styles.footerLink}>Реєстрація</Link>
+          <Link to="/onboarding" className={styles.footerLink}>{t('footer_register')}</Link>
           <span className={styles.footerDot}>·</span>
-          <Link to="/login"      className={styles.footerLink}>Вхід</Link>
+          <Link to="/login"      className={styles.footerLink}>{t('footer_login')}</Link>
         </div>
       </div>
     </div>

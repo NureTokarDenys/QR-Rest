@@ -21,5 +21,14 @@
   "confirm_backward_title": "Повернути статус?",
   "confirm_backward_sub": "Це поверне групу з «{{from}}» до «{{to}}». Ви впевнені?",
   "cancel": "Скасувати",
-  "confirm": "Повернути"
+  "confirm": "Повернути",
+  "item_without": "Без",
+  "item_extras": "Додатки",
+  "item_note": "Примітка",
+  "close": "Закрити",
+  "rollback_blocked_title": "Не можна повернути статус",
+  "rollback_window_expired": "Вікно виправлення (2 хвилини) закрилося — статус більше не можна скасувати",
+  "rollback_already_used": "Статус вже виправлявся — спочатку просуньте групу вперед",
+  "rollback_window_remaining": "Залишилось часу для виправлення: {{secs}}с",
+  "rollback_client_notified": "⚠ Клієнт отримає сповіщення про виправлення"
 }

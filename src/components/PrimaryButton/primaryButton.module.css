@@ -10,8 +10,12 @@
   cursor: pointer;
 }
 
+/* Previously this only dimmed the text colour, which on a blue accent
+   background produced a button whose text matched its own fill — unreadable.
+   Drop the background to the muted token and keep the label visible. */
 .button:disabled {
-  color: var(--primary-btn-disabled);
+  background: var(--primary-btn-disabled);
+  color: var(--primary-text-inverted);
   cursor: not-allowed;
 }
 

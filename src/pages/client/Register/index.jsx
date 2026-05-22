@@ -12,6 +12,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function Register() {
   const { t, i18n } = useTranslation('register');
+  const { t: tErr } = useTranslation('errors');
   const navigate     = useNavigate();
   const { isAuthenticated, user, _persist } = useAuth();
 
@@ -55,8 +56,7 @@ export default function Register() {
       window.location.href = '/';
     } catch (err) {
       const code = err?.response?.data?.error?.code;
-      if (code === 'EMAIL_TAKEN') setServerError(t('email_taken'));
-      else setServerError(t('error_generic'));
+      setServerError(tErr(`code.${code}`, { defaultValue: tErr('generic') }));
     } finally {
       setLoading(false);
     }

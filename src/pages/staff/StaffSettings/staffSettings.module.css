@@ -191,6 +191,205 @@
   color: #ce9a3a;
 }
 
+/* ── Field row (label + value + edit button) ── */
+.fieldRow {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.fieldLabel {
+  font-size: 12px;
+  color: var(--secondary-text);
+}
+
+.fieldValue {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.fieldValueText {
+  font-size: 15px;
+  color: var(--primary-text);
+  font-weight: 500;
+  flex: 1;
+}
+
+.fieldOk {
+  font-size: 13px;
+  color: #16a34a;
+}
+
+.fieldMsg {
+  font-size: 13px;
+  margin: 2px 0 0;
+}
+
+.editIconBtn {
+  background: none;
+  border: none;
+  padding: 4px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--secondary-text);
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  transition: color 0.1s, background 0.1s;
+}
+
+.editIconBtn:hover {
+  color: var(--primary-text);
+  background: var(--bg-color);
+}
+
+/* Name edit block */
+.nameEditBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.nameEditActions {
+  display: flex;
+  gap: 6px;
+}
+
+.iconActionBtn {
+  background: none;
+  border: 1.5px solid var(--border);
+  border-radius: 7px;
+  padding: 5px 10px;
+  cursor: pointer;
+  color: var(--secondary-text);
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  transition: color 0.1s, border-color 0.1s, background 0.1s;
+}
+
+.iconActionBtn:hover {
+  color: var(--primary-text);
+  border-color: var(--primary-text);
+}
+
+.iconActionBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Email / password flow blocks */
+.flowBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  background: var(--bg-color);
+  border-radius: 10px;
+  border: 1px solid var(--separator-color);
+}
+
+.flowActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sentBlock {
+  padding: 12px 14px;
+  background: var(--bg-color);
+  border-radius: 10px;
+  border: 1px solid var(--separator-color);
+}
+
+.sentTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: #16a34a;
+  margin: 0 0 4px;
+}
+
+.sentBody {
+  font-size: 13px;
+  color: var(--secondary-text);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.resetBtn {
+  background: none;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-color);
+  cursor: pointer;
+  width: fit-content;
+  transition: background 0.1s, border-color 0.1s;
+}
+
+.resetBtn:hover {
+  background: var(--bg-color);
+  border-color: var(--accent-color);
+}
+
+/* Integrations */
+.integrationRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+}
+
+.integrationInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.integrationLabel {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--primary-text);
+}
+
+.integrationNote {
+  font-size: 12px;
+  color: var(--secondary-text);
+  line-height: 1.4;
+}
+
+.integrationBadge {
+  font-size: 12px;
+  font-weight: 600;
+  color: #16a34a;
+  background: #dcfce7;
+  border-radius: 6px;
+  padding: 3px 10px;
+  flex-shrink: 0;
+}
+
+.integrationBtn {
+  background: none;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-color);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.1s, border-color 0.1s;
+}
+
+.integrationBtn:hover {
+  background: var(--bg-color);
+  border-color: var(--accent-color);
+}
+
 @media (max-width: 1024px) {
   .layout {
     flex-direction: column;

@@ -1,4 +1,7 @@
 {
     "message_p1": "Dish",
-    "message_p2": "added to order"
+    "message_p2": "added to order",
+    "offline_banner": "No connection — some features are unavailable",
+    "offline_flushing": "Sending queued order…",
+    "offline_order_queued": "Order saved — will be sent when the connection is restored"
 }

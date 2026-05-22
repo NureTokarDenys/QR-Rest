@@ -1,0 +1,164 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--surface-color);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--primary-text);
+  margin: 0;
+}
+
+.sub {
+  font-size: 13px;
+  color: var(--secondary-text);
+  margin: -4px 0 4px;
+  line-height: 1.4;
+}
+
+.loginHint {
+  font-size: 13px;
+  color: var(--secondary-text);
+  margin: 0;
+}
+
+.allDone {
+  font-size: 13px;
+  color: var(--success-text);
+  margin: 0;
+}
+
+/* ── Per-target review card ─────────────────────────────────────────────────── */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--bg-color);
+  border: 1px solid var(--separator-color);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.cardHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cardTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary-text);
+}
+
+.cardSubtitle {
+  font-size: 13px;
+  color: var(--secondary-text);
+}
+
+/* ── Star picker ────────────────────────────────────────────────────────────── */
+
+.stars {
+  display: flex;
+  gap: 2px;
+}
+
+.stars button {
+  background: none;
+  border: none;
+  padding: 2px 4px;
+  cursor: pointer;
+  font-size: 26px;
+  line-height: 1;
+  transition: transform 0.1s ease;
+}
+
+.stars button:hover {
+  transform: scale(1.1);
+}
+
+.starsDisabled button {
+  cursor: default;
+}
+
+.starsDisabled button:hover {
+  transform: none;
+}
+
+.starFilled {
+  color: var(--rating-text);
+}
+
+.starEmpty {
+  color: var(--separator-color);
+}
+
+/* ── Comment box + submit ───────────────────────────────────────────────────── */
+
+.textarea {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--primary-text);
+  background: var(--surface-color);
+  border: 1px solid var(--separator-color);
+  border-radius: 8px;
+  padding: 8px 10px;
+  resize: vertical;
+  min-height: 56px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.textarea:focus {
+  border-color: var(--accent-color);
+}
+
+.submitBtn {
+  align-self: flex-start;
+  background: var(--accent-color);
+  color: var(--primary-text-inverted);
+  border: none;
+  border-radius: 8px;
+  padding: 7px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.12s;
+}
+
+.submitBtn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.submitBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.errText {
+  margin: 0;
+  font-size: 12px;
+  color: var(--danger-text);
+}
+
+.submittedText {
+  font-size: 13px;
+  color: var(--secondary-text);
+  font-style: italic;
+  margin: 0;
+}
+
+.thanksText {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--success-text);
+  margin: 0;
+}

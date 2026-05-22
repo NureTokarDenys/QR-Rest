@@ -32,6 +32,8 @@
 }
 
 .exportBtn {
+  display: flex;
+  align-items: center;
   background: none;
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -40,6 +42,11 @@
   cursor: pointer;
   color: var(--accent-color);
   font-weight: 600;
+  transition: opacity 0.15s;
+}
+.exportBtnBusy {
+  opacity: 0.5;
+  cursor: default;
 }
 
 .page {
@@ -171,6 +178,19 @@
 .barLabel {
   font-size: 10px;
   color: var(--secondary-text);
+  min-width: 0;
+  text-align: center;
+}
+
+.barLabelEmpty {
+  height: 14px; /* same height as .barLabel to keep rows aligned */
+}
+
+.noDataMsg {
+  font-size: 13px;
+  color: var(--secondary-text);
+  padding: 8px 0;
+  font-style: italic;
 }
 
 .tableBox {

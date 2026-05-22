@@ -37,3 +37,13 @@ export async function submitDishReview(payload, restaurantId = getStoredRestaura
   const res = await apiClient.post(`/${restaurantId}/reviews/dish`, payload);
   return res.data?.data;
 }
+
+/**
+ * GET /:restaurantId/reviews/my/:orderId
+ * Returns the authenticated guest's reviews for this order:
+ *   { restaurantReview: <doc|null>, dishReviews: [{ orderItemId, ... }] }
+ */
+export async function getMyReviewsForOrder(orderId, restaurantId = getStoredRestaurantId()) {
+  const res = await apiClient.get(`/${restaurantId}/reviews/my/${orderId}`);
+  return res.data?.data;
+}

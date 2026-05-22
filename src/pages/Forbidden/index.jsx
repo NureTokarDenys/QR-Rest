@@ -6,10 +6,12 @@ import styles from './forbidden.module.css';
 
 // Role display config — icon + i18n key
 const ROLE_CONFIG = {
-  admin:  { icon: '👑', key: 'role_admin' },
-  waiter: { icon: '🧑‍💼', key: 'role_waiter' },
-  cook:   { icon: '👨‍🍳', key: 'role_cook' },
-  guest:  { icon: '👤', key: 'role_guest' },
+  root_admin:  { icon: '👑', key: 'role_root_admin' },
+  admin:       { icon: '🛡️', key: 'role_admin' },
+  waiter:      { icon: '🧑‍💼', key: 'role_waiter' },
+  cook:        { icon: '👨‍🍳', key: 'role_cook' },
+  waiter_cook: { icon: '🧑‍🍳', key: 'role_waiter_cook' },
+  guest:       { icon: '👤', key: 'role_guest' },
 };
 
 function resolveRoleDisplay(role, t) {

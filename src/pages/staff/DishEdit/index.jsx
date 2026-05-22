@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useToast } from '../../../context/ClientToastContext';
 import StaffShell from '../../../components/staff/StaffShell';
 import InputField from '../../../components/InputField';
 import TextareaField from '../../../components/staff/TextareaField';
@@ -10,27 +11,32 @@ import { Dropdown } from '../../../components/Dropdown';
 import PrimaryButton from '../../../components/PrimaryButton';
 import SecondaryButton from '../../../components/SecondaryButton';
 import LangTabs from '../../../components/staff/LangTabs';
+import UpgradeModal from '../../../components/UpgradeModal';
 import {
-  getCategories, translateText,
-  getAdminMenuItem, createMenuItem, updateMenuItem,
+  translateText,
+  getAdminMenuItem, createMenuItem, updateMenuItem, uploadMenuItemImage, setMenuItemImages,
   searchIngredients, searchAddons, searchComponentGroups,
 } from '../../../api/admin';
+import { useStaffData } from '../../../context/StaffDataContext';
 import { SUPPORTED_LANGS, SOURCE_LANG, fieldFor, emptyI18n } from '../../../i18n/langs';
-import { useLocalField } from '../../../i18n/useLang';
 import { MdAdd, MdDelete, MdSearch, MdClose } from 'react-icons/md';
+import { usePlan } from '../../../hooks/usePlan';
+import TranslateOverlay from '../../../components/staff/TranslateOverlay';
 import styles from './dishEdit.module.css';
 
 // ── Factories ─────────────────────────────────────────────────────────────────
 const EMPTY_FORM = {
   ...emptyI18n('name', 'description'),
-  price:           '',
-  weight:          '',
-  category:        '',
-  images:          [],
-  available:       true,
-  ingredientsList: [],
-  addons:          [],
-  componentGroups: [],
+  price:             '',
+  weight:            '',
+  weight_en:         '',
+  category:          '',
+  images:            [],   // Array<{ url: string, file: File | null }>
+  selectedImageIdx:  0,
+  available:         true,
+  ingredientsList:   [],
+  addons:            [],
+  componentGroups:   [],
 };
 
 function newIngredientEmbed(name = '') {
@@ -115,12 +121,21 @@ function SearchPicker({ placeholder, results, onSearch, onSelect, onCreate, crea
 export default function DishEdit() {
   const { id }   = useParams();
   const navigate = useNavigate();
-  const local    = useLocalField();
-  const { t }    = useTranslation('dishEdit');
-  const isNew    = !id || id === 'new';
+  const location = useLocation();
+  const { t }         = useTranslation('dishEdit');
+  const { showToast } = useToast();
+  const { isFree }    = usePlan();
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const isNew         = !id || id === 'new';
 
   const [form,        setForm]        = useState(EMPTY_FORM);
-  const [categories,  setCategories]  = useState([]);
+
+  // Categories from shared cache — lazy-loaded on first dish-edit visit.
+  const { categories: cachedCats, ensureCategories } = useStaffData();
+  useEffect(() => { ensureCategories(); }, [ensureCategories]);
+  const categories = Array.isArray(cachedCats)
+    ? cachedCats.map(c => ({ id: c._id || c.id, name: c.name, name_en: c.name_en || '', color: c.color }))
+    : [];
   const [saving,      setSaving]      = useState(false);
   const [activeLang,  setActiveLang]  = useState(SOURCE_LANG);
   const [translating, setTranslating] = useState(false);
@@ -137,14 +152,7 @@ export default function DishEdit() {
 
   // ── Data loading ─────────────────────────────────────────────────────────────
   useEffect(() => {
-    getCategories()
-      .then(data => {
-        if (Array.isArray(data) && data.length > 0) {
-          setCategories(data.map(c => ({ id: c._id || c.id, name: c.name, name_en: c.name_en || '', color: c.color })));
-        }
-      })
-      .catch(err => console.error('getCategories error:', err));
-
+    // Categories come from the shared cache — no fetch here.
     Promise.all([searchIngredients(''), searchAddons(''), searchComponentGroups('')])
       .then(([ings, ads, cgs]) => { setIngPool(ings); setAddPool(ads); setCgPool(cgs); })
       .catch(err => console.error('load pools error:', err));
@@ -160,10 +168,16 @@ export default function DishEdit() {
           name_en:     raw.translations?.en?.name?.value || '',
           description: raw.description || '',
           description_en: raw.translations?.en?.description?.value || '',
-          price:    raw.basePrice ?? '',
-          weight:   raw.weight ?? '',
-          category: raw.categoryId?._id || raw.categoryId || '',
-          images:   raw.imageUrl ? [raw.imageUrl] : [],
+          price:     raw.basePrice ?? '',
+          weight:    raw.weight ?? '',
+          weight_en: raw.translations?.en?.weight?.value || '',
+          category:  raw.categoryId?._id || raw.categoryId || '',
+          images: (
+            raw.images?.length
+              ? raw.images
+              : raw.imageUrl ? [raw.imageUrl] : []
+          ).map(url => ({ url, file: null })),
+          selectedImageIdx: raw.selectedImageIdx ?? 0,
           available: raw.isAvailable ?? true,
           ingredientsList: (raw.ingredients || []).map(i => ({
             _id: i._id,
@@ -213,6 +227,9 @@ export default function DishEdit() {
       const texts = [
         form[fieldFor('name',        SOURCE_LANG)],
         form[fieldFor('description', SOURCE_LANG)],
+        form.weight,
+        ...form.ingredientsList.map(i => i.name),
+        ...form.addons.map(a => a.name),
         ...form.componentGroups.flatMap(g => [
           g.name,
           ...g.options.map(o => o.name),
@@ -223,9 +240,12 @@ export default function DishEdit() {
 
       setForm(prev => {
         let idx = 0;
-        const nameT  = tr[idx++] ?? '';
-        const descT  = tr[idx++] ?? '';
-        const groupTs = prev.componentGroups.map(g => ({
+        const nameT    = tr[idx++] ?? '';
+        const descT    = tr[idx++] ?? '';
+        const weightT  = tr[idx++] ?? '';
+        const ingTs    = prev.ingredientsList.map(() => tr[idx++] ?? '');
+        const aoTs     = prev.addons.map(() => tr[idx++] ?? '');
+        const groupTs  = prev.componentGroups.map(g => ({
           name: tr[idx++] ?? '',
           optTs: g.options.map(() => tr[idx++] ?? ''),
         }));
@@ -234,6 +254,15 @@ export default function DishEdit() {
           ...prev,
           [tf('name')]:        nameT,
           [tf('description')]: descT,
+          weight_en: activeLang === 'en' ? weightT : prev.weight_en,
+          ingredientsList: prev.ingredientsList.map((i, ii) => ({
+            ...i,
+            name_en: activeLang === 'en' ? ingTs[ii] : i.name_en,
+          })),
+          addons: prev.addons.map((a, ai) => ({
+            ...a,
+            name_en: activeLang === 'en' ? aoTs[ai] : a.name_en,
+          })),
           componentGroups: prev.componentGroups.map((g, gi) => ({
             ...g,
             name_en: activeLang === 'en' ? groupTs[gi].name : g.name_en,
@@ -257,12 +286,15 @@ export default function DishEdit() {
     setSaving(true);
     try {
       const payload = {
-        name:        form.name,
-        description: form.description,
-        price:       Number(form.price),
-        categoryId:  form.category,
-        isAvailable: form.available,
-        weight:      form.weight || null,
+        name:            form.name,
+        description:     form.description,
+        name_en:         form.name_en        || '',
+        description_en:  form.description_en || '',
+        price:           Number(form.price),
+        categoryId:      form.category,
+        isAvailable:     form.available,
+        weight:          form.weight    || null,
+        weight_en:       form.weight_en || '',
         // Embedded arrays sent directly — no global creation
         ingredients: form.ingredientsList.map(i => ({
           ...(i._id ? { _id: i._id } : {}),
@@ -297,8 +329,27 @@ export default function DishEdit() {
           })),
         })),
       };
-      if (isNew) await createMenuItem(payload);
-      else       await updateMenuItem(id, payload);
+      const result  = isNew ? await createMenuItem(payload) : await updateMenuItem(id, payload);
+      const savedId = isNew ? (result?._id || result?.id) : id;
+      if (savedId) {
+        // Upload each new file, collect final URLs
+        const finalUrls = [];
+        for (const img of form.images) {
+          if (img.file) {
+            const uploaded = await uploadMenuItemImage(savedId, img.file);
+            finalUrls.push(uploaded.imageUrl);
+          } else {
+            finalUrls.push(img.url);
+          }
+        }
+        if (finalUrls.length > 0) {
+          await setMenuItemImages(savedId, {
+            images: finalUrls,
+            selectedImageIdx: Math.min(form.selectedImageIdx, finalUrls.length - 1),
+          });
+        }
+      }
+      showToast(t(isNew ? 'savedNew' : 'savedUpdated', isNew ? 'Страву додано' : 'Зміни збережено'));
       navigate('/staff/menu');
     } catch (err) {
       console.error('Save dish error:', err);
@@ -424,9 +475,11 @@ export default function DishEdit() {
       (g._id || g.tempId) === key ? { ...g, options: g.options.filter(o => o.id !== oid) } : g));
   }
 
+  const activeLangLabel = SUPPORTED_LANGS.find(l => l.code === activeLang)?.label ?? activeLang;
+
   const catOptions = categories.map(c => ({
     value: c.id,
-    label: local(c, 'name'),
+    label: activeLang === SOURCE_LANG ? c.name : (c.name_en || c.name),
     icon: c.color
       ? <span style={{ width: 10, height: 10, borderRadius: '50%', background: c.color, display: 'inline-block', flexShrink: 0 }} />
       : null,
@@ -438,6 +491,9 @@ export default function DishEdit() {
 
   // ── Render ────────────────────────────────────────────────────────────────────
   return (
+    <>
+    <TranslateOverlay visible={translating} lang={activeLangLabel} />
+    <UpgradeModal open={upgradeOpen} onClose={() => setUpgradeOpen(false)} ns="components" />
     <StaffShell
       title={isNew ? t('titleAdd') : t('titleEdit')}
       backTo="/staff/menu"
@@ -457,7 +513,9 @@ export default function DishEdit() {
               langs={SUPPORTED_LANGS}
               active={activeLang}
               onChange={setActiveLang}
-              onTranslate={activeLang !== SOURCE_LANG ? handleAutoTranslate : null}
+              onTranslate={activeLang !== SOURCE_LANG
+                ? (isFree ? () => setUpgradeOpen(true) : handleAutoTranslate)
+                : null}
               translating={translating}
             />
           </div>
@@ -486,12 +544,17 @@ export default function DishEdit() {
                 onChange={e => set('price', e.target.value)}
               />
 
-              <InputField
-                label={t('weight')}
-                placeholder={t('weightPlaceholder')}
-                value={form.weight}
-                onChange={e => set('weight', e.target.value)}
-              />
+              <div className={styles.fieldWrap}>
+                <InputField
+                  label={t('weight')}
+                  placeholder={t('weightPlaceholder')}
+                  value={activeLang === SOURCE_LANG ? form.weight : form.weight_en}
+                  onChange={e => set(activeLang === SOURCE_LANG ? 'weight' : 'weight_en', e.target.value)}
+                />
+                {activeLang !== SOURCE_LANG && form.weight && (
+                  <span className={styles.srcHint}>{srcLang.flag} {form.weight}</span>
+                )}
+              </div>
 
               <Dropdown
                 label={t('category')}
@@ -521,6 +584,9 @@ export default function DishEdit() {
           <div className={styles.section}>
             <div className={styles.sectionHeader}>
               <p className={styles.sectionTitle}>{t('ingredientsSection')}</p>
+              <button className={styles.addRowBtn} onClick={() => navigate(`/staff/extras/ingredient/new?backTo=${encodeURIComponent(location.pathname)}`)}>
+                <MdAdd /> {t('createNewPage')}
+              </button>
             </div>
             <SearchPicker
               placeholder={t('searchIngredients')}
@@ -535,21 +601,33 @@ export default function DishEdit() {
             )}
             {form.ingredientsList.map(ing => {
               const key = ing._id || ing.tempId;
-              const displayName = activeLang === 'en' && ing.name_en ? ing.name_en : ing.name;
+              const nameField = activeLang === SOURCE_LANG ? 'name' : 'name_en';
               return (
-                <div key={key} className={styles.listRow}>
-                  <span className={`${styles.rowName} ${styles.ingName}`}>{displayName}</span>
-                  <label className={styles.checkLabel}>
-                    <input
-                      type="checkbox"
-                      checked={ing.isRemovable}
-                      onChange={e => updateIngField(key, 'isRemovable', e.target.checked)}
-                    />
-                    {t('removable')}
-                  </label>
-                  <button className={styles.deleteRowBtn} onClick={() => removeIng(key)}>
-                    <MdDelete />
-                  </button>
+                <div key={key} className={styles.groupBlock}>
+                  <div className={styles.groupBlockRow}>
+                    <div className={`${styles.fieldWrap} ${styles.rowName}`}>
+                      <InputField
+                        label={t('name')}
+                        placeholder="—"
+                        value={ing[nameField]}
+                        onChange={e => updateIngField(key, nameField, e.target.value)}
+                      />
+                      {activeLang !== SOURCE_LANG && ing.name && (
+                        <span className={styles.srcHint}>{srcLang.flag} {ing.name}</span>
+                      )}
+                    </div>
+                    <label className={styles.checkLabel}>
+                      <input
+                        type="checkbox"
+                        checked={ing.isRemovable}
+                        onChange={e => updateIngField(key, 'isRemovable', e.target.checked)}
+                      />
+                      {t('removable')}
+                    </label>
+                    <button className={styles.deleteRowBtn} onClick={() => removeIng(key)}>
+                      <MdDelete />
+                    </button>
+                  </div>
                 </div>
               );
             })}
@@ -559,6 +637,9 @@ export default function DishEdit() {
           <div className={styles.section}>
             <div className={styles.sectionHeader}>
               <p className={styles.sectionTitle}>{t('addonsSection')}</p>
+              <button className={styles.addRowBtn} onClick={() => navigate(`/staff/extras/addon/new?backTo=${encodeURIComponent(location.pathname)}`)}>
+                <MdAdd /> {t('createNewPage')}
+              </button>
             </div>
             <SearchPicker
               placeholder={t('searchAddons')}
@@ -573,22 +654,34 @@ export default function DishEdit() {
             )}
             {form.addons.map(ao => {
               const key = ao._id || ao.tempId;
-              const displayName = activeLang === 'en' && ao.name_en ? ao.name_en : ao.name;
+              const nameField = activeLang === SOURCE_LANG ? 'name' : 'name_en';
               return (
-                <div key={key} className={styles.listRow}>
-                  <span className={`${styles.rowName} ${styles.ingName}`}>{displayName}</span>
-                  <div className={styles.addonPrice}>
-                    <InputField
-                      label={t('addonPrice')}
-                      type="number"
-                      placeholder="0"
-                      value={ao.price}
-                      onChange={e => updateAoField(key, 'price', Number(e.target.value))}
-                    />
+                <div key={key} className={styles.groupBlock}>
+                  <div className={styles.groupBlockRow}>
+                    <div className={`${styles.fieldWrap} ${styles.rowName}`}>
+                      <InputField
+                        label={t('name')}
+                        placeholder="—"
+                        value={ao[nameField]}
+                        onChange={e => updateAoField(key, nameField, e.target.value)}
+                      />
+                      {activeLang !== SOURCE_LANG && ao.name && (
+                        <span className={styles.srcHint}>{srcLang.flag} {ao.name}</span>
+                      )}
+                    </div>
+                    <div className={styles.addonPrice}>
+                      <InputField
+                        label={t('addonPrice')}
+                        type="number"
+                        placeholder="0"
+                        value={ao.price}
+                        onChange={e => updateAoField(key, 'price', Number(e.target.value))}
+                      />
+                    </div>
+                    <button className={styles.deleteRowBtn} onClick={() => removeAo(key)}>
+                      <MdDelete />
+                    </button>
                   </div>
-                  <button className={styles.deleteRowBtn} onClick={() => removeAo(key)}>
-                    <MdDelete />
-                  </button>
                 </div>
               );
             })}
@@ -598,9 +691,14 @@ export default function DishEdit() {
           <div className={styles.section}>
             <div className={styles.sectionHeader}>
               <p className={styles.sectionTitle}>{t('componentGroupsSection')}</p>
-              <button className={styles.addRowBtn} onClick={() => addNewCg('')}>
-                <MdAdd /> {t('addGroup')}
-              </button>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button className={styles.addRowBtn} onClick={() => navigate(`/staff/extras/componentgroup/new?backTo=${encodeURIComponent(location.pathname)}`)}>
+                  <MdAdd /> {t('createNewPage')}
+                </button>
+                <button className={styles.addRowBtn} onClick={() => addNewCg('')}>
+                  <MdAdd /> {t('addGroup')}
+                </button>
+              </div>
             </div>
             <SearchPicker
               placeholder={t('searchComponentGroups')}
@@ -680,8 +778,19 @@ export default function DishEdit() {
 
           {/* ── Photos ── */}
           <div className={styles.section}>
-            <p className={styles.sectionTitle}>{t('photos')}</p>
-            <PhotoUpload images={form.images} onChange={imgs => set('images', imgs)} />
+            <div className={styles.sectionHeader}>
+              <p className={styles.sectionTitle}>{t('photos')}</p>
+              <span className={styles.photoCount}>
+                {form.images.length} / {isFree ? 5 : 20}
+              </span>
+            </div>
+            <PhotoUpload
+              images={form.images}
+              selectedIdx={form.selectedImageIdx}
+              onChange={(imgs, idx) => setForm(p => ({ ...p, images: imgs, selectedImageIdx: idx }))}
+              maxImages={isFree ? 5 : 20}
+              onAttemptBeyondLimit={() => setUpgradeOpen(true)}
+            />
           </div>
         </div>
 
@@ -690,5 +799,6 @@ export default function DishEdit() {
         </div>
       </div>
     </StaffShell>
+    </>
   );
 }

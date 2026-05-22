@@ -2,10 +2,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px;
+  padding: 0 16px;
+  height: 56px;
   background: var(--surface-color);
   border-bottom: 1px solid var(--separator-color);
-  min-height: 52px;
   position: sticky;
   top: 0;
   z-index: 10;
@@ -13,13 +13,8 @@
   box-sizing: border-box;
 }
 
-/* Inner centering wrapper — used on tablet+ */
-.headerInner {
-  display: contents; /* passthrough on mobile */
-}
-
-.left  { min-width: 40px; }
-.right { min-width: 40px; display: flex; justify-content: flex-end; }
+.left  { min-width: 40px; display: flex; align-items: center; }
+.right { min-width: 40px; display: flex; justify-content: flex-end; align-items: center; }
 
 .title {
   font-size: 17px;
@@ -27,7 +22,6 @@
   color: var(--primary-text);
   flex: 1;
   text-align: center;
-  /* prevent long names from overflowing */
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -47,36 +41,15 @@
 /* ════════ Responsive ════════ */
 
 @media (min-width: 600px) {
-  .header {
-    padding: 16px 24px;
-  }
-
-  .title {
-    font-size: 18px;
-  }
+  .header { padding: 0 24px; height: 56px; }
 }
 
 @media (min-width: 768px) {
-  .header {
-    padding: 18px 32px;
-    min-height: 60px;
-  }
-
-  .title {
-    font-size: 20px;
-  }
-
-  .backButton {
-    font-size: 24px;
-  }
+  .header     { padding: 0 32px; height: 64px; }
+  .title      { font-size: 20px; }
+  .backButton { font-size: 24px; }
 }
 
 @media (min-width: 1024px) {
-  .header {
-    padding: 20px 40px;
-  }
-
-  .title {
-    font-size: 22px;
-  }
+  .header { padding: 0 40px; }
 }

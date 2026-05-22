@@ -4,8 +4,12 @@
   "logout": "Log out",
   
   "online": "Online",
+  "role_root_admin": "Owner",
   "role_admin": "Administrator",
   "role_waiter": "Waiter",
+  "role_cook": "Cook",
+  "role_waiter_cook": "Waiter & Cook",
+  "role_guest": "Guest",
   
   "personalData": "Personal Data",
   "name": "Name",
@@ -52,5 +56,23 @@
   "resetSendError": "Failed to send reset link. Please try again.",
 
   "back": "Back",
-  "cancel": "Cancel"
+  "cancel": "Cancel",
+
+  "nameEdit": "Edit",
+  "nameSaveBtn": "Save",
+  "nameCancelBtn": "Cancel",
+
+  "emailChangeConfirmTitle": "Change email?",
+  "emailChangeConfirmMessage": "We'll ask you to enter a new address and send a confirmation link.",
+
+  "passwordConfirmTitle": "Reset password?",
+  "passwordConfirmMessage": "We'll send a reset link to {{email}}. Continue?",
+  "passwordConfirm": "Send link",
+
+  "integrationsSection": "Integrations",
+  "google_connect": "Connect Google",
+  "google_connected": "Google",
+  "google_connected_value": "Connected",
+  "google_add": "Connect",
+  "google_no_password": "Your account uses Google only — contact an admin to set a password."
 }

@@ -12,6 +12,7 @@
   "active": "Активний",
   "inactive": "Неактивний",
 
+  "role_root_admin": "Власник",
   "role_admin": "Адміністратор",
   "role_waiter": "Офіціант",
   "role_cook": "Кухар",
@@ -41,5 +42,6 @@
   "roleUpdated": "Роль оновлено",
   "errorCreate": "Не вдалося створити співробітника",
   "errorLoad": "Не вдалося завантажити персонал",
-  "cancel": "Скасувати"
+  "cancel": "Скасувати",
+  "nameEmailRequired": "Ім'я та email є обов'язковими"
 }

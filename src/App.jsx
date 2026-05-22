@@ -2,11 +2,17 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'; // Navigate used by /staff redirect
 import { AppProvider, useApp } from './context/AppContext';
 import { AuthProvider } from './context/AuthContext';
+import { PlanProvider } from './context/PlanContext';
+import { MenuProvider } from './context/MenuContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { ClientToastProvider } from "./context/ClientToastContext";
-import ProtectedRoute from './components/ProtectedRoute';
+import { StaffNotificationsProvider } from './context/StaffNotificationsContext';
+import { StaffDataProvider } from './context/StaffDataContext';
+import ProtectedRoute, { ClientOnlyRoute } from './components/ProtectedRoute';
+import RequirePlan from './components/RequirePlan';
 import HttpErrorToast from './components/HttpErrorToast';
 import NotificationToast from './components/client/NotificationToast';
+import OfflineBanner from './components/client/OfflineBanner';
 import DevToolbar from './components/DevToolbar';
 import Login from './pages/Login';
 import ForgotPassword from './pages/client/ForgotPassword';
@@ -34,6 +40,7 @@ import MenuManagement from './pages/staff/MenuManagement';
 import CategoryEdit from './pages/staff/CategoryEdit';
 import DishEdit from './pages/staff/DishEdit';
 import ExtrasManagement from './pages/staff/ExtrasManagement';
+import ExtrasEdit from './pages/staff/ExtrasEdit';
 import PdfGenerator from './pages/staff/PdfGenerator';
 import Analytics from './pages/staff/Analytics';
 import StaffSettings from './pages/staff/StaffSettings';
@@ -69,13 +76,19 @@ export default function App() {
   return (
     <AuthProvider>
     <AppProvider>
-      <BrowserRouter>
+    <StaffDataProvider>
+    <PlanProvider>
+    <MenuProvider>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <ThemeProvider>
           <ClientToastProvider>
+            <StaffNotificationsProvider>
             {/* Global HTTP error overlay — catches all unhandled 4xx / 5xx */}
             <HttpErrorToast />
             {/* Persistent notification banner for guest order events */}
             <NotificationToast />
+            {/* Offline / reconnect status pill — visible only when needed */}
+            <OfflineBanner />
             {/* Dev-only floating toolbar — stripped from production builds */}
             <DevToolbar />
             <Routes>
@@ -103,17 +116,17 @@ export default function App() {
               {/* Restaurant picker — direct access without QR scan */}
               <Route path="/restaurants" element={<RestaurantPicker />} />
 
-              {/* Client routes — open to everyone */}
-              <Route path="/menu" element={<Menu />} />
-              <Route path="/category/:id" element={<Category />} />
-              <Route path="/dish/:id" element={<DishDetail />} />
-              <Route path="/cart" element={<Cart />} />
-              <Route path="/confirm" element={<ConfirmOrder />} />
-              <Route path="/order-status" element={<OrderStatus />} />
-              <Route path="/order-status/:orderId" element={<OrderStatus />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/order-history" element={<OrderHistory />} />
-              <Route path="/restaurant-reviews" element={<RestaurantReviews />} />
+              {/* Client routes — blocked for staff */}
+              <Route path="/menu"             element={<ClientOnlyRoute><Menu /></ClientOnlyRoute>} />
+              <Route path="/category/:id"     element={<ClientOnlyRoute><Category /></ClientOnlyRoute>} />
+              <Route path="/dish/:id"         element={<ClientOnlyRoute><DishDetail /></ClientOnlyRoute>} />
+              <Route path="/cart"             element={<ClientOnlyRoute><Cart /></ClientOnlyRoute>} />
+              <Route path="/confirm"          element={<ClientOnlyRoute><ConfirmOrder /></ClientOnlyRoute>} />
+              <Route path="/order-status"     element={<ClientOnlyRoute><OrderStatus /></ClientOnlyRoute>} />
+              <Route path="/order-status/:orderId" element={<ClientOnlyRoute><OrderStatus /></ClientOnlyRoute>} />
+              <Route path="/profile"          element={<ClientOnlyRoute><Profile /></ClientOnlyRoute>} />
+              <Route path="/order-history"    element={<ClientOnlyRoute><OrderHistory /></ClientOnlyRoute>} />
+              <Route path="/restaurant-reviews" element={<ClientOnlyRoute><RestaurantReviews /></ClientOnlyRoute>} />
 
               {/* Staff routes — role-gated */}
               <Route path="/staff" element={<Navigate to="/staff/map" replace />} />
@@ -125,7 +138,7 @@ export default function App() {
                 <Guard roles={['admin', 'waiter', 'waiter_cook']}><TableDetail /></Guard>
               } />
               <Route path="/staff/orders" element={
-                <Guard roles={['admin', 'waiter', 'waiter_cook']}><WaiterOrders /></Guard>
+                <Guard roles={['admin', 'cook', 'waiter', 'waiter_cook']}><WaiterOrders /></Guard>
               } />
               <Route path="/staff/cooking" element={
                 <Guard roles={['admin', 'cook', 'waiter_cook']}><Cooking /></Guard>
@@ -137,25 +150,31 @@ export default function App() {
                 <Guard roles={['admin', 'cook', 'waiter_cook']}><MenuManagement /></Guard>
               } />
               <Route path="/staff/menu/category/new" element={
-                <Guard roles={['admin']}><CategoryEdit /></Guard>
+                <Guard roles={['admin', 'cook', 'waiter_cook']}><CategoryEdit /></Guard>
               } />
               <Route path="/staff/menu/category/:id" element={
-                <Guard roles={['admin']}><CategoryEdit /></Guard>
+                <Guard roles={['admin', 'cook', 'waiter_cook']}><CategoryEdit /></Guard>
               } />
               <Route path="/staff/menu/dish/new" element={
-                <Guard roles={['admin']}><DishEdit /></Guard>
+                <Guard roles={['admin', 'cook', 'waiter_cook']}><DishEdit /></Guard>
               } />
               <Route path="/staff/menu/dish/:id" element={
-                <Guard roles={['admin']}><DishEdit /></Guard>
+                <Guard roles={['admin', 'cook', 'waiter_cook']}><DishEdit /></Guard>
               } />
               <Route path="/staff/menu/pdf" element={
-                <Guard roles={['admin']}><PdfGenerator /></Guard>
+                <Guard roles={['admin', 'cook', 'waiter_cook']}><PdfGenerator /></Guard>
               } />
               <Route path="/staff/extras" element={
                 <Guard roles={['admin', 'cook', 'waiter_cook']}><ExtrasManagement /></Guard>
               } />
+              <Route path="/staff/extras/:type/new" element={
+                <Guard roles={['admin', 'cook', 'waiter_cook']}><ExtrasEdit /></Guard>
+              } />
+              <Route path="/staff/extras/:type/:id" element={
+                <Guard roles={['admin', 'cook', 'waiter_cook']}><ExtrasEdit /></Guard>
+              } />
               <Route path="/staff/analytics" element={
-                <Guard roles={['admin']}><Analytics /></Guard>
+                <Guard roles={['admin']}><RequirePlan><Analytics /></RequirePlan></Guard>
               } />
               <Route path="/staff/settings" element={
                 <Guard roles={['admin', 'waiter', 'cook']}><StaffSettings /></Guard>
@@ -167,12 +186,16 @@ export default function App() {
                 <Guard roles={['admin']}><StaffManagement /></Guard>
               } />
               <Route path="/staff/reviews" element={
-                <Guard roles={['admin']}><ReviewsManagement /></Guard>
+                <Guard roles={['admin']}><RequirePlan><ReviewsManagement /></RequirePlan></Guard>
               } />
             </Routes>
+            </StaffNotificationsProvider>
           </ClientToastProvider>
         </ThemeProvider>
       </BrowserRouter>
+    </MenuProvider>
+    </PlanProvider>
+    </StaffDataProvider>
     </AppProvider>
     </AuthProvider>
   );

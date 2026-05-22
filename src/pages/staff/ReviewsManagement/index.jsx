@@ -2,9 +2,12 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import StaffShell from '../../../components/staff/StaffShell';
 import { Dropdown } from '../../../components/Dropdown';
-import { getAdminReviews, getMenuItems } from '../../../api/admin';
+import { Skel } from '../../../components/staff/Skeleton';
+import ConfirmDialog from '../../../components/ConfirmDialog';
+import { getAdminReviews, deleteAdminReview } from '../../../api/admin';
+import { useStaffData } from '../../../context/StaffDataContext';
 import styles from './reviewsManagement.module.css';
-import { MdStar, MdStarBorder, MdRateReview } from 'react-icons/md';
+import { MdStar, MdStarBorder, MdRateReview, MdDeleteOutline } from 'react-icons/md';
 
 const TABS = ['restaurant', 'dish'];
 
@@ -20,26 +23,33 @@ function Stars({ rating, max = 5 }) {
   );
 }
 
-function ReviewCard({ review, isDish }) {
-  const author = review.userId?.name || '—';
-  const date   = review.createdAt
-    ? new Date(review.createdAt).toLocaleDateString()
-    : '';
+function ReviewCard({ review, isDish, onDeleteRequest }) {
+  const { t } = useTranslation('reviewsManagement');
+
+  const author   = review.userId?.name || '—';
+  const initial  = author !== '—' ? author.charAt(0).toUpperCase() : '?';
+  const date     = review.createdAt ? new Date(review.createdAt).toLocaleDateString() : '';
   const dishName = review.menuItemId?.name || '';
 
   return (
     <div className={styles.card}>
-      <div className={styles.cardTop}>
-        <div className={styles.cardLeft}>
+      <div className={styles.cardHeader}>
+        <div className={styles.avatar}>{initial}</div>
+        <div className={styles.authorBlock}>
           <span className={styles.author}>{author}</span>
-          {isDish && dishName && (
-            <span className={styles.dishTag}>{dishName}</span>
-          )}
+          {isDish && dishName && <span className={styles.dishTag}>{dishName}</span>}
         </div>
-        <div className={styles.cardRight}>
+        <div className={styles.metaBlock}>
           <Stars rating={review.rating} />
           <span className={styles.date}>{date}</span>
         </div>
+        <button
+          className={styles.deleteBtn}
+          title={t('deleteReview')}
+          onClick={() => onDeleteRequest(review._id)}
+        >
+          <MdDeleteOutline />
+        </button>
       </div>
       {review.comment && (
         <p className={styles.comment}>{review.comment}</p>
@@ -50,23 +60,20 @@ function ReviewCard({ review, isDish }) {
 
 export default function ReviewsManagement() {
   const { t } = useTranslation('reviewsManagement');
-
   const [activeTab,   setActiveTab]   = useState('restaurant');
   const [reviews,     setReviews]     = useState([]);
   const [pagination,  setPagination]  = useState(null);
   const [page,        setPage]        = useState(1);
   const [loading,     setLoading]     = useState(true);
-  const [menuItems,   setMenuItems]   = useState([]);
   const [dishFilter,  setDishFilter]  = useState('');
+  const [confirmId,   setConfirmId]   = useState(null);
+  const [deleteError, setDeleteError] = useState('');
 
-  // Load menu items for dish filter dropdown
-  useEffect(() => {
-    if (activeTab === 'dish') {
-      getMenuItems()
-        .then(items => setMenuItems(items || []))
-        .catch(() => setMenuItems([]));
-    }
-  }, [activeTab]);
+  // Menu items for the dish-filter dropdown come from the shared cache.
+  // Only requested when the user actually switches to the "dish" tab.
+  const { menuItems: cachedMenu, ensureMenuItems } = useStaffData();
+  useEffect(() => { if (activeTab === 'dish') ensureMenuItems(); }, [activeTab, ensureMenuItems]);
+  const menuItems = cachedMenu || [];
 
   const load = useCallback(() => {
     setLoading(true);
@@ -95,6 +102,19 @@ export default function ReviewsManagement() {
     setPage(1);
   }
 
+  async function handleDeleteConfirmed() {
+    const id   = confirmId;
+    const type = activeTab === 'dish' ? 'dish' : 'restaurant';
+    setConfirmId(null);
+    setDeleteError('');
+    try {
+      await deleteAdminReview(id, type);
+      setReviews(prev => prev.filter(r => r._id !== id));
+    } catch {
+      setDeleteError(t('deleteError'));
+    }
+  }
+
   const dishOptions = [
     { value: '', label: t('allDishes') },
     ...menuItems.map(item => ({ value: item._id || item.id, label: item.name || '—' })),
@@ -103,6 +123,18 @@ export default function ReviewsManagement() {
   return (
     <StaffShell title={<><MdRateReview /> {t('title')}</>}>
       <div className={styles.page}>
+        <ConfirmDialog
+          open={confirmId !== null}
+          title={t('deleteReview')}
+          message={t('confirmDelete')}
+          confirmLabel={t('deleteConfirm')}
+          cancelLabel={t('cancel')}
+          onConfirm={handleDeleteConfirmed}
+          onCancel={() => setConfirmId(null)}
+          danger
+        />
+
+        {deleteError && <p className={styles.deleteError}>{deleteError}</p>}
 
         {/* ── Tabs ── */}
         <div className={styles.tabBar}>
@@ -134,12 +166,24 @@ export default function ReviewsManagement() {
         {/* ── Review list ── */}
         <div className={styles.list}>
           {loading ? (
-            <div className={styles.empty}>{t('loading')}</div>
+            Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className={styles.card}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <Skel w={40} h={40} r="50%" />
+                    <Skel w={140} h={15} />
+                  </div>
+                  <Skel w={90} h={18} r={6} />
+                </div>
+                <Skel w="100%" h={12} style={{ marginBottom: 6 }} />
+                <Skel w="75%" h={12} />
+              </div>
+            ))
           ) : reviews.length === 0 ? (
             <div className={styles.empty}>{t('noReviews')}</div>
           ) : (
             reviews.map(r => (
-              <ReviewCard key={r._id} review={r} isDish={activeTab === 'dish'} />
+              <ReviewCard key={r._id} review={r} isDish={activeTab === 'dish'} onDeleteRequest={setConfirmId} />
             ))
           )}
         </div>

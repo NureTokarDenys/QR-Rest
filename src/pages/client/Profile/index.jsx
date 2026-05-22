@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Header from '../../../components/client/Header';
 import SettingsSection from '../../../components/client/SettingsSection';
-import SettingsRow, { SettingsRowDropdown, ThemeSettingsRow } from '../../../components/client/SettingsRow';
+import SettingsRow, { SettingsRowDropdown, ThemeSettingsRow, SettingsRowToggle } from '../../../components/client/SettingsRow';
+import { SOUND_KEY } from '../../../hooks/useNotificationSound';
 import Footer from '../../../components/client/Footer';
 import PrimaryButton from '../../../components/PrimaryButton';
 import SecondaryButton from '../../../components/SecondaryButton';
@@ -10,18 +11,13 @@ import InputField from '../../../components/InputField';
 import { useTheme } from '../../../context/ThemeContext';
 import { useAuth } from '../../../context/AuthContext';
 import { useApp } from '../../../context/AppContext';
-import { initiateGoogleOAuth, forgotPassword, requestEmailChange } from '../../../api/auth';
+import { initiateGoogleLink, unlinkGoogle, forgotPassword, requestEmailChange, setPassword } from '../../../api/auth';
 import ConfirmDialog from '../../../components/ConfirmDialog';
 import styles from './profile.module.css';
 import { useTranslation } from 'react-i18next';
 import { SUPPORTED_LANGS } from '../../../i18n/langs';
 
-import { MdPerson }        from 'react-icons/md';
-import { MdEmail }         from 'react-icons/md';
-import { MdLanguage }      from 'react-icons/md';
-import { MdPalette }       from 'react-icons/md';
-import { MdLock }          from 'react-icons/md';
-import { MdDeleteSweep }   from 'react-icons/md';
+import { MdPerson, MdEmail, MdLanguage, MdPalette, MdLock, MdDeleteSweep, MdNotifications } from 'react-icons/md';
 
 // Inline Google icon (reuse from login)
 function GoogleIcon({ size = 18 }) {
@@ -39,8 +35,10 @@ export default function Profile() {
   const { theme, setTheme }     = useTheme();
   const { i18n }                = useTranslation();
   const { t }                   = useTranslation('profile');
+  const { t: tErr }             = useTranslation('errors');
   const navigate                = useNavigate();
-  const { user, isAuthenticated, updateProfile, changePassword, logout, deleteAccount } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { user, isAuthenticated, updateProfile, changePassword, refreshUser, logout, deleteAccount } = useAuth();
   const [resetSent,      setResetSent]      = useState(false);
   const [resetSending,   setResetSending]   = useState(false);
   const [resetSendError, setResetSendError] = useState('');
@@ -72,11 +70,64 @@ export default function Profile() {
   const [sheetError, setSheetError] = useState('');
   const [saving, setSaving]     = useState(false);
 
+  // ── Name edit mode ────────────────────────────────
+  const [nameEditing, setNameEditing] = useState(false);
+
   // ── Email change flow state ───────────────────────
-  const [emailStep,    setEmailStep]    = useState(0); // 0=info 1=input 2=sent
+  const [emailConfirmOpen, setEmailConfirmOpen] = useState(false);
+  const [emailStep,    setEmailStep]    = useState(1); // 1=input 2=sent
   const [emailInput,   setEmailInput]   = useState('');
   const [emailSending, setEmailSending] = useState(false);
   const [emailError,   setEmailError]   = useState('');
+
+  // ── Password confirm state ────────────────────────
+  const [passwordConfirmOpen, setPasswordConfirmOpen] = useState(false);
+
+  // ── Google link / unlink state ────────────────────
+  const [googleLinking,    setGoogleLinking]    = useState(false);
+  const [googleUnlinking,  setGoogleUnlinking]  = useState(false);
+  const [googleLinkOk,     setGoogleLinkOk]     = useState(false);
+  const [googleLinkError,  setGoogleLinkError]  = useState('');
+
+  // Handle return from the OAuth redirect (/profile?googleLinked=1 or ?oauthError=link_failed)
+  useEffect(() => {
+    const linked = searchParams.get('googleLinked');
+    const err    = searchParams.get('oauthError');
+    if (linked === '1') {
+      refreshUser().then(() => setGoogleLinkOk(true));
+      setSearchParams({}, { replace: true });
+    } else if (err) {
+      setGoogleLinkError(tErr(`code.${err}`, { defaultValue: tErr('generic') }));
+      setSearchParams({}, { replace: true });
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function handleGoogleLink() {
+    setGoogleLinking(true);
+    setGoogleLinkOk(false);
+    setGoogleLinkError('');
+    try {
+      await initiateGoogleLink(); // sets cookie then navigates away — no return
+    } catch {
+      setGoogleLinkError(tErr('generic'));
+      setGoogleLinking(false);
+    }
+  }
+
+  async function handleGoogleUnlink() {
+    setGoogleUnlinking(true);
+    setGoogleLinkOk(false);
+    setGoogleLinkError('');
+    try {
+      await unlinkGoogle();
+      await refreshUser();
+    } catch (err) {
+      const code = err?.response?.data?.error?.code;
+      setGoogleLinkError(tErr(`code.${code}`, { defaultValue: tErr('generic') }));
+    } finally {
+      setGoogleUnlinking(false);
+    }
+  }
 
   // Show only the languages the restaurant has enabled.
   // If restaurantLangs is empty the restaurant hasn't configured anything yet
@@ -93,10 +144,34 @@ export default function Profile() {
     setSheetError('');
     setResetSent(false);
     setResetSendError('');
-    setEmailStep(0);
+    setEmailStep(1);
     setEmailInput('');
     setEmailError('');
     setSheet(type);
+  }
+
+  function handleEmailConfirmed() {
+    setEmailConfirmOpen(false);
+    setEmailInput('');
+    setEmailError('');
+    setEmailStep(1);
+    setSheet('email');
+  }
+
+  async function handlePasswordConfirmed() {
+    setPasswordConfirmOpen(false);
+    setResetSendError('');
+    setResetSending(true);
+    setResetSent(false);
+    setSheet('password');
+    try {
+      await forgotPassword(user?.email);
+      setResetSent(true);
+    } catch {
+      setResetSendError(t('reset_send_error'));
+    } finally {
+      setResetSending(false);
+    }
   }
 
   function closeSheet() {
@@ -121,8 +196,7 @@ export default function Profile() {
       setEmailStep(2);
     } catch (err) {
       const code = err?.response?.data?.error?.code;
-      if (code === 'EMAIL_TAKEN') setEmailError(t('email_taken'));
-      else setEmailError(t('save_error'));
+      setEmailError(tErr(`code.${code}`, { defaultValue: tErr('generic') }));
     } finally {
       setEmailSending(false);
     }
@@ -149,16 +223,29 @@ export default function Profile() {
       } else if (sheet === 'password') {
         if (!fields.newPw || fields.newPw.length < 8) { setSheetError(t('password_too_short')); return; }
         if (fields.newPw !== fields.confirmPw) { setSheetError(t('password_mismatch')); return; }
-        // currentPw may be blank for Google-only accounts setting a password for the first time
-        await changePassword(fields.currentPw, fields.newPw);
+        if (googleOnly) {
+          // First-time password setup — no current password needed
+          await setPassword(fields.newPw);
+          await refreshUser(); // hasPassword becomes true → UI switches to "Change password"
+        } else {
+          await changePassword(fields.currentPw, fields.newPw);
+        }
         closeSheet();
       }
     } catch (err) {
-      const msg = err?.response?.data?.message;
-      setSheetError(msg || t('save_error'));
+      const code = err?.response?.data?.error?.code;
+      setSheetError(tErr(`code.${code}`, { defaultValue: tErr('generic') }));
     } finally {
       setSaving(false);
     }
+  }
+
+  // ── Sound notifications ───────────────────────────
+  const [soundEnabled, setSoundEnabled] = useState(() => localStorage.getItem(SOUND_KEY) !== 'false');
+
+  function handleSoundChange(val) {
+    setSoundEnabled(val);
+    localStorage.setItem(SOUND_KEY, val ? 'true' : 'false');
   }
 
   // ── Shared settings rows (guests can still change language / theme) ──────
@@ -172,6 +259,12 @@ export default function Profile() {
         onChange={lng => i18n.changeLanguage(lng)}
       />
       <ThemeSettingsRow icon={<MdPalette />} theme={theme} onThemeChange={setTheme} />
+      <SettingsRowToggle
+        icon={<MdNotifications />}
+        label={t('sound_notifications')}
+        value={soundEnabled}
+        onChange={handleSoundChange}
+      />
     </SettingsSection>
   );
 
@@ -226,13 +319,33 @@ export default function Profile() {
         onConfirm={handleDeleteAccount}
         onCancel={() => setDialog(null)}
       />
+      <ConfirmDialog
+        open={emailConfirmOpen}
+        title={t('email_change_confirm_title')}
+        message={t('email_change_confirm_message')}
+        confirmLabel={t('email_change_continue')}
+        cancelLabel={t('cancel')}
+        danger={false}
+        onConfirm={handleEmailConfirmed}
+        onCancel={() => setEmailConfirmOpen(false)}
+      />
+      <ConfirmDialog
+        open={passwordConfirmOpen}
+        title={t('password_confirm_title')}
+        message={t('password_confirm_message', { email: user?.email || '' })}
+        confirmLabel={t('password_confirm')}
+        cancelLabel={t('cancel')}
+        danger={false}
+        onConfirm={handlePasswordConfirmed}
+        onCancel={() => setPasswordConfirmOpen(false)}
+      />
     </>
   );
 
   // ── Google integration state ─────────────────────
-  const hasGoogle   = Boolean(user?.googleId);
-  // Google-only = has Google, has no passwordHash (backend may expose this flag)
-  const googleOnly  = hasGoogle && !user?.hasPassword;
+  // The API returns hasGoogle / hasPassword flags (not raw googleId / passwordHash)
+  const hasGoogle  = Boolean(user?.hasGoogle);
+  const googleOnly = hasGoogle && !user?.hasPassword;
 
   // ════════════════════════════════════════════════
   //  GUEST VIEW
@@ -300,7 +413,7 @@ export default function Profile() {
             icon={<MdEmail />}
             label={t('enail')}
             value={user.email || '—'}
-            onClick={() => openSheet('email')}
+            onClick={() => setEmailConfirmOpen(true)}
           />
         </SettingsSection>
 
@@ -312,7 +425,7 @@ export default function Profile() {
               icon={<MdLock />}
               label={t('change_password')}
               value={t('change')}
-              onClick={() => openSheet('password')}
+              onClick={() => setPasswordConfirmOpen(true)}
             />
           )}
           {/* Google-only accounts: offer to set a password for the first time */}
@@ -328,12 +441,50 @@ export default function Profile() {
 
         {/* ── Integrations ── */}
         <SettingsSection title={t('integrations')}>
-          <SettingsRow
-            icon={<GoogleIcon />}
-            label={t(hasGoogle ? 'google_connected' : 'google_connect')}
-            value={t(hasGoogle ? 'connected' : 'add')}
-            onClick={hasGoogle ? undefined : initiateGoogleOAuth}
-          />
+          {/* Connected state */}
+          {hasGoogle ? (
+            <>
+              {/* Google account card — shows the linked Google identity */}
+              <div className={styles.googleAccountCard}>
+                {user.googlePicture ? (
+                  <img
+                    src={user.googlePicture}
+                    alt={user.googleName || 'Google'}
+                    className={styles.googleAvatar}
+                    referrerPolicy="no-referrer"
+                  />
+                ) : (
+                  <div className={styles.googleAvatarFallback}>
+                    {(user.googleName || user.googleEmail || 'G').charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <div className={styles.googleAccountInfo}>
+                  {user.googleName  && <span className={styles.googleAccountName}>{user.googleName}</span>}
+                  {user.googleEmail && <span className={styles.googleAccountEmail}>{user.googleEmail}</span>}
+                </div>
+                <span className={styles.googleConnectedBadge}>{t('google_account_connected')}</span>
+              </div>
+
+              {/* Unlink — only when the user also has a password */}
+              {!googleOnly && (
+                <SettingsRow
+                  label={t('google_disconnect')}
+                  value={googleUnlinking ? '...' : t('disconnect')}
+                  onClick={googleUnlinking ? undefined : handleGoogleUnlink}
+                  danger
+                />
+              )}
+            </>
+          ) : (
+            <SettingsRow
+              icon={<GoogleIcon />}
+              label={t('google_connect')}
+              value={googleLinking ? '...' : t('add')}
+              onClick={googleLinking ? undefined : handleGoogleLink}
+            />
+          )}
+          {googleLinkOk    && <p className={styles.googleNote} style={{ color: 'var(--success-color, #4caf50)' }}>{t('google_link_success')}</p>}
+          {googleLinkError && <p className={styles.googleNote} style={{ color: 'var(--error-color, #e53935)' }}>{googleLinkError}</p>}
           {googleOnly && (
             <p className={styles.googleNote}>{t('google_no_password')}</p>
           )}
@@ -381,12 +532,7 @@ export default function Profile() {
               />
             )}
 
-            {/* ── Email – 3-step flow ── */}
-            {sheet === 'email' && emailStep === 0 && (
-              <div className={styles.resetInfo}>
-                <p className={styles.resetInfoText}>{t('email_change_desc')}</p>
-              </div>
-            )}
+            {/* ── Email – 2-step flow ── */}
             {sheet === 'email' && emailStep === 1 && (
               <>
                 <InputField
@@ -409,14 +555,15 @@ export default function Profile() {
             {/* ── Password – reset link for regular / set-password form for Google-only ── */}
             {sheet === 'password' && !googleOnly && (
               <div className={styles.resetInfo}>
-                {resetSent ? (
+                {resetSending ? (
+                  <p className={styles.resetInfoText}>...</p>
+                ) : resetSent ? (
                   <>
                     <p className={styles.resetSentTitle}>{t('reset_sent_title')}</p>
                     <p className={styles.resetSentBody}>{t('reset_sent_body', { email: user?.email })}</p>
                   </>
                 ) : (
                   <>
-                    <p className={styles.resetInfoText}>{t('reset_password_info')}</p>
                     {resetSendError && <p className={styles.sheetError}>{resetSendError}</p>}
                   </>
                 )}
@@ -443,12 +590,6 @@ export default function Profile() {
 
             <div className={styles.sheetActions}>
               {/* Email flow actions */}
-              {sheet === 'email' && emailStep === 0 && (
-                <>
-                  <PrimaryButton label={t('email_change_continue')} onClick={() => setEmailStep(1)} />
-                  <SecondaryButton label={t('cancel')} onClick={closeSheet} />
-                </>
-              )}
               {sheet === 'email' && emailStep === 1 && (
                 <>
                   <PrimaryButton
@@ -456,36 +597,16 @@ export default function Profile() {
                     onClick={handleSendEmailConfirmation}
                     disabled={emailSending}
                   />
-                  <SecondaryButton label={t('cancel')} onClick={() => setEmailStep(0)} />
+                  <SecondaryButton label={t('cancel')} onClick={closeSheet} />
                 </>
               )}
               {sheet === 'email' && emailStep === 2 && (
                 <SecondaryButton label={t('cancel')} onClick={closeSheet} />
               )}
 
-              {/* Password sheet – reset link for regular accounts */}
+              {/* Password sheet – auto-sent, just close */}
               {sheet === 'password' && !googleOnly && (
-                <>
-                  {!resetSent && (
-                    <PrimaryButton
-                      label={resetSending ? '...' : t('send_reset_link')}
-                      onClick={async () => {
-                        setResetSendError('');
-                        setResetSending(true);
-                        try {
-                          await forgotPassword(user?.email);
-                          setResetSent(true);
-                        } catch {
-                          setResetSendError(t('reset_send_error'));
-                        } finally {
-                          setResetSending(false);
-                        }
-                      }}
-                      disabled={resetSending}
-                    />
-                  )}
-                  <SecondaryButton label={t('cancel')} onClick={closeSheet} />
-                </>
+                <SecondaryButton label={t('close')} onClick={closeSheet} />
               )}
 
               {/* Name and Google-only password form */}

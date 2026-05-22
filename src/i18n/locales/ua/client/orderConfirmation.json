@@ -13,5 +13,23 @@
     "submit_error": "Не вдалося надіслати замовлення. Будь ласка, спробуйте ще раз.",
     "confirm_add": "Підтвердити та додати",
     "locked_section_label": "Вже замовлено",
-    "adding_to_order": "Додаємо до замовлення #{{id}}"
+    "adding_to_order": "Додаємо до замовлення #{{id}}",
+
+    "order_locked_msg": "Інший гість вже зробив замовлення за цим столиком.",
+    "view_order": "Переглянути замовлення",
+
+    "changes_banner_title": "Ваше замовлення оновлено",
+    "changes_banner_sub": "Деякі позиції були змінені відповідно до актуального меню",
+
+    "tag_removed": "Видалено",
+    "tag_unavailable": "Недоступно",
+    "tag_adjusted": "Скориговано",
+    "tag_price_changed": "Ціна змінена",
+    "diff_item_removed": "Страву прибрано із замовлення",
+
+    "base_price": "Базова ціна",
+    "addon_removed": "додаток видалено",
+    "option_removed": "опцію видалено",
+    "group_removed": "групу опцій видалено",
+    "replaced_with": "→ замінено на"
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import Logo from '../../components/Logo';
 import InputField from '../../components/InputField';
 import PrimaryButton from '../../components/PrimaryButton';
@@ -10,10 +10,9 @@ import { useAuth } from '../../context/AuthContext';
 import { initiateGoogleOAuth } from '../../api/auth';
 
 function staffHome(role) {
-  if (role === 'cook')   return '/staff/cooking';
-  if (role === 'waiter') return '/staff/map';
-  if (role === 'admin')  return '/staff/map';
-  return '/';
+  if (role === 'cook') return '/staff/cooking';
+  if (['waiter', 'waiter_cook', 'admin', 'root_admin'].includes(role)) return '/staff/map';
+  return '/menu'; // guest
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -22,7 +21,9 @@ const MIN_PASS  = 8;
 export default function Login() {
   const { i18n } = useTranslation();
   const { t } = useTranslation('login');
+  const { t: tErr } = useTranslation('errors');
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { login, loginAsGuest, isAuthenticated, user } = useAuth();
 
   useEffect(() => {
@@ -33,8 +34,12 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [emailError,    setEmailError]    = useState('');
   const [passwordError, setPasswordError] = useState('');
-  const [serverError,   setServerError]   = useState('');
-  const [loading,       setLoading]       = useState(false);
+  // Show OAuth error passed via URL param (e.g. ?oauthError=oauth_failed)
+  const oauthErrParam = searchParams.get('oauthError');
+  const [serverError, setServerError] = useState(
+    oauthErrParam ? tErr(`code.${oauthErrParam.toUpperCase()}`, { defaultValue: tErr('code.OAUTH_FAILED') }) : ''
+  );
+  const [loading, setLoading] = useState(false);
 
   function validateEmail(val) {
     if (!val)                return t('fill_fields');
@@ -64,8 +69,8 @@ export default function Login() {
       const u = await login(email, password);
       navigate(staffHome(u?.role));
     } catch (err) {
-      const apiMsg = err?.response?.data?.message;
-      setServerError(apiMsg || t('login_error'));
+      const code = err?.response?.data?.error?.code;
+      setServerError(tErr(`code.${code}`, { defaultValue: tErr('generic') }));
     } finally {
       setLoading(false);
     }

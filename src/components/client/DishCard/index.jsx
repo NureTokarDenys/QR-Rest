@@ -21,7 +21,10 @@ export default function DishCard({ dish }) {
   function handleAdd(e) {
     e.stopPropagation();
     addToCart(dish);
-    showToast(`${t('message_p1')} "${local(dish, 'name')}" ${t('message_p2')}`);
+    showToast(
+      `${t('message_p1')} "${local(dish, 'name')}" ${t('message_p2')}`,
+      { onClick: () => navigate('/cart') },
+    );
   }
 
   return (

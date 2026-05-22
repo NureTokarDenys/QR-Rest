@@ -2,20 +2,29 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 16px;
+  padding: 0 16px;
+  height: 56px;
   background: var(--surface-color);
   border-bottom: 1px solid var(--separator-color);
   position: sticky;
   top: 0;
   z-index: 10;
   gap: 10px;
+  box-sizing: border-box;
+}
+
+/* ── Left slot ───────────────────────────────────────────────────────────── */
+.left {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  min-width: 40px;
 }
 
 /* ── Logo ────────────────────────────────────────────────────────────────── */
 .logo {
   font-size: 24px;
   font-weight: 800;
-  flex-shrink: 0;
   background: none;
   border: none;
   padding: 0;
@@ -25,12 +34,38 @@
 .logoWait { color: var(--accent-color); }
 .logoLess  { color: var(--logo-color); }
 
+/* ── Back button ─────────────────────────────────────────────────────────── */
+.backButton {
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: var(--primary-btn-active);
+  padding: 0;
+  line-height: 1;
+}
+
+/* ── Center title (category mode) ────────────────────────────────────────── */
+.title {
+  flex: 1;
+  text-align: center;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--primary-text);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  padding: 0 8px;
+}
+
 /* ── Right cluster ───────────────────────────────────────────────────────── */
 .right {
   display: flex;
   align-items: center;
   gap: 8px;
-  min-width: 0;
+  flex-shrink: 0;
+  min-width: 40px;
+  justify-content: flex-end;
 }
 
 /* ── Context chip (table / restaurant name) ──────────────────────────────── */
@@ -44,7 +79,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 140px;
+  max-width: 130px;
 }
 
 /* ── Rating badge ────────────────────────────────────────────────────────── */
@@ -61,33 +96,29 @@
   white-space: nowrap;
   flex-shrink: 0;
 }
-.ratingBadge:hover {
-  background: color-mix(in srgb, #f6ad55 25%, var(--surface-color));
-  transform: translateY(-1px);
-}
-.ratingBadge:active {
-  transform: translateY(0);
-}
+.ratingBadge:hover  { background: color-mix(in srgb, #f6ad55 25%, var(--surface-color)); transform: translateY(-1px); }
+.ratingBadge:active { transform: translateY(0); }
 
-.ratingStar {
-  font-size: 13px;
-  color: #f6ad55;
-  line-height: 1;
-}
-.ratingValue {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--primary-text);
-}
-.ratingCount {
-  font-size: 11px;
-  color: var(--secondary-text);
-}
+.ratingStar  { font-size: 13px; color: #f6ad55; line-height: 1; }
+.ratingValue { font-size: 13px; font-weight: 700; color: var(--primary-text); }
+.ratingCount { font-size: 11px; color: var(--secondary-text); }
 
 /* ── Responsive ─────────────────────────────────────────────────────────── */
 @media (min-width: 600px) {
-  .header { padding: 16px 24px; }
-  .logo   { font-size: 26px; }
-  .contextChip { font-size: 13px; max-width: 200px; }
+  .header      { padding: 0 24px; height: 56px; }
+  .logo        { font-size: 26px; }
+  .contextChip { font-size: 13px; max-width: 180px; }
   .ratingBadge, .ratingValue { font-size: 14px; }
+}
+
+@media (min-width: 768px) {
+  .header      { padding: 0 32px; height: 64px; }
+  .logo        { font-size: 28px; }
+  .title       { font-size: 20px; }
+  .backButton  { font-size: 24px; }
+  .contextChip { max-width: 220px; }
+}
+
+@media (min-width: 1024px) {
+  .header { padding: 0 40px; }
 }
