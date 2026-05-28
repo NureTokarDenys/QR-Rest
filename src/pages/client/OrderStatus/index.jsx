@@ -3,19 +3,21 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useApp } from '../../../context/AppContext';
 import { normalizeApiOrder } from '../../../context/AppContext';
 import { usePlan } from '../../../hooks/usePlan';
-import { getOrder, cancelGuestOrder, cancelGuestServingGroup, waiterCall, waiterCallCash, initiatePayment } from '../../../api/orders';
+import { getOrder, cancelGuestOrder, cancelGuestServingGroup, cancelGuestOrderItem, waiterCall } from '../../../api/orders';
 import Header from '../../../components/client/Header';
 import OrderStatusItem from '../../../components/client/OrderStatusItem';
+import ConfirmDialog from '../../../components/ConfirmDialog';
 import WsStatusBanner from '../../../components/WsStatusBanner';
 import WsStatusChip from '../../../components/WsStatusChip';
 import SecondaryButton from '../../../components/SecondaryButton';
 import Footer from '../../../components/client/Footer';
 import OrderReviews from '../../../components/client/OrderReviews';
+import PaymentSheet from '../../../components/client/PaymentSheet';
 import styles from './orderStatus.module.css';
 import { useLocalField } from '../../../i18n/useLang';
 import { useTranslation } from 'react-i18next';
 
-import { MdNotificationsActive, MdInfoOutline, MdLocalFireDepartment, MdCheck, MdCheckCircle, MdPayments, MdCreditCard, MdNotifications, MdExpandMore, MdExpandLess, MdStorefront } from "react-icons/md";
+import { MdNotificationsActive, MdInfoOutline, MdLocalFireDepartment, MdCheck, MdCheckCircle, MdNotifications, MdStorefront, MdPayments, MdHourglassTop } from "react-icons/md";
 
 const DISH_STATUSES = ['waiting', 'cooking', 'ready', 'served'];
 // 5-step progress bar shown to the guest: dish-progression + final paid step.
@@ -47,47 +49,6 @@ export default function OrderStatus() {
   callStateRef.current = callState; // always current, no stale-closure risk
   const [callElapsed, setCallElapsed] = useState(0);
 
-  // ── Payment state ──────────────────────────────────────────────────────────
-  const [callSent, setCallSent]               = useState(null); // cash only
-  const [liqpayLoading, setLiqpayLoading]     = useState(false);
-  const [showPayWarning, setShowPayWarning]   = useState(false);
-  const [showCashExpand, setShowCashExpand]   = useState(false);
-  const [showCashWarning, setShowCashWarning] = useState(false);
-
-  async function handleLiqPay() {
-    if (!activeOrder || liqpayLoading) return;
-    setShowPayWarning(false);
-    setLiqpayLoading(true);
-    try {
-      const payload = await initiatePayment(activeOrder.id);
-      if (!payload?.data || !payload?.signature) return;
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = 'https://www.liqpay.ua/api/3/checkout';
-      form.acceptCharset = 'utf-8';
-      const di = document.createElement('input');
-      di.type = 'hidden'; di.name = 'data'; di.value = payload.data;
-      const si = document.createElement('input');
-      si.type = 'hidden'; si.name = 'signature'; si.value = payload.signature;
-      form.appendChild(di); form.appendChild(si);
-      document.body.appendChild(form);
-      form.submit();
-    } catch (_) {
-      setLiqpayLoading(false);
-    }
-  }
-
-  async function handleCashCall() {
-    if (!activeOrder) return;
-    setShowCashWarning(false);
-    try {
-      await waiterCallCash(activeOrder.id);
-      setCallSent('cash');
-      setShowCashExpand(false);
-      setTimeout(() => setCallSent(null), 4000);
-    } catch (_) {}
-  }
-
   async function handleWaiterCall() {
     if (!activeOrder) return;
     const cs = callStateRef.current;
@@ -116,14 +77,25 @@ export default function OrderStatus() {
   }
 
   // ── Cancel state ───────────────────────────────────────────────────────────
-  const [cancelTarget, setCancelTarget] = useState(null);
-  const [cancelling, setCancelling]     = useState(false);
-  const [cancelError, setCancelError]   = useState('');
+  // cancelTarget: null | 'order' | <groupId string>
+  const [cancelTarget,  setCancelTarget]  = useState(null);
+  const [cancelLoading, setCancelLoading] = useState(false);
+  const [cancelError,   setCancelError]   = useState('');
 
-  async function handleCancel() {
+  function openCancel(target) {
+    setCancelTarget(target);
+    setCancelError('');
+  }
+
+  function closeCancel() {
+    setCancelTarget(null);
+    setCancelError('');
+  }
+
+  async function executeCancel() {
     const token = sessionToken || localStorage.getItem('sessionToken');
     if (!token || !activeOrder) return;
-    setCancelling(true);
+    setCancelLoading(true);
     setCancelError('');
     try {
       if (cancelTarget === 'order') {
@@ -133,12 +105,25 @@ export default function OrderStatus() {
       }
       const fresh = await getOrder(activeOrder.id);
       if (fresh) setCurrentOrder(normalizeApiOrder(fresh));
-      setCancelTarget(null);
+      closeCancel();
     } catch (err) {
-      const msg = err?.response?.data?.error?.message || t('cancel_blocked');
-      setCancelError(msg);
+      setCancelError(err?.response?.data?.error?.message || t('cancel_blocked'));
     } finally {
-      setCancelling(false);
+      setCancelLoading(false);
+    }
+  }
+
+  // ── Individual item cancel (guest, waiting items only) ────────────────────
+  // Passed as onCancel to OrderStatusItem — throws on error
+  async function handleCancelItem(orderItemId) {
+    const token = sessionToken || localStorage.getItem('sessionToken');
+    if (!token || !activeOrder) return;
+    await cancelGuestOrderItem(activeOrder.id, orderItemId, token);
+    const fresh = await getOrder(activeOrder.id);
+    if (fresh) {
+      const normalized = normalizeApiOrder(fresh);
+      if (currentOrder?.id === activeOrder.id) setCurrentOrder(normalized);
+      else setFetchedOrder(normalized);
     }
   }
 
@@ -151,14 +136,13 @@ export default function OrderStatus() {
   const activeOrderIdRef = useRef(null);
 
   // Auto-open + mark-read when navigated here from a toast tap.
-  // Uses a small timeout so activeOrderIdRef is populated on the first render.
   useEffect(() => {
     if (!location.state?.openNotifs) return;
-    const t = setTimeout(() => {
+    const tid = setTimeout(() => {
       setShowNotifs(true);
       markAllRead(activeOrderIdRef.current);
     }, 0);
-    return () => clearTimeout(t);
+    return () => clearTimeout(tid);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   function toggleNotifs() {
@@ -166,19 +150,20 @@ export default function OrderStatus() {
     setShowNotifs(v => !v);
   }
 
-  // ── Fetch order when navigating to /order-status/:id from history ──────────
-  // The order may belong to a DIFFERENT restaurant than the one currently
-  // stored — history can span any place the user has ordered from. The
-  // history card passes the order's restaurantId via navigation state so we
-  // hit the right scoped endpoint instead of falling back to the stored one.
+  // ── Fetch order when navigating to /order-status/:id ──────────────────────
+  // Always re-fetches so we pick up state changes that happened while the
+  // browser was on LiqPay (WS was closed, events were missed).
   const [fetchedOrder, setFetchedOrder] = useState(null);
   useEffect(() => {
     if (!orderId) return;
-    if (currentOrder?.id === orderId) return;
-    if (orderHistory?.some(o => o.id === orderId)) return;
     const historicalRestaurantId = location.state?.restaurantId;
     getOrder(orderId, historicalRestaurantId)
-      .then(data => { if (data) setFetchedOrder(normalizeApiOrder(data)); })
+      .then(data => {
+        if (!data) return;
+        const normalized = normalizeApiOrder(data);
+        if (currentOrder?.id === orderId) setCurrentOrder(normalized);
+        else setFetchedOrder(normalized);
+      })
       .catch(() => {});
   }, [orderId]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -249,10 +234,6 @@ export default function OrderStatus() {
   }, [handleWsMessage, addWsListener, removeWsListener]);
 
   // Load notifications for this order when they haven't been fetched yet.
-  // Guests need this: after a page reload currentOrder is null so the AppContext
-  // effect never fires, but the orderId is known from the URL param.
-  // For history navigation, prefer the historical order's restaurantId — the
-  // stored one points to the *current* session's place which may not match.
   const resolvedOrderId = orderId || currentOrder?.id;
   const resolvedRestaurantId = location.state?.restaurantId || restaurantId;
   useEffect(() => {
@@ -316,8 +297,6 @@ export default function OrderStatus() {
         : (orderHistory?.find(order => order.id === orderId) ?? fetchedOrder));
 
   if (!activeOrder) {
-    // Guest has no URL param but has a stored orderId — redirect so the fetch
-    // effect can load the order properly (and the URL becomes shareable/reloadable).
     if (!orderId) {
       const storedId = localStorage.getItem('orderId');
       if (storedId) {
@@ -337,7 +316,7 @@ export default function OrderStatus() {
     );
   }
 
-  // Keep ref in sync so async callbacks (toggleNotifs, item clicks) use the right id.
+  // Keep ref in sync so async callbacks use the right id.
   activeOrderIdRef.current = activeOrder.id;
 
   const allItems = (activeOrder.items || []).map(item => ({
@@ -371,14 +350,9 @@ export default function OrderStatus() {
   const isOpenPaid      = activeOrder.status === 'open_paid';
   const isOrderDone     = currentStatus === 'served' || isOrderTerminal || isOpenPaid;
   const allServed       = allItems.length > 0 && allItems.every(i => i.status === 'served');
-  const showPayment     = allServed && !isOrderTerminal && !isOpenPaid;
+  const showActions     = !isOrderTerminal && !isOpenPaid;
 
-  // Stepper indices follow STEPPER_KEYS (0..4). The first 4 steps mirror
-  // dish progression (worstStatusIndex). The 5th step "Completed" is forced
-  // done whenever the order is paid-in-advance or in a terminal completed_*
-  // state — even if dishes haven't been served yet.
   const completedStepDone = isOpenPaid || activeOrder.status === 'completed_cash' || activeOrder.status === 'completed_epay';
-  // When everything is finished, advance the active step into the Completed slot.
   const activeStep = completedStepDone && (allServed || isOrderTerminal)
     ? STEPPER_KEYS.length - 1
     : worstStatusIndex;
@@ -389,7 +363,15 @@ export default function OrderStatus() {
     ready:   { icon: <MdCheck />,               title: t('snipet_ready_title'),   subtitle: t('snipet_ready_subtitle')   },
     served:  { icon: <MdCheckCircle />,          title: t('snipet_served_title'),  subtitle: t('snipet_served_subtitle')  },
   };
+
+  const groupStatusConfig = {
+    waiting: { icon: <MdHourglassTop />,        label: t('status_waiting'), cls: styles.groupBadgeWaiting },
+    cooking: { icon: <MdLocalFireDepartment />,  label: t('status_cooking'), cls: styles.groupBadgeCooking },
+    ready:   { icon: <MdCheck />,               label: t('status_ready'),   cls: styles.groupBadgeReady   },
+    served:  { icon: <MdCheck />,               label: t('status_served'),  cls: styles.groupBadgeServed  },
+  };
   const currentBanner = bannerConfig[currentStatus] || bannerConfig.waiting;
+
 
   return (
     <div className={styles.page}>
@@ -398,7 +380,6 @@ export default function OrderStatus() {
         showBack
         rightElement={
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            {/* Notification bell */}
             <button
               className={styles.notifBell}
               onClick={toggleNotifs}
@@ -409,8 +390,6 @@ export default function OrderStatus() {
                 <span className={styles.notifBadge}>{unreadCount > 9 ? '9+' : unreadCount}</span>
               )}
             </button>
-
-            {/* WS status chip — responsive (dot-only on mobile) */}
             <WsStatusChip status={wsStatus} latency={wsLatency} />
           </div>
         }
@@ -473,22 +452,27 @@ export default function OrderStatus() {
         )}
 
         {/* ── open_paid banner ── */}
-        {isOpenPaid && (
-          <div className={styles.paidBanner}>
-            <MdCheckCircle className={styles.paidBannerIcon} />
-            <div>
-              <p className={styles.paidBannerTitle}>{t('paid_banner_title')}</p>
-              <p className={styles.paidBannerSub}>{t('paid_banner_sub')}</p>
+        {isOpenPaid && (() => {
+          const isEpay = activeOrder.paymentMethod === 'epay';
+          const titleKey = isEpay ? 'paid_banner_title_epay' : 'paid_banner_title';
+          const subKey   = isEpay
+            ? (allServed ? 'paid_banner_sub_served_epay' : 'paid_banner_sub_cooking_epay')
+            : (allServed ? 'paid_banner_sub_served'      : 'paid_banner_sub_cooking');
+          return (
+            <div className={`${styles.paidBanner} ${isEpay ? styles.paidBannerEpay : ''}`}>
+              <MdPayments className={`${styles.paidBannerIcon} ${isEpay ? styles.paidBannerIconEpay : ''}`} />
+              <div>
+                <p className={`${styles.paidBannerTitle} ${isEpay ? styles.paidBannerTitleEpay : ''}`}>{t(titleKey)}</p>
+                <p className={styles.paidBannerSub}>{t(subKey)}</p>
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* ── Progress tracker ── */}
         <div className={styles.stepsCard}>
           <div className={styles.steps}>
             {stepsLabels.map((stepLabel, i) => {
-              // The final "Completed" step is forced done whenever the order
-              // is paid-in-advance, even though dishes may still be cooking.
               const isCompletedSlot = i === STEPPER_KEYS.length - 1;
               const forceDone       = isCompletedSlot && completedStepDone;
               const cls =
@@ -530,7 +514,16 @@ export default function OrderStatus() {
 
           {groupedSections.map(({ group, items: gItems }, sectionIdx) => {
             const groupAllWaiting = gItems.length > 0 && gItems.every(i => i.status === 'waiting');
-            const isTargeted = cancelTarget === group.id;
+
+            const groupWorstIdx = gItems.length > 0
+              ? Math.min(...gItems.map(i => {
+                  const idx = DISH_STATUSES.indexOf(i.status);
+                  return idx === -1 ? 0 : idx;
+                }))
+              : 0;
+            const groupStatus = DISH_STATUSES[groupWorstIdx] || 'waiting';
+            const groupBadge  = groupStatusConfig[groupStatus] || groupStatusConfig.waiting;
+
             return (
               <div
                 key={group.id}
@@ -538,43 +531,36 @@ export default function OrderStatus() {
               >
                 <div className={styles.groupHeader}>
                   <p className={styles.groupLabel}>{local(group, 'name')}</p>
+                  {gItems.length > 0 && (
+                    <span className={`${styles.groupStatusBadge} ${groupBadge.cls}`}>
+                      {groupBadge.icon}{groupBadge.label}
+                    </span>
+                  )}
                   {groupAllWaiting && !isOrderDone && groupedSections.length > 1 && (
                     <button
                       className={styles.cancelGroupBtn}
-                      onClick={() => { setCancelTarget(isTargeted ? null : group.id); setCancelError(''); }}
+                      onClick={() => openCancel(group.id)}
                     >
                       {t('cancel_group')}
                     </button>
                   )}
                 </div>
 
-                {isTargeted && (
-                  <div className={styles.cancelConfirm}>
-                    <div className={styles.cancelConfirmText}>
-                      <div>{t('cancel_confirm_group')}</div>
-                      <div className={styles.cancelConfirmHint}>{t('cancel_hint')}</div>
-                      {cancelError && <div className={styles.cancelConfirmHint} style={{ color: '#dc2626' }}>{cancelError}</div>}
-                    </div>
-                    <button className={styles.cancelYesBtn} onClick={handleCancel} disabled={cancelling}>
-                      {cancelling ? '…' : t('cancel_yes')}
-                    </button>
-                    <button className={styles.cancelNoBtn} onClick={() => { setCancelTarget(null); setCancelError(''); }}>
-                      {t('cancel_no')}
-                    </button>
-                  </div>
-                )}
-
                 {gItems.length === 0 ? (
                   <p className={styles.emptyGroup}>—</p>
                 ) : (
                   gItems.map((item, i) => (
                     <OrderStatusItem
-                      key={item.id ? `${item.id}-${i}` : i}
-                      name={item.quantity > 1
-                        ? `${local(item, 'name')} (×${item.quantity})`
-                        : local(item, 'name')
-                      }
+                      key={item.orderItemId || (item.id ? `${item.id}-${i}` : i)}
+                      orderItemId={item.orderItemId}
+                      name={local(item, 'name')}
+                      quantity={item.quantity}
+                      lineTotal={item.lineTotal}
                       status={item.status}
+                      excludedIngredients={item.excludedIngredients}
+                      addons={item.addons}
+                      componentGroupChoices={item.componentGroupChoices}
+                      onCancel={!isOrderDone ? handleCancelItem : undefined}
                     />
                   ))
                 )}
@@ -587,19 +573,31 @@ export default function OrderStatus() {
               <p className={styles.groupLabel}>—</p>
               {orphanItems.map((item, i) => (
                 <OrderStatusItem
-                  key={item.id ? `orphan-${item.id}-${i}` : `orphan-${i}`}
-                  name={item.quantity > 1
-                    ? `${local(item, 'name')} (×${item.quantity})`
-                    : local(item, 'name')
-                  }
+                  key={item.orderItemId || (item.id ? `orphan-${item.id}-${i}` : `orphan-${i}`)}
+                  orderItemId={item.orderItemId}
+                  name={local(item, 'name')}
+                  quantity={item.quantity}
+                  lineTotal={item.lineTotal}
                   status={item.status}
+                  excludedIngredients={item.excludedIngredients}
+                  addons={item.addons}
+                  componentGroupChoices={item.componentGroupChoices}
+                  onCancel={!isOrderDone ? handleCancelItem : undefined}
                 />
               ))}
             </div>
           )}
+
+          {/* ── Order total ── */}
+          {activeOrder.total != null && !isNaN(Number(activeOrder.total)) && (
+            <div className={styles.orderTotalRow}>
+              <span className={styles.orderTotalLabel}>{t('pay_total')}</span>
+              <span className={styles.orderTotalAmount}>₴{Number(activeOrder.total).toFixed(2)}</span>
+            </div>
+          )}
         </div>
 
-        {/* ── Reviews (completed orders, premium restaurants only) ── */}
+        {/* ── Reviews ── */}
         <OrderReviews
           orderId={activeOrder.id}
           restaurantId={activeOrder.restaurantId}
@@ -609,82 +607,10 @@ export default function OrderStatus() {
         />
 
         {/* ── Actions ── */}
-        {showPayment ? (
+        {showActions && (
           <>
-            {/* Payment warning */}
-            {showPayWarning && (
-              <div className={styles.payWarning}>
-                <p className={styles.payWarningText}>
-                  {t('pay_warning') ?? '⚠️ Після оплати додавання страв буде заблоковано. Продовжити?'}
-                </p>
-                <div className={styles.payWarningActions}>
-                  <button className={styles.payConfirmBtn} onClick={handleLiqPay} disabled={liqpayLoading}>
-                    {liqpayLoading ? '…' : t('pay_confirm') ?? 'Так, сплатити онлайн'}
-                  </button>
-                  <button className={styles.cancelNoBtn} onClick={() => setShowPayWarning(false)}>
-                    {t('cancel_no')}
-                  </button>
-                </div>
-              </div>
-            )}
+            <PaymentSheet orderId={activeOrder.id} isFree={isFree} allServed={allServed} amount={activeOrder.total} />
 
-            {!showPayWarning && !isFree && (
-              <button
-                className={styles.payLiqpayBtn}
-                onClick={() => setShowPayWarning(true)}
-                disabled={liqpayLoading}
-              >
-                <MdCreditCard />
-                {t('pay_liqpay')}
-              </button>
-            )}
-
-            {/* Cash payment expandable */}
-            <div className={styles.cashSection}>
-              <button
-                className={styles.cashToggle}
-                onClick={() => { setShowCashExpand(v => !v); setShowCashWarning(false); }}
-              >
-                <MdPayments />
-                <span>{t('waiter_call_cash')}</span>
-                {showCashExpand ? <MdExpandLess /> : <MdExpandMore />}
-              </button>
-
-              {showCashExpand && (
-                <div className={styles.cashExpand}>
-                  {callSent === 'cash' ? (
-                    <div className={styles.callSentMsg}>{t('cash_call_sent')}</div>
-                  ) : showCashWarning ? (
-                    <div className={styles.payWarning}>
-                      <p className={styles.payWarningText}>
-                        {t('cash_warning') ?? '⚠️ Після підтвердження оплати готівкою замовлення буде заблоковано.'}
-                      </p>
-                      <div className={styles.payWarningActions}>
-                        <button className={styles.payConfirmBtn} onClick={handleCashCall}>
-                          {t('pay_confirm') ?? 'Підтвердити'}
-                        </button>
-                        <button className={styles.cancelNoBtn} onClick={() => setShowCashWarning(false)}>
-                          {t('cancel_no')}
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <SecondaryButton
-                      label={t('request_cash_payment') ?? 'Попросити рахунок готівкою'}
-                      onClick={() => setShowCashWarning(true)}
-                    />
-                  )}
-                </div>
-              )}
-            </div>
-
-            <SecondaryButton
-              label={`+ ${t('add_more')}`}
-              onClick={() => { startEditingOrder(activeOrder); navigate('/menu'); }}
-            />
-          </>
-        ) : !isOrderDone ? (
-          <>
             {callCooldownMsg && (
               <div className={styles.callCooldownMsg}>{t('waiter_call_cooldown_msg')}</div>
             )}
@@ -706,46 +632,41 @@ export default function OrderStatus() {
               <SecondaryButton
                 label={<><MdNotificationsActive /> {t('waiter_call')}</>}
                 onClick={handleWaiterCall}
-                disabled={isOrderTerminal}
               />
             )}
 
             <SecondaryButton
               label={`+ ${t('add_more')}`}
               onClick={() => { startEditingOrder(activeOrder); navigate('/menu'); }}
-              disabled={isOrderTerminal}
             />
           </>
-        ) : null}
+        )}
 
         {/* Cancel whole order — only when all items are still waiting */}
         {allItems.length > 0 && allItems.every(i => i.status === 'waiting') && !isOrderDone && (
-          cancelTarget === 'order' ? (
-            <div className={styles.cancelConfirm}>
-              <div className={styles.cancelConfirmText}>
-                <div>{t('cancel_confirm_order')}</div>
-                <div className={styles.cancelConfirmHint}>{t('cancel_hint')}</div>
-                {cancelError && <div className={styles.cancelConfirmHint} style={{ color: '#dc2626' }}>{cancelError}</div>}
-              </div>
-              <button className={styles.cancelYesBtn} onClick={handleCancel} disabled={cancelling}>
-                {cancelling ? '…' : t('cancel_yes')}
-              </button>
-              <button className={styles.cancelNoBtn} onClick={() => { setCancelTarget(null); setCancelError(''); }}>
-                {t('cancel_no')}
-              </button>
-            </div>
-          ) : (
-            <button
-              className={styles.cancelOrderBtn}
-              onClick={() => { setCancelTarget('order'); setCancelError(''); }}
-            >
-              {t('cancel_order')}
-            </button>
-          )
+          <button
+            className={styles.cancelOrderBtn}
+            onClick={() => openCancel('order')}
+          >
+            {t('cancel_order')}
+          </button>
         )}
       </div>
 
       <Footer />
+
+      {/* ── Cancel confirmation ── */}
+      <ConfirmDialog
+        open={!!cancelTarget}
+        title={cancelTarget === 'order' ? t('cancel_confirm_order') : t('cancel_confirm_group')}
+        error={cancelError}
+        confirmLabel={t('cancel_yes')}
+        cancelLabel={t('cancel_no')}
+        danger
+        loading={cancelLoading}
+        onConfirm={executeCancel}
+        onCancel={closeCancel}
+      />
     </div>
   );
 }

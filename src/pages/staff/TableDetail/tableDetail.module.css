@@ -43,6 +43,35 @@
   color: #15803d;
 }
 
+.waiterCallBannerCash {
+  background: #f0f4ff;
+  border-color: #93c5fd;
+  color: #1e40af;
+}
+
+.revertBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 6px;
+  border: 1.5px solid #f0ad00;
+  background: transparent;
+  color: #7a4f00;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.revertBtn:hover {
+  background: #fff3cd;
+}
+.revertBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .waiterCallInfo {
   display: flex;
   flex-direction: column;
@@ -112,6 +141,19 @@
   font-weight: 700;
   color: var(--primary-text);
 }
+
+.orderIdLink {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--accent-color, #1d7afc);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.orderIdLink:hover { text-decoration: underline; }
 
 /* ── Table ── */
 .table {
@@ -228,6 +270,20 @@
 
 .voidBtn:hover { background: #fee2e2; }
 
+/* Pay cash / complete order — all dishes served */
+.payBtn {
+  background: #f0fdf4;
+  color: #16a34a;
+}
+.payBtn:hover { background: #dcfce7; }
+
+/* Pay cash — some dishes not yet served (early close) */
+.payBtnPending {
+  background: #fffbeb;
+  color: #d97706;
+}
+.payBtnPending:hover { background: #fef3c7; }
+
 /* ── Void form ── */
 .voidFormRow td {
   padding: 10px 16px 14px;
@@ -239,6 +295,9 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  padding: 12px 16px 14px;
+  background: #fff5f5;
+  border-bottom: 1px solid #fecaca;
 }
 
 .voidReasonInput {
@@ -338,6 +397,36 @@
   color: #dc2626;
 }
 
+/* ── Inline delete confirm ── */
+.deleteConfirmRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.deleteConfirmYes {
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: none;
+  background: #dc2626;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.deleteConfirmNo {
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--separator-color, #ddd);
+  background: var(--surface-color, #fff);
+  color: var(--secondary-text, #666);
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
 .saveBtn {
   display: flex;
   align-items: center;
@@ -421,6 +510,32 @@
   text-align: center;
   color: var(--secondary-text);
   font-size: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.createOrderBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 18px;
+  border-radius: 10px;
+  border: none;
+  background: #1d7afc;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.createOrderBtn:hover:not(:disabled) { background: #1565e0; }
+
+.createOrderBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* ── Add-items panel ── */

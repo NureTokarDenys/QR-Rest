@@ -51,6 +51,7 @@
     "ITEM_NOT_EDITABLE":        "This item can only be modified before kitchen preparation starts.",
     "CANCEL_REASON_TOO_SHORT":  "Cancellation reason must be at least 10 characters.",
     "TABLE_ORDER_LOCKED":       "Another guest has already placed an order for this table. You can view the current order.",
+    "ACTIVE_ORDER_EXISTS":      "You already have an active order. Only one order is allowed at a time.",
     "ACTIVE_CALL_EXISTS":       "There is already an active waiter call for this table.",
     "PAYMENT_NOT_CONFIGURED":   "Online payments are not configured for this restaurant.",
     "PAYMENT_ALREADY_MADE":     "Payment has already been processed for this order.",

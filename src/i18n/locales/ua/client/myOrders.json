@@ -6,9 +6,10 @@
     "loading": "Завантаження…",
     "empty": "Замовлень поки немає",
     "status_open": "В процесі",
+    "status_open_paid": "Оплачено · Очікує",
     "status_cancelled": "Скасовано",
-    "status_completed_cash": "Оплачено готівкою",
-    "status_completed_epay": "Оплачено онлайн",
+    "status_completed_cash": "Оплачено · Готівка",
+    "status_completed_epay": "Оплачено · Онлайн",
     "status_void": "Скасовано",
     "status_payment": "Очікує оплати"
 }

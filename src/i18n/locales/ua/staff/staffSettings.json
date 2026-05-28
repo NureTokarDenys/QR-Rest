@@ -74,5 +74,8 @@
   "google_connected": "Google",
   "google_connected_value": "Підключено",
   "google_add": "Підключити",
-  "google_no_password": "Ваш акаунт використовує лише Google — зверніться до адміністратора для встановлення пароля."
+  "google_disconnect": "Відключити Google",
+  "google_link_success": "Акаунт Google успішно підключено.",
+  "google_no_password": "Ваш акаунт використовує лише Google — зверніться до адміністратора для встановлення пароля.",
+  "disconnect": "Відключити"
 }

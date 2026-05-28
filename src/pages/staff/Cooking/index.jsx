@@ -6,29 +6,31 @@ import WsStatusBanner from '../../../components/WsStatusBanner';
 import { updateGroupStatus } from '../../../api/kitchen';
 import { useStaffData } from '../../../context/StaffDataContext';
 import { useWebSocket } from '../../../hooks/useWebSocket';
+import { useLocalField } from '../../../i18n/useLang';
 import styles from './cooking.module.css';
 
 import { MdLocalFireDepartment, MdViewColumn, MdTableChart } from 'react-icons/md';
 
-function nameOf(obj) {
-  if (!obj) return '';
-  if (typeof obj === 'string') return obj;
-  return obj.name || obj.name_en || '';
+// Each helper takes `local` (from useLocalField) so it picks the right
+// language field reactively. The backend always returns both `name` and
+// `name_en` for each entity, so `local(obj, 'name')` resolves at render time.
+function getExcluded(local, item) {
+  return (item.excludedIngredients || []).map(x => local(x, 'name')).filter(Boolean);
 }
-function getExcluded(item) {
-  return (item.excludedIngredients || []).map(x => nameOf(x)).filter(Boolean);
-}
-function getAddons(item) {
+function getAddons(local, item) {
   return (item.addons || []).map(ao => {
-    const base = nameOf(typeof ao.addonId === 'object' ? ao.addonId : ao) || nameOf(ao.addon);
+    const src  = typeof ao.addonId === 'object' && ao.addonId ? ao.addonId : ao;
+    const base = local(src, 'name') || local(ao.addon, 'name');
     if (!base) return null;
     return ao.quantity > 1 ? `${base} ×${ao.quantity}` : base;
   }).filter(Boolean);
 }
-function getChoices(item) {
+function getChoices(local, item) {
   return (item.componentGroupChoices || []).map(c => {
-    const grp = nameOf(typeof c.groupId === 'object' ? c.groupId : null) || c.groupName || '';
-    const opt = nameOf(typeof c.optionId === 'object' ? c.optionId : null) || c.optionName || '';
+    const grpSrc = typeof c.groupId  === 'object' && c.groupId  ? c.groupId  : null;
+    const optSrc = typeof c.optionId === 'object' && c.optionId ? c.optionId : null;
+    const grp    = local(grpSrc, 'name') || c.groupName  || '';
+    const opt    = local(optSrc, 'name') || c.optionName || '';
     if (grp && opt) return `${grp}: ${opt}`;
     return opt || grp || null;
   }).filter(Boolean);
@@ -102,10 +104,12 @@ function buildGroupCards(orders) {
         statusChangedAt: null,
         items: (order.items || []).map(item => ({
           id: String(item._id),
-          name: (typeof item.menuItemId === 'object' ? item.menuItemId?.name : null) || item.name || '—',
+          name:    (typeof item.menuItemId === 'object' ? item.menuItemId?.name    : null) || item.name    || '—',
+          name_en: (typeof item.menuItemId === 'object' ? item.menuItemId?.name_en : null) || item.name_en || null,
           quantity: item.quantity || 1,
-          categoryName:  item.categoryName  || null,
-          categoryColor: item.categoryColor || null,
+          categoryName:    item.categoryName    || null,
+          categoryName_en: item.categoryName_en || item.categoryName || null,
+          categoryColor:   item.categoryColor   || null,
           excludedIngredients:    item.excludedIngredients    || [],
           addons:                 item.addons                 || [],
           componentGroupChoices:  item.componentGroupChoices  || [],
@@ -186,10 +190,12 @@ function buildGroupCards(orders) {
         wasRolledBack: group.wasRolledBack || false,
         items: groupItems.map(item => ({
           id: String(item._id),
-          name: (typeof item.menuItemId === 'object' ? item.menuItemId?.name : null) || item.name || '—',
+          name:    (typeof item.menuItemId === 'object' ? item.menuItemId?.name    : null) || item.name    || '—',
+          name_en: (typeof item.menuItemId === 'object' ? item.menuItemId?.name_en : null) || item.name_en || null,
           quantity: item.quantity || 1,
-          categoryName:  item.categoryName  || null,
-          categoryColor: item.categoryColor || null,
+          categoryName:    item.categoryName    || null,
+          categoryName_en: item.categoryName_en || item.categoryName || null,
+          categoryColor:   item.categoryColor   || null,
           excludedIngredients:   item.excludedIngredients   || [],
           addons:                item.addons                || [],
           componentGroupChoices: item.componentGroupChoices || [],
@@ -250,11 +256,15 @@ function applyGroupStatusEvent(orders, orderId, groupId, status) {
 export default function Cooking() {
   const { t } = useTranslation('cooking');
   const { t: tc } = useTranslation('components');
+  const local = useLocalField();
 
   // Kitchen orders live in the shared cache — lazy-loaded on first visit,
   // kept fresh via WS. In-place status flips happen without a refetch.
+  // Names/ingredients always carry both `name` and `name_en`, so language
+  // switches resolve at render via `local()` — no refetch needed.
   const { kitchenOrders, setKitchenOrders, refreshKitchenOrders, ensureKitchenOrders } = useStaffData();
   useEffect(() => { ensureKitchenOrders(); }, [ensureKitchenOrders]);
+
   const orders  = Array.isArray(kitchenOrders) ? kitchenOrders : [];
   const loading = kitchenOrders === null;
   const setOrders = setKitchenOrders;
@@ -281,8 +291,22 @@ export default function Cooking() {
     }
     if (event === 'GROUP_STATUS_UPDATED') {
       setOrders(prev => applyGroupStatusEvent(prev || [], payload.orderId, payload.groupId, payload.status));
+      return;
     }
-  }, [setOrders]);
+    // Remove completed/cancelled orders instantly (no network round-trip needed).
+    if (event === 'ORDER_CANCELLED' || event === 'ORDER_VOID' || event === 'ORDER_COMPLETED') {
+      if (payload.orderId) {
+        setOrders(prev => (prev || []).filter(
+          o => String(o._id || o.id) !== String(payload.orderId)
+        ));
+      }
+      return;
+    }
+    // When a client adds dishes, fetch fresh data so new items appear immediately.
+    if (event === 'ORDER_ITEMS_ADDED' || event === 'ORDER_NEW') {
+      refreshKitchenOrders();
+    }
+  }, [setOrders, refreshKitchenOrders]);
 
   const { status: wsStatus } = useWebSocket({ onMessage: handleWsMessage });
 
@@ -402,10 +426,12 @@ export default function Cooking() {
           statusChangedAt: group.statusChangedAt || null,
           items: items.map(item => ({
             id: String(item._id),
-            name: (typeof item.menuItemId === 'object' ? item.menuItemId?.name : null) || item.name || '—',
+            name:    (typeof item.menuItemId === 'object' ? item.menuItemId?.name    : null) || item.name    || '—',
+            name_en: (typeof item.menuItemId === 'object' ? item.menuItemId?.name_en : null) || item.name_en || null,
             quantity: item.quantity || 1,
-            categoryName:  item.categoryName  || null,
-            categoryColor: item.categoryColor || null,
+            categoryName:    item.categoryName    || null,
+            categoryName_en: item.categoryName_en || item.categoryName || null,
+            categoryColor:   item.categoryColor   || null,
             excludedIngredients:   item.excludedIngredients   || [],
             addons:                item.addons                || [],
             componentGroupChoices: item.componentGroupChoices || [],
@@ -548,16 +574,16 @@ export default function Cooking() {
                         )}
                       </div>
                       {group.items.map(item => {
-                        const excluded = getExcluded(item);
-                        const addons   = getAddons(item);
-                        const choices  = getChoices(item);
+                        const excluded = getExcluded(local, item);
+                        const addons   = getAddons(local, item);
+                        const choices  = getChoices(local, item);
                         return (
                           <div key={item.id} className={styles.tableItemRow}>
                             <span className={styles.tableItemDot} style={{ background: orderColor }} />
                             <span className={styles.tableItemQty}>×{item.quantity}</span>
                             <div className={styles.tableItemContent}>
                               <div className={styles.tableItemNameRow}>
-                                <span className={styles.tableItemName}>{item.name}</span>
+                                <span className={styles.tableItemName}>{local(item, 'name')}</span>
                                 {item.categoryName && (
                                   <span
                                     className={styles.tableCatTag}
@@ -566,7 +592,7 @@ export default function Cooking() {
                                       color: item.categoryColor,
                                     } : undefined}
                                   >
-                                    {item.categoryName}
+                                    {local(item, 'categoryName') || item.categoryName}
                                   </span>
                                 )}
                               </div>

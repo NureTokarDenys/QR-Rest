@@ -7,6 +7,7 @@ import PrimaryButton from '../../../components/PrimaryButton';
 import SecondaryButton from '../../../components/SecondaryButton';
 import { Dropdown } from '../../../components/Dropdown';
 import UpgradeModal from '../../../components/UpgradeModal';
+import ConfirmDialog from '../../../components/ConfirmDialog';
 import {
   createStaff, updateStaffRole,
   deactivateStaff, activateStaff, resetStaffPassword,
@@ -59,8 +60,10 @@ export default function StaffManagement() {
   useEffect(() => { ensureStaff(); }, [ensureStaff]);
   const staff = Array.isArray(cachedStaff) ? cachedStaff : [];
   const loading = cachedStaff === null;
-  const [showAdd,  setShowAdd]  = useState(false);
-  const [pwdModal, setPwdModal] = useState(null); // { title, text, password }
+  const [showAdd,   setShowAdd]   = useState(false);
+  const [pwdModal,  setPwdModal]  = useState(null); // { title, text, password } — only for new account temp password
+  const [confirm,   setConfirm]   = useState(null); // { type: 'deactivate'|'activate'|'reset', user }
+  const [infoModal, setInfoModal] = useState(null); // { title, body }
 
   // Add staff form state
   const [addName,  setAddName]  = useState('');
@@ -108,38 +111,50 @@ export default function StaffManagement() {
     }
   }
 
-  async function handleToggleActive(user) {
-    const confirmed = window.confirm(
-      user.isActive ? t('confirmDeactivate') : t('confirmActivate')
-    );
-    if (!confirmed) return;
-    try {
-      if (user.isActive) await deactivateStaff(user._id);
-      else               await activateStaff(user._id);
-      refreshStaff();
-    } catch (err) {
-      console.error('Toggle active error:', err);
-    }
+  function handleToggleActive(user) {
+    setConfirm({ type: user.isActive ? 'deactivate' : 'activate', user });
   }
 
-  async function handleResetPassword(user) {
-    const confirmed = window.confirm(t('confirmResetPassword'));
-    if (!confirmed) return;
+  function handleResetPassword(user) {
+    setConfirm({ type: 'reset', user });
+  }
+
+  async function handleConfirmed() {
+    if (!confirm) return;
+    const { type, user } = confirm;
+    setConfirm(null);
     try {
-      const res = await resetStaffPassword(user._id);
-      setPwdModal({
-        title:    t('resetPasswordTitle'),
-        text:     t('resetPasswordText'),
-        password: res.newPassword,
-      });
+      if (type === 'deactivate') {
+        await deactivateStaff(user._id);
+        refreshStaff();
+      } else if (type === 'activate') {
+        await activateStaff(user._id);
+        refreshStaff();
+      } else if (type === 'reset') {
+        await resetStaffPassword(user._id);
+        setInfoModal({
+          title: t('resetPasswordSentTitle'),
+          body:  t('resetPasswordSentText', { email: user.email }),
+        });
+      }
     } catch (err) {
-      console.error('Reset password error:', err);
+      console.error(`${type} error:`, err);
     }
   }
 
   return (
     <>
     <UpgradeModal open={upgradeOpen} onClose={() => setUpgradeOpen(false)} ns="components" reason="upgrade_limit_staff" />
+
+    <ConfirmDialog
+      open={Boolean(confirm)}
+      title={confirm ? t(`confirm${confirm.type.charAt(0).toUpperCase() + confirm.type.slice(1)}Title`) : ''}
+      message={confirm ? t(`confirm${confirm.type.charAt(0).toUpperCase() + confirm.type.slice(1)}Message`, { name: confirm.user?.name, email: confirm.user?.email }) : ''}
+      confirmLabel={t('confirm')}
+      cancelLabel={t('cancel')}
+      onConfirm={handleConfirmed}
+      onCancel={() => setConfirm(null)}
+    />
     <StaffShell
       title={<><MdPeople /> {t('title')}</>}
       rightActions={
@@ -312,7 +327,7 @@ export default function StaffManagement() {
         </Modal>
       )}
 
-      {/* Temp password / reset password modal */}
+      {/* Temp password modal — shown only when creating a new account */}
       {pwdModal && (
         <PasswordDisplay
           title={pwdModal.title}
@@ -321,6 +336,16 @@ export default function StaffManagement() {
           onClose={() => setPwdModal(null)}
           t={t}
         />
+      )}
+
+      {/* Info modal — shown after password reset email is sent */}
+      {infoModal && (
+        <Modal title={infoModal.title} onClose={() => setInfoModal(null)}>
+          <p className={styles.pwdText}>{infoModal.body}</p>
+          <div className={styles.modalFooter}>
+            <PrimaryButton label={t('close')} onClick={() => setInfoModal(null)} />
+          </div>
+        </Modal>
       )}
     </StaffShell>
     </>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useLocalField } from '../../../i18n/useLang';
 import StaffShell from '../../../components/staff/StaffShell';
 import { Skel } from '../../../components/staff/Skeleton';
 import MenuCategoryList, { MenuCategoryListSkeleton } from '../../../components/staff/MenuCategoryList';
@@ -46,6 +47,7 @@ function normaliseApiCategory(cat) {
 export default function MenuManagement() {
   const navigate = useNavigate();
   const { t } = useTranslation('menuManagement');
+  const local = useLocalField();
   const { isFree } = usePlan();
   const [upgradeOpen, setUpgradeOpen] = useState(null); // null | 'categories' | 'items'
   const [selectedCat, setSelectedCat] = useState('all');
@@ -210,7 +212,7 @@ export default function MenuManagement() {
                     onToggle={handleToggle}
                     onDelete={(id) => {
                       const target = dishes.find(d => d.id === id);
-                      setDeleteDialog({ id, name: target?.name || '' });
+                      setDeleteDialog({ id, name: target ? (local(target, 'name') || target.name) : '' });
                     }}
                   />
                 ))}

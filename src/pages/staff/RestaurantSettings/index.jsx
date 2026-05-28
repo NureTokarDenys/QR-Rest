@@ -8,7 +8,9 @@ import PageSkeleton from '../../../components/staff/Skeleton';
 import InputField from '../../../components/InputField';
 import ReadonlyField from '../../../components/staff/ReadonlyField';
 import PrimaryButton from '../../../components/PrimaryButton';
+import SecondaryButton from '../../../components/SecondaryButton';
 import LangTabs from '../../../components/staff/LangTabs';
+import TranslateOverlay from '../../../components/staff/TranslateOverlay';
 import { Dropdown } from '../../../components/Dropdown';
 import { updateRestaurant, uploadRestaurantLogo, translateText, saveLiqpayKeys } from '../../../api/admin';
 import { usePlan } from '../../../hooks/usePlan';
@@ -28,6 +30,7 @@ const EMPTY_FIELDS = emptyI18n('name', 'address', 'cuisine');
 export default function RestaurantSettings() {
   const { t } = useTranslation('restaurantSettings');
   const { isPremium } = usePlan();
+  const isFree = !isPremium;
   const [searchParams, setSearchParams] = useSearchParams();
   // Restaurant is already in the cache (loaded eagerly for PlanContext).
   // LiqPay is lazy — only requested when an admin opens this page.
@@ -219,6 +222,28 @@ export default function RestaurantSettings() {
     }
   }
 
+  function handleCancel() {
+    if (!cachedRestaurant) return;
+    const r = cachedRestaurant;
+    const loaded = { ...EMPTY_FIELDS };
+    SUPPORTED_LANGS.forEach(l => {
+      ['name', 'address', 'cuisine'].forEach(base => {
+        const key = fieldFor(base, l.code);
+        if (l.code === SOURCE_LANG) {
+          loaded[key] = r[base] || '';
+        } else {
+          loaded[key] = r.translations?.[l.apiCode]?.[base]?.value || '';
+        }
+      });
+    });
+    setFields(loaded);
+    setSlug(r.slug || '');
+    const allowed = new Set(BACKEND_LANGUAGES.map(lc => lc.code));
+    setDefaultLang(allowed.has(r.defaultLanguage) ? r.defaultLanguage : 'uk');
+    setEnabledLangs((r.enabledLanguages || []).filter(code => allowed.has(code)));
+    handleCancelLogoChanges();
+  }
+
   async function handleSave() {
     setSaving(true);
     setSavedOk(false);
@@ -271,12 +296,22 @@ export default function RestaurantSettings() {
     );
   }
 
+  const activeLangLabel = SUPPORTED_LANGS.find(l => l.code === activeLang)?.label ?? activeLang;
+
   return (
+    <>
+    <TranslateOverlay visible={translating} lang={activeLangLabel} />
     <StaffShell
       title={<><MdStorefront /> {t('title')}</>}
       titleHideBelow={340}
       rightActions={
         <div className={styles.headerActions}>
+          <SecondaryButton
+            label={t('cancel')}
+            onClick={handleCancel}
+            disabled={saving}
+            className={styles.cancelBtn}
+          />
           <PrimaryButton
             label={saving ? t('saving') : savedOk ? `✓ ${t('saved')}` : t('save')}
             onClick={handleSave}
@@ -325,7 +360,9 @@ export default function RestaurantSettings() {
               langs={SUPPORTED_LANGS}
               active={activeLang}
               onChange={setActiveLang}
-              onTranslate={activeLang !== SOURCE_LANG ? handleAutoTranslate : null}
+              onTranslate={activeLang !== SOURCE_LANG
+                ? (isFree ? () => setUpgradeModalOpen(true) : handleAutoTranslate)
+                : null}
               translating={translating}
             />
           </div>
@@ -547,5 +584,6 @@ export default function RestaurantSettings() {
 
       </div>
     </StaffShell>
+    </>
   );
 }

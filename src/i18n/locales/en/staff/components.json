@@ -85,6 +85,7 @@
   "ws_ping": "Ping",
 
   "notif_order_new":        "New order — Table #{{table}}",
+  "notif_order_items_added": "Items added — Table #{{table}}",
   "notif_waiter_call":      "Table #{{table}} needs assistance",
   "notif_waiter_call_cash": "Table #{{table}} requests cash payment",
   "notif_order_void":       "Order #{{order}} cancelled",

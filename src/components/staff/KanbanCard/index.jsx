@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { fieldFor } from '../../../i18n/langs';
+import { useLocalField } from '../../../i18n/useLang';
 import { Skel } from '../Skeleton';
 import styles from './kanbanCard.module.css';
 
@@ -22,25 +22,23 @@ function formatElapsed(isoTimestamp, now) {
   return `${s}s`;
 }
 
-function nameOf(obj, lang = 'ua') {
-  if (!obj) return '';
-  if (typeof obj === 'string') return obj;
-  return obj[fieldFor('name', lang)] || obj.name || obj.name_en || '';
+function getExcluded(local, item) {
+  return (item.excludedIngredients || []).map(x => local(x, 'name')).filter(Boolean);
 }
-function getExcluded(item, lang) {
-  return (item.excludedIngredients || []).map(x => nameOf(x, lang)).filter(Boolean);
-}
-function getAddons(item, lang) {
+function getAddons(local, item) {
   return (item.addons || []).map(ao => {
-    const base = nameOf(typeof ao.addonId === 'object' ? ao.addonId : ao, lang) || nameOf(ao.addon, lang);
+    const src  = typeof ao.addonId === 'object' && ao.addonId ? ao.addonId : ao;
+    const base = local(src, 'name') || local(ao.addon, 'name');
     if (!base) return null;
     return ao.quantity > 1 ? `${base} ×${ao.quantity}` : base;
   }).filter(Boolean);
 }
-function getChoices(item, lang) {
+function getChoices(local, item) {
   return (item.componentGroupChoices || []).map(c => {
-    const grp = nameOf(typeof c.groupId  === 'object' ? c.groupId  : null, lang) || c.groupName  || '';
-    const opt = nameOf(typeof c.optionId === 'object' ? c.optionId : null, lang) || c.optionName || '';
+    const grpSrc = typeof c.groupId  === 'object' && c.groupId  ? c.groupId  : null;
+    const optSrc = typeof c.optionId === 'object' && c.optionId ? c.optionId : null;
+    const grp    = local(grpSrc, 'name') || c.groupName  || '';
+    const opt    = local(optSrc, 'name') || c.optionName || '';
     if (grp && opt) return `${grp}: ${opt}`;
     return opt || grp || null;
   }).filter(Boolean);
@@ -48,8 +46,8 @@ function getChoices(item, lang) {
 
 export default function KanbanCard({ item: group, status, onStatusChange }) {
   const navigate = useNavigate();
-  const { t, i18n } = useTranslation('components');
-  const lang = i18n.language;
+  const { t } = useTranslation('components');
+  const local = useLocalField();
 
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
@@ -98,16 +96,16 @@ export default function KanbanCard({ item: group, status, onStatusChange }) {
       {/* ── Dish list ── */}
       <div className={styles.items}>
         {(group.items || []).map(item => {
-          const excluded = getExcluded(item, lang);
-          const addons   = getAddons(item, lang);
-          const choices  = getChoices(item, lang);
+          const excluded = getExcluded(local, item);
+          const addons   = getAddons(local, item);
+          const choices  = getChoices(local, item);
           const hasExtras = excluded.length || addons.length || choices.length || item.comment;
           return (
             <div key={item.id} className={`${styles.itemRow} ${hasExtras ? styles.itemRowExpanded : ''}`}>
               <span className={styles.itemQty}>×{item.quantity}</span>
               <div className={styles.itemDetails}>
                 <div className={styles.itemNameRow}>
-                  <span className={styles.itemName}>{nameOf(item, lang)}</span>
+                  <span className={styles.itemName}>{local(item, 'name') || item.name}</span>
                   {item.categoryName && (
                     <span
                       className={styles.catTag}
@@ -116,7 +114,7 @@ export default function KanbanCard({ item: group, status, onStatusChange }) {
                         color: item.categoryColor,
                       } : undefined}
                     >
-                      {item.categoryName}
+                      {local(item, 'categoryName') || item.categoryName}
                     </span>
                   )}
                 </div>

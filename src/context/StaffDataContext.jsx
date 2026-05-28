@@ -64,8 +64,13 @@ export function StaffDataProvider({ children }) {
 
   function makeRefresher(key, fetcher, setter) {
     return async () => {
-      if (inflightRef.current[key]) return inflightRef.current[key];
-      const p = (async () => {
+      if (inflightRef.current[key]) {
+        // Another fetch is running; schedule one more after it completes so
+        // WS events that arrive mid-flight are never silently dropped.
+        inflightRef.current[`${key}:queued`] = true;
+        return inflightRef.current[key];
+      }
+      const run = async () => {
         try {
           const data = await fetcher();
           setter(data);
@@ -73,10 +78,14 @@ export function StaffDataProvider({ children }) {
           console.warn(`[StaffData] refresh ${key} failed:`, err?.message);
         } finally {
           inflightRef.current[key] = null;
+          if (inflightRef.current[`${key}:queued`]) {
+            inflightRef.current[`${key}:queued`] = false;
+            inflightRef.current[key] = run();
+          }
         }
-      })();
-      inflightRef.current[key] = p;
-      return p;
+      };
+      inflightRef.current[key] = run();
+      return inflightRef.current[key];
     };
   }
 

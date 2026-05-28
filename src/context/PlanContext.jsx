@@ -10,7 +10,7 @@ const PlanContext = createContext(null);
  */
 export function PlanProvider({ children }) {
   const { restaurant } = useStaffData();
-  const plan = restaurant?.plan || 'free';
+  const plan = restaurant?.plan ?? null; // null until loaded — lets usePlan() fall through to AppContext on client pages
   const planLoading = restaurant === null;
 
   return (

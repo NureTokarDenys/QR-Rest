@@ -29,13 +29,29 @@
   margin: 0;
 }
 
-.saveBtn {
-  color: #fff;
-  border: 1px solid #1d7afc;
-  background-color: #1d7afc;
+.cancelBtn {
+  color: var(--primary-text);
+  border: 1px solid var(--separator-color);
+  background-color: var(--danger-color);
   border-radius: 6px;
-  padding: 7px 14px;
+  padding: 4px 10px;
   font-size: 14px;
+  cursor: pointer;
+}
+
+.saveBtn {
+  color: var(--primary-text);
+  border: 1px solid var(--separator-color);
+  background-color: var(--accent-color);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.saveBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 

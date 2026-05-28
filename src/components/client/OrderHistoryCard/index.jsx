@@ -13,8 +13,9 @@ export default function OrderHistoryCard({ order }) {
   const local = useLocalField();
 
   const statusConfig = {
-    // Active order state
+    // Active order states
     open:            { label: <><MdHourglassTop />        {t2('status_open')}</>,          className: 'waiting' },
+    open_paid:       { label: <><MdPayments />            {t2('status_open_paid')}</>,      className: 'served'  },
     // Terminal states
     completed_cash:  { label: <><MdPayments />            {t2('status_completed_cash')}</>, className: 'served'  },
     completed_epay:  { label: <><MdCreditCard />          {t2('status_completed_epay')}</>, className: 'served'  },

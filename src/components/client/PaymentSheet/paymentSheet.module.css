@@ -1,0 +1,375 @@
+/* ── Trigger button ── */
+.payNowBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  background: var(--accent-color);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.15s;
+}
+.payNowBtn:hover { opacity: 0.88; }
+.payNowBtn svg { font-size: 20px; }
+
+/* ── Overlay ── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 900;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Bottom sheet ── */
+.sheet {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 480px;
+  background: var(--surface-color);
+  border-radius: 20px 20px 0 0;
+  padding: 10px 20px 40px;
+  z-index: 901;
+  animation: slideUp 0.25s ease;
+  box-sizing: border-box;
+}
+
+@keyframes slideUp {
+  from { transform: translateX(-50%) translateY(100%); }
+  to   { transform: translateX(-50%) translateY(0); }
+}
+
+.sheetHandle {
+  width: 40px;
+  height: 4px;
+  background: var(--separator-color);
+  border-radius: 2px;
+  margin: 0 auto 16px;
+}
+
+/* ── Sheet header ── */
+.sheetHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.sheetTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--primary-text);
+}
+
+.sheetClose {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 22px;
+  color: var(--secondary-text);
+  padding: 4px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  transition: color 0.1s;
+}
+.sheetClose:hover { color: var(--primary-text); }
+
+/* ── Order total display ── */
+.totalRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-color);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 6px;
+}
+
+.totalLabel {
+  font-size: 13px;
+  color: var(--secondary-text);
+  font-weight: 500;
+}
+
+.totalAmount {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--accent-color);
+  letter-spacing: -0.5px;
+}
+
+/* ── Payment method rows ── */
+.methodRow {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 0;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--separator-color);
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  transition: background 0.15s;
+  border-radius: 0;
+}
+.methodRow:hover { background: var(--bg-color); }
+.methodRow:last-child { border-bottom: none; }
+
+.methodIcon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--bg-color);
+  border: 1px solid var(--separator-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  color: var(--primary-text);
+  flex-shrink: 0;
+}
+
+.methodIconCard {
+  color: var(--accent-color);
+}
+
+.methodRowChecking {
+  opacity: 0.65;
+  cursor: default;
+}
+
+/* Inline spinner inside the method icon circle */
+.methodSpinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--separator-color);
+  border-top-color: var(--accent-color);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.methodInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+}
+
+.methodLabel {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--primary-text);
+}
+
+.methodDesc {
+  font-size: 12px;
+  color: var(--secondary-text);
+  line-height: 1.4;
+}
+
+/* ── Confirmation step ── */
+.confirmBlock {
+  padding: 4px 0;
+}
+
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--secondary-text);
+  font-family: inherit;
+  padding: 0;
+  margin-bottom: 14px;
+  transition: color 0.1s;
+}
+.backBtn:hover { color: var(--primary-text); }
+.backBtn svg { font-size: 16px; }
+
+.confirmText {
+  font-size: 14px;
+  color: var(--primary-text);
+  line-height: 1.55;
+  margin: 0 0 18px;
+}
+
+.confirmActions {
+  display: flex;
+  gap: 10px;
+}
+
+.cancelBtn {
+  flex: 1;
+  background: none;
+  border: 1.5px solid var(--separator-color);
+  color: var(--primary-text);
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+.cancelBtn:hover { background: var(--bg-color); }
+
+.confirmBtn {
+  flex: 1;
+  background: var(--accent-color);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.15s;
+}
+.confirmBtn:hover:not(:disabled) { opacity: 0.88; }
+.confirmBtn:disabled { opacity: 0.55; cursor: default; }
+
+/* ── Warning step (dishes not all served) ── */
+.warnBlock {
+  padding: 4px 0;
+}
+
+.warnIcon {
+  font-size: 48px;
+  color: #d97706;
+  display: flex;
+  justify-content: center;
+  margin: 8px 0 12px;
+}
+
+.warnTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--primary-text);
+  margin: 0 0 10px;
+  text-align: center;
+}
+
+.warnBody {
+  font-size: 13px;
+  color: var(--secondary-text);
+  line-height: 1.6;
+  margin: 0 0 20px;
+  text-align: center;
+  padding: 12px 8px;
+  background: #fef3c7;
+  border-radius: 10px;
+  border: 1px solid #fde68a;
+}
+
+.warnProceedBtn {
+  flex: 1;
+  background: #d97706;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.15s;
+}
+.warnProceedBtn:hover { opacity: 0.88; }
+
+/* ── Card error step ── */
+.cardErrorBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 4px 8px;
+  gap: 12px;
+}
+
+.cardErrorIcon {
+  font-size: 52px;
+  color: #dc2626;
+  display: flex;
+  align-items: center;
+}
+
+.cardErrorText {
+  font-size: 14px;
+  color: var(--primary-text);
+  line-height: 1.6;
+  text-align: center;
+  margin: 0;
+  padding: 12px 8px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.cardErrorBackBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1.5px solid var(--separator-color);
+  color: var(--primary-text);
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+  width: 100%;
+  justify-content: center;
+}
+.cardErrorBackBtn:hover { background: var(--bg-color); }
+
+/* ── Cash sent / success state ── */
+.sentBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 0 8px;
+  gap: 12px;
+}
+
+.sentIcon {
+  font-size: 52px;
+  color: #16a34a;
+}
+
+.sentText {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--primary-text);
+  text-align: center;
+  margin: 0;
+}

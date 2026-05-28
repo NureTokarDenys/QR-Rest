@@ -3,6 +3,14 @@
   "waiterCall": "Виклик офіціанта",
   "acceptCall": "Прийняти виклик",
   "status": "Статус",
+  "tableStatus": "Статус столу",
+  "orderStatus": "Статус замовлення",
+  "orderStatusOpen": "Відкрито",
+  "orderStatusOpenPaid": "Оплачено · Обслуговується",
+  "orderStatusCompleted": "Завершено",
+  "orderStatusCompletedCash": "Завершено · Готівка",
+  "orderStatusCompletedEpay": "Завершено · Онлайн",
+  "orderStatusCancelled": "Скасовано",
   "statusFree": "Вільний",
   "statusBusy": "Зайнятий",
   "statusWaiter": "Виклик офіціанта",
@@ -40,6 +48,9 @@
   "deleteItemConfirm": "Видалити позицію з замовлення?",
   "orders": "Замовлень",
   "payCash": "Оплата готівкою",
+  "completeOrder": "Завершити замовлення",
+  "payCashConfirm": "Закрити замовлення та отримати оплату готівкою?",
+  "completeOrderConfirm": "Позначити передплачене замовлення як завершене?",
   "voidOrder": "Скасувати замовлення",
   "markWalkout": "Незавершений візит (walk-out)",
   "voidReasonPlaceholder": "Причина скасування (мін. 10 символів)...",
@@ -88,6 +99,10 @@
   "callInitiated": "Виклик о",
   "callAnswered": "Виклик прийнято",
   "callAnsweredAt": "Прийнято о",
+  "waiterCallCash": "Запит на оплату готівкою",
+  "callAnsweredCash": "Виклик для оплати прийнято",
+  "revertPayment": "Скасувати оплату",
+  "revertPaymentConfirm": "Скасувати оплату готівкою та знову відкрити замовлення?",
 
   "qrGenerateError": "Не вдалося згенерувати QR-код",
   "pdfGenerateError": "Помилка генерації PDF",
@@ -98,5 +113,15 @@
   "editTableLabel": "Назва (необов'язково)",
   "saveTableInfo": "Зберегти",
   "duplicateTableNumber": "Стіл з таким номером вже існує",
-  "tableInfoSaved": "Стіл оновлено"
+  "tableInfoSaved": "Стіл оновлено",
+
+  "createOrder": "Створити замовлення",
+
+  "pickerAddToBasket": "Додати · {{price}}₴",
+  "pickerConfirmOrder": "Додати до замовлення",
+  "addedByWaiter": "Додано офіціантом",
+  "saveItem": "Зберегти зміни",
+  "deleteItem": "Видалити",
+  "deleteConfirm": "Видалити позицію?",
+  "deleteYes": "Видалити"
 }

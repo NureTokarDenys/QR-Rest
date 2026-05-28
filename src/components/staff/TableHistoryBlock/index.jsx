@@ -3,15 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import styles from './tableHistoryBlock.module.css';
 
-// Maps order status → translation key and CSS class
+// Maps DB order status → translation key and CSS class
 const STATUS_MAP = {
-  waiting:         { key: 'historyStatusWaiting',   cls: 'active'    },
-  cooking:         { key: 'historyStatusCooking',   cls: 'active'    },
-  ready:           { key: 'historyStatusReady',     cls: 'active'    },
-  served:          { key: 'historyStatusServed',    cls: 'active'    },
-  payment_pending: { key: 'historyStatusPayment',   cls: 'active'    },
-  completed:       { key: 'historyStatusCompleted', cls: 'completed' },
-  void:            { key: 'historyStatusVoid',      cls: 'void'      },
+  open:            { key: 'orderStatusOpen',       cls: 'active'    },
+  open_paid:       { key: 'orderStatusOpenPaid',        cls: 'paid'      },
+  completed_cash:  { key: 'orderStatusCompletedCash',   cls: 'completed' },
+  completed_epay:  { key: 'orderStatusCompletedEpay',   cls: 'completed' },
+  cancelled:       { key: 'orderStatusCancelled',       cls: 'void'      },
 };
 
 export default function TableHistoryBlock({ history = [] }) {

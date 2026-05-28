@@ -3,6 +3,14 @@
   "waiterCall": "Waiter call",
   "acceptCall": "Accept call",
   "status": "Status",
+  "tableStatus": "Table status",
+  "orderStatus": "Order status",
+  "orderStatusOpen": "Open",
+  "orderStatusOpenPaid": "Paid · Serving",
+  "orderStatusCompleted": "Completed",
+  "orderStatusCompletedCash": "Completed · Cash",
+  "orderStatusCompletedEpay": "Completed · Online",
+  "orderStatusCancelled": "Cancelled",
   "statusFree": "Free",
   "statusBusy": "Occupied",
   "statusWaiter": "Waiter call",
@@ -40,6 +48,9 @@
   "deleteItemConfirm": "Remove this item from the order?",
   "orders": "Orders",
   "payCash": "Pay cash",
+  "completeOrder": "Complete order",
+  "payCashConfirm": "Close this order and collect cash payment?",
+  "completeOrderConfirm": "Mark this pre-paid order as completed?",
   "voidOrder": "Cancel order",
   "markWalkout": "Walk-out (left without paying)",
   "voidReasonPlaceholder": "Reason for cancellation (min. 10 chars)...",
@@ -88,6 +99,10 @@
   "callInitiated": "Called at",
   "callAnswered": "Call accepted",
   "callAnsweredAt": "Accepted at",
+  "waiterCallCash": "Cash payment request",
+  "callAnsweredCash": "Payment call accepted",
+  "revertPayment": "Revert payment",
+  "revertPaymentConfirm": "Revert cash payment and re-open the order?",
 
   "qrGenerateError": "Failed to generate QR code",
   "pdfGenerateError": "Failed to generate PDF",
@@ -98,5 +113,15 @@
   "editTableLabel": "Name (optional)",
   "saveTableInfo": "Save",
   "duplicateTableNumber": "A table with this number already exists",
-  "tableInfoSaved": "Table updated"
+  "tableInfoSaved": "Table updated",
+
+  "createOrder": "Create order",
+
+  "pickerAddToBasket": "Add · {{price}}₴",
+  "pickerConfirmOrder": "Add to order",
+  "addedByWaiter": "Added by waiter",
+  "saveItem": "Save changes",
+  "deleteItem": "Delete",
+  "deleteConfirm": "Delete item?",
+  "deleteYes": "Delete"
 }

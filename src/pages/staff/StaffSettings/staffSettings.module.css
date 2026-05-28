@@ -335,59 +335,160 @@
   border-color: var(--accent-color);
 }
 
-/* Integrations */
-.integrationRow {
+/* ── Google account card ── */
+.googleAccountCard {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 10px 0;
+  border-bottom: 1px solid var(--separator-color);
 }
 
-.integrationInfo {
-  flex: 1;
+.googleAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.googleAvatarFallback {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #4285F4;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  font-weight: 700;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.googleAccountInfo {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
 }
 
-.integrationLabel {
+.googleAccountName {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--primary-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.googleAccountEmail {
+  font-size: 13px;
+  color: var(--secondary-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.googleConnectedBadge {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #16a34a;
+  background: #dcfce7;
+  border-radius: 20px;
+  padding: 3px 9px;
+}
+
+/* "Connect Google" row */
+.googleConnectRow {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--separator-color);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+
+.googleConnectRow:hover {
+  background: var(--dropdown-option-hover);
+}
+
+.googleConnectRow:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.googleConnectIcon {
+  width: 22px;
+  text-align: center;
+  flex-shrink: 0;
+  color: var(--icon-color);
+}
+
+.googleConnectLabel {
+  flex: 1;
   font-size: 14px;
   font-weight: 500;
   color: var(--primary-text);
 }
 
-.integrationNote {
+.googleConnectValue {
+  font-size: 14px;
+  color: var(--accent-color);
+  font-weight: 600;
+}
+
+/* "Disconnect Google" danger row */
+.googleDisconnectRow {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--separator-color);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease;
+}
+
+.googleDisconnectRow:hover {
+  background: var(--dropdown-option-hover);
+}
+
+.googleDisconnectRow:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.googleDisconnectLabel {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--danger-color);
+}
+
+.googleDisconnectValue {
+  font-size: 14px;
+  color: var(--secondary-text);
+}
+
+/* Notes and feedback below the card */
+.googleNote {
   font-size: 12px;
   color: var(--secondary-text);
-  line-height: 1.4;
-}
-
-.integrationBadge {
-  font-size: 12px;
-  font-weight: 600;
-  color: #16a34a;
-  background: #dcfce7;
-  border-radius: 6px;
-  padding: 3px 10px;
-  flex-shrink: 0;
-}
-
-.integrationBtn {
-  background: none;
-  border: 1.5px solid var(--border);
-  border-radius: 8px;
-  padding: 6px 14px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--accent-color);
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: background 0.1s, border-color 0.1s;
-}
-
-.integrationBtn:hover {
-  background: var(--bg-color);
-  border-color: var(--accent-color);
+  padding: 6px 0 4px;
+  line-height: 1.5;
 }
 
 @media (max-width: 1024px) {

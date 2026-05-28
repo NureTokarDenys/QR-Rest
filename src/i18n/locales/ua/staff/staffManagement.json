@@ -32,16 +32,21 @@
   "tempPasswordText": "Тимчасовий пароль для входу. Збережіть його — він більше не буде показаний:",
   "close": "Закрити",
 
-  "resetPasswordTitle": "Новий тимчасовий пароль",
-  "resetPasswordText": "Пароль скинуто. Передайте цей пароль співробітнику:",
+  "resetPasswordSentTitle": "Посилання надіслано",
+  "resetPasswordSentText": "Посилання для скидання пароля надіслано на {{email}}. Посилання дійсне 1 годину.",
 
-  "confirmDeactivate": "Деактивувати цього співробітника?",
-  "confirmActivate": "Активувати цього співробітника?",
-  "confirmResetPassword": "Скинути пароль цього співробітника?",
+  "confirmDeactivateTitle": "Деактивувати акаунт?",
+  "confirmDeactivateMessage": "{{name}} не зможе входити в систему, поки акаунт деактивовано.",
+  "confirmActivateTitle": "Активувати акаунт?",
+  "confirmActivateMessage": "Це відновить доступ {{name}} до системи.",
+  "confirmResetTitle": "Скинути пароль?",
+  "confirmResetMessage": "Посилання для скидання пароля буде надіслано на {{email}}. Посилання дійсне 1 годину.",
+
+  "confirm": "Підтвердити",
+  "cancel": "Скасувати",
 
   "roleUpdated": "Роль оновлено",
   "errorCreate": "Не вдалося створити співробітника",
   "errorLoad": "Не вдалося завантажити персонал",
-  "cancel": "Скасувати",
   "nameEmailRequired": "Ім'я та email є обов'язковими"
 }

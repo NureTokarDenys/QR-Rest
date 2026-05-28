@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { useLocalField, useFallbackField } from '../../../i18n/useLang';
 import FallbackMark from '../../FallbackMark';
 
-export default function DishCard({ dish }) {
+export default function DishCard({ dish, onClick }) {
   const { t } = useTranslation('clientToast');
   const { t: tMenu } = useTranslation('menu');
   const local = useLocalField();
@@ -17,6 +17,7 @@ export default function DishCard({ dish }) {
   const { showToast } = useToast();
 
   const { value: dishName, isFallback: nameFallback } = fb(dish, 'name');
+  const isStaffMode = Boolean(onClick);
 
   function handleAdd(e) {
     e.stopPropagation();
@@ -28,7 +29,7 @@ export default function DishCard({ dish }) {
   }
 
   return (
-    <div className={styles.card} onClick={() => navigate(`/dish/${dish.id}`)}>
+    <div className={styles.card} onClick={() => isStaffMode ? onClick(dish) : navigate(`/dish/${dish.id}`)}>
       <img src={dish.image} alt={dish.name} className={styles.image} />
       <div className={styles.body}>
         <span className={styles.name}>
@@ -48,7 +49,7 @@ export default function DishCard({ dish }) {
         )}
         <div className={styles.bottom}>
           <span className={styles.price}>{dish.price}₴</span>
-          <button className={styles.addButton} onClick={handleAdd}>+</button>
+          {!isStaffMode && <button className={styles.addButton} onClick={handleAdd}>+</button>}
         </div>
       </div>
     </div>

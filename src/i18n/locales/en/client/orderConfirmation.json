@@ -15,7 +15,7 @@
     "locked_section_label": "Already ordered",
     "adding_to_order": "Adding to order #{{id}}",
 
-    "order_locked_msg": "Another guest has already placed an order at this table.",
+    "order_locked_msg": "You already have an active order. Only one order is allowed at a time.",
     "view_order": "View order",
 
     "changes_banner_title": "Your order has been updated",

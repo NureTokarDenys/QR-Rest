@@ -90,11 +90,17 @@ export function normalizeApiOrder(raw) {
       name:        dish.name || item.menuItemName || item.name || '',
       name_en:     dish.name_en || item.name_en || dish.name || item.menuItemName || '',
       price:       dish.basePrice ?? dish.price ?? item.totalPrice ?? item.price ?? 0,
+      // Pre-computed line total from the backend (unitPrice × qty + addons sum)
+      lineTotal:   item.totalPrice ?? null,
       image:       dish.imageUrl  || dish.image  || item.image || '',
       quantity:    item.quantity ?? item.qty ?? 1,
       groupId:     item.servingGroupId || 'main',
       // Domain model field is `dishStatus`; fall back to `status` for local mock orders
       status:      item.dishStatus || item.status || 'waiting',
+      // Customisation details — used for the "Show details" expander on the order status page
+      excludedIngredients:   item.excludedIngredients   || [],
+      addons:                item.addons                || [],
+      componentGroupChoices: item.componentGroupChoices || [],
     };
   });
 
@@ -124,9 +130,10 @@ export function normalizeApiOrder(raw) {
     restaurantPlan:   orderData.restaurantPlan || null,
     servingGroups,
     items,
-    total:  orderData.totalAmount ?? orderData.total ?? computedTotal,
-    status: orderData.status,
-    date:   orderData.createdAt || null,
+    total:         orderData.totalAmount ?? orderData.total ?? computedTotal,
+    status:        orderData.status,
+    paymentMethod: orderData.paymentMethod || null,
+    date:          orderData.createdAt || null,
   };
 }
 

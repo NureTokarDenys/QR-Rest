@@ -1,6 +1,6 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { SOUND_KEY } from '../../../hooks/useNotificationSound';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import StaffShell from '../../../components/staff/StaffShell';
 import PageSkeleton from '../../../components/staff/Skeleton';
@@ -12,7 +12,7 @@ import ConfirmDialog from '../../../components/ConfirmDialog';
 import styles from './staffSettings.module.css';
 import { useTheme } from '../../../context/ThemeContext';
 import { useAuth } from '../../../context/AuthContext';
-import { forgotPassword, requestEmailChange, initiateGoogleOAuth } from '../../../api/auth';
+import { forgotPassword, requestEmailChange, initiateGoogleLink, unlinkGoogle } from '../../../api/auth';
 import { MdSettings, MdNotifications, MdEdit, MdCheck, MdClose } from 'react-icons/md';
 
 function GoogleIcon({ size = 18 }) {
@@ -28,8 +28,10 @@ function GoogleIcon({ size = 18 }) {
 
 export default function StaffSettings() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { t, i18n } = useTranslation('staffSettings');
-  const { user, updateProfile, logout } = useAuth();
+  const { t: tErr } = useTranslation('errors');
+  const { user, updateProfile, logout, refreshUser } = useAuth();
   const { theme, setTheme } = useTheme();
 
   const [lang, setLang]   = useState(i18n.language);
@@ -150,8 +152,52 @@ export default function StaffSettings() {
   }
 
   // ── Google ────────────────────────────────────────
-  const hasGoogle  = Boolean(user?.googleId);
+  const hasGoogle  = Boolean(user?.hasGoogle);
   const googleOnly = hasGoogle && !user?.hasPassword;
+
+  const [googleLinkOk,    setGoogleLinkOk]    = useState(false);
+  const [googleLinkError, setGoogleLinkError] = useState('');
+  const [googleLinking,   setGoogleLinking]   = useState(false);
+  const [googleUnlinking, setGoogleUnlinking] = useState(false);
+
+  useEffect(() => {
+    const linked = searchParams.get('googleLinked');
+    const err    = searchParams.get('oauthError');
+    if (linked === '1') {
+      refreshUser().then(() => setGoogleLinkOk(true));
+      setSearchParams({}, { replace: true });
+    } else if (err) {
+      setGoogleLinkError(tErr(`code.${err}`, { defaultValue: tErr('generic') }));
+      setSearchParams({}, { replace: true });
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function handleGoogleUnlink() {
+    setGoogleUnlinking(true);
+    setGoogleLinkOk(false);
+    setGoogleLinkError('');
+    try {
+      await unlinkGoogle();
+      await refreshUser();
+    } catch (err) {
+      const code = err?.response?.data?.error?.code;
+      setGoogleLinkError(tErr(`code.${code}`, { defaultValue: tErr('generic') }));
+    } finally {
+      setGoogleUnlinking(false);
+    }
+  }
+
+  async function handleGoogleLink() {
+    setGoogleLinking(true);
+    setGoogleLinkOk(false);
+    setGoogleLinkError('');
+    try {
+      await initiateGoogleLink();
+    } catch {
+      setGoogleLinkError(tErr('generic'));
+      setGoogleLinking(false);
+    }
+  }
 
   const Toggle = ({ value, onChange }) => (
     <button
@@ -267,22 +313,54 @@ export default function StaffSettings() {
           {/* ── Integrations ── */}
           <div className={styles.section}>
             <p className={styles.sectionTitle}>{t('integrationsSection')}</p>
-            <div className={styles.integrationRow}>
-              <GoogleIcon size={20} />
-              <div className={styles.integrationInfo}>
-                <span className={styles.integrationLabel}>{t(hasGoogle ? 'google_connected' : 'google_connect')}</span>
-                {googleOnly && (
-                  <span className={styles.integrationNote}>{t('google_no_password')}</span>
+
+            {hasGoogle ? (
+              <>
+                <div className={styles.googleAccountCard}>
+                  {user.googlePicture ? (
+                    <img
+                      src={user.googlePicture}
+                      alt={user.googleName || 'Google'}
+                      className={styles.googleAvatar}
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <div className={styles.googleAvatarFallback}>
+                      {(user.googleName || user.googleEmail || 'G').charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div className={styles.googleAccountInfo}>
+                    {user.googleName  && <span className={styles.googleAccountName}>{user.googleName}</span>}
+                    {user.googleEmail && <span className={styles.googleAccountEmail}>{user.googleEmail}</span>}
+                  </div>
+                  <span className={styles.googleConnectedBadge}>{t('google_connected_value')}</span>
+                </div>
+                {!googleOnly && (
+                  <button
+                    className={styles.googleDisconnectRow}
+                    onClick={googleUnlinking ? undefined : handleGoogleUnlink}
+                    disabled={googleUnlinking}
+                  >
+                    <span className={styles.googleDisconnectLabel}>{t('google_disconnect')}</span>
+                    <span className={styles.googleDisconnectValue}>{googleUnlinking ? '...' : t('disconnect')}</span>
+                  </button>
                 )}
-              </div>
-              {hasGoogle ? (
-                <span className={styles.integrationBadge}>{t('google_connected_value')}</span>
-              ) : (
-                <button className={styles.integrationBtn} onClick={initiateGoogleOAuth}>
-                  {t('google_add')}
-                </button>
-              )}
-            </div>
+              </>
+            ) : (
+              <button
+                className={styles.googleConnectRow}
+                onClick={googleLinking ? undefined : handleGoogleLink}
+                disabled={googleLinking}
+              >
+                <span className={styles.googleConnectIcon}><GoogleIcon size={18} /></span>
+                <span className={styles.googleConnectLabel}>{t('google_connect')}</span>
+                <span className={styles.googleConnectValue}>{googleLinking ? '...' : t('google_add')}</span>
+              </button>
+            )}
+
+            {googleLinkOk    && <p className={styles.googleNote} style={{ color: 'var(--success-color, #4caf50)' }}>{t('google_link_success')}</p>}
+            {googleLinkError && <p className={styles.googleNote} style={{ color: 'var(--error-color, #e53935)' }}>{googleLinkError}</p>}
+            {googleOnly      && <p className={styles.googleNote}>{t('google_no_password')}</p>}
           </div>
 
           {/* ── Email change ── */}

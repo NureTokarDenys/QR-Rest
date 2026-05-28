@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { fieldFor } from '../../../i18n/langs';
+import { useLocalField } from '../../../i18n/useLang';
 import StaffShell from '../../../components/staff/StaffShell';
 import WsStatusBanner from '../../../components/WsStatusBanner';
 import { Skel } from '../../../components/staff/Skeleton';
@@ -128,8 +128,9 @@ function OrderCardSkeleton({ dishes = 3, more = false }) {
 }
 
 export default function WaiterOrders() {
-  const { t, i18n } = useTranslation('components');
+  const { t } = useTranslation('components');
   const navigate = useNavigate();
+  const local = useLocalField();
 
   // Tables — lazy-loaded the first time /orders is visited, then kept fresh via WS.
   const { tables: cachedTables, refreshTables, ensureTables } = useStaffData();
@@ -394,7 +395,7 @@ export default function WaiterOrders() {
               <ul className={styles.itemList}>
                 {order.items.slice(0, 4).map(item => (
                   <li key={item.id} className={styles.itemRow}>
-                    <span className={styles.itemName}>{item[fieldFor('name', i18n.language)] || item.name}</span>
+                    <span className={styles.itemName}>{local(item, 'name')}</span>
                     <span className={styles.itemQty}>×{item.qty}</span>
                     <span className={`${styles.itemDot} ${styles[`dot_${item.status}`]}`} />
                   </li>

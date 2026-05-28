@@ -32,16 +32,21 @@
   "tempPasswordText": "Temporary login password. Save it — it won't be shown again:",
   "close": "Close",
 
-  "resetPasswordTitle": "New Temporary Password",
-  "resetPasswordText": "Password has been reset. Share this password with the staff member:",
+  "resetPasswordSentTitle": "Reset Link Sent",
+  "resetPasswordSentText": "A password reset link has been sent to {{email}}. The link is valid for 1 hour.",
 
-  "confirmDeactivate": "Deactivate this staff member?",
-  "confirmActivate": "Activate this staff member?",
-  "confirmResetPassword": "Reset this staff member's password?",
+  "confirmDeactivateTitle": "Deactivate account?",
+  "confirmDeactivateMessage": "{{name}} won't be able to sign in while the account is deactivated.",
+  "confirmActivateTitle": "Activate account?",
+  "confirmActivateMessage": "This will restore {{name}}'s access to the system.",
+  "confirmResetTitle": "Reset password?",
+  "confirmResetMessage": "A password reset link will be sent to {{email}}. The link is valid for 1 hour.",
+
+  "confirm": "Confirm",
+  "cancel": "Cancel",
 
   "roleUpdated": "Role updated",
   "errorCreate": "Failed to create staff member",
   "errorLoad": "Failed to load staff",
-  "cancel": "Cancel",
   "nameEmailRequired": "Name and email are required"
 }

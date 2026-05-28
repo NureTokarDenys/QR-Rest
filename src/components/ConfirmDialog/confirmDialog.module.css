@@ -99,6 +99,20 @@
   background: color-mix(in srgb, var(--secondary-text) 8%, transparent);
 }
 
+/* Inline error (shown in step 2 when the async action fails) */
+.error {
+  font-size: 13px;
+  color: var(--danger-color, #dc2626);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+  transform: none;
+}
+
 /* ── Responsive ───────────────────────────────────────────────────────────── */
 @media (max-width: 380px) {
   .dialog  { padding: 22px 18px 16px; border-radius: 16px; }

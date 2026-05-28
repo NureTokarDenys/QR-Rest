@@ -9,6 +9,7 @@ const Ctx = createContext(null);
 // Ordered list of types cycled through by fireTestNotification
 const TEST_TYPES = [
   'ORDER_NEW',
+  'ORDER_ITEMS_ADDED',
   'WAITER_CALL',
   'WAITER_CALL_CASH',
   'PAYMENT_COMPLETED',
@@ -24,10 +25,10 @@ const MOCK_PAYLOAD = {
 };
 
 const ROLE_EVENTS = {
-  cook:        ['ORDER_NEW'],
+  cook:        ['ORDER_NEW', 'ORDER_ITEMS_ADDED'],
   waiter:      ['ORDER_NEW', 'WAITER_CALL', 'WAITER_CALL_CASH'],
-  waiter_cook: ['ORDER_NEW', 'WAITER_CALL', 'WAITER_CALL_CASH'],
-  admin:       ['ORDER_NEW', 'WAITER_CALL', 'WAITER_CALL_CASH',
+  waiter_cook: ['ORDER_NEW', 'ORDER_ITEMS_ADDED', 'WAITER_CALL', 'WAITER_CALL_CASH'],
+  admin:       ['ORDER_NEW', 'ORDER_ITEMS_ADDED', 'WAITER_CALL', 'WAITER_CALL_CASH',
                 'ORDER_VOID', 'ORDER_CANCELLED', 'PAYMENT_COMPLETED'],
 };
 
@@ -35,12 +36,13 @@ function buildNotif(event, payload, t) {
   const table   = payload.tableNumber ?? payload.tableNum ?? payload.table ?? '?';
   const orderId = payload.orderId ?? '?';
   const titleMap = {
-    ORDER_NEW:         t('notif_order_new',        { table }),
-    WAITER_CALL:       t('notif_waiter_call',       { table }),
-    WAITER_CALL_CASH:  t('notif_waiter_call_cash',  { table }),
-    ORDER_VOID:        t('notif_order_void',        { order: orderId }),
-    ORDER_CANCELLED:   t('notif_order_cancelled'),
-    PAYMENT_COMPLETED: t('notif_payment_done',      { table }),
+    ORDER_NEW:          t('notif_order_new',           { table }),
+    ORDER_ITEMS_ADDED:  t('notif_order_items_added',   { table }),
+    WAITER_CALL:        t('notif_waiter_call',          { table }),
+    WAITER_CALL_CASH:   t('notif_waiter_call_cash',     { table }),
+    ORDER_VOID:         t('notif_order_void',           { order: orderId }),
+    ORDER_CANCELLED:    t('notif_order_cancelled'),
+    PAYMENT_COMPLETED:  t('notif_payment_done',         { table }),
   };
   return {
     id:        `${event}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,

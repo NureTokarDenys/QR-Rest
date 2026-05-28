@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useLocalField } from '../../../i18n/useLang';
 import StaffShell from '../../../components/staff/StaffShell';
 import SearchBar from '../../../components/SearchBar';
 import { Skel } from '../../../components/staff/Skeleton';
@@ -27,6 +28,7 @@ const TYPE_FOR = {
 
 export default function ExtrasManagement() {
   const { t }        = useTranslation('extrasManagement');
+  const local        = useLocalField();
   const navigate     = useNavigate();
   const [activeTab,  setActiveTab]   = useState('ingredients');
   const [expanded,   setExpanded]    = useState(new Set());
@@ -119,7 +121,7 @@ export default function ExtrasManagement() {
       <div className={styles.usageList}>
         {top.map((d) => (
           <span key={String(d._id)} className={styles.dishBadge}>
-            <span className={styles.dishName}>{d.name}</span>
+            <span className={styles.dishName}>{local(d, 'name') || d.name}</span>
             <button
               className={styles.relationRemoveBtn}
               onClick={() => handleDetachRelation(String(d._id), extraType, String(item._id))}
@@ -147,13 +149,17 @@ export default function ExtrasManagement() {
   }
 
   // ── Filtered lists ────────────────────────────────────────────────────────
-  const norm = (tabSearch[activeTab] || '').trim().toLowerCase();
-  const filteredIngredients    = data.ingredients.filter(i => !norm || (i.name || '').toLowerCase().includes(norm));
-  const filteredAddons         = data.addons.filter(a => !norm || (a.name || '').toLowerCase().includes(norm));
+  // Search hits any language variant so users can type in either UA or EN.
+  const norm    = (tabSearch[activeTab] || '').trim().toLowerCase();
+  const hitName = (obj) =>
+    (obj?.name || '').toLowerCase().includes(norm) ||
+    (obj?.name_en || '').toLowerCase().includes(norm);
+  const filteredIngredients    = data.ingredients.filter(i => !norm || hitName(i));
+  const filteredAddons         = data.addons.filter(a => !norm || hitName(a));
   const filteredComponentGroups = data.componentGroups.filter(g => {
     if (!norm) return true;
-    if ((g.name || '').toLowerCase().includes(norm)) return true;
-    return (g.options || []).some(o => (o.name || '').toLowerCase().includes(norm));
+    if (hitName(g)) return true;
+    return (g.options || []).some(o => hitName(o));
   });
 
   function handleDeleteClick(item) {
@@ -186,7 +192,7 @@ export default function ExtrasManagement() {
               const id = String(item._id);
               return (
                 <tr key={id} className={!item.isAvailable ? styles.unavailRow : ''}>
-                  <td>{item.name}</td>
+                  <td>{local(item, 'name') || item.name}</td>
                   <td>{item.isRemovable ? <span className={styles.badge}>{t('removable')}</span> : null}</td>
                   <td>{renderUsageList(item, 'ingredients')}</td>
                   <td><AvailToggle item={item} /></td>
@@ -240,7 +246,7 @@ export default function ExtrasManagement() {
               const id = String(item._id);
               return (
                 <tr key={id} className={!item.isAvailable ? styles.unavailRow : ''}>
-                  <td>{item.name}</td>
+                  <td>{local(item, 'name') || item.name}</td>
                   <td>{item.price} ₴</td>
                   <td>{renderUsageList(item, 'addons')}</td>
                   <td><AvailToggle item={item} /></td>
@@ -283,7 +289,7 @@ export default function ExtrasManagement() {
           return (
             <div key={id} className={`${styles.groupCard} ${!group.isAvailable ? styles.unavailCard : ''}`}>
               <div className={styles.groupHeader}>
-                <span className={styles.groupName}>{group.name}</span>
+                <span className={styles.groupName}>{local(group, 'name') || group.name}</span>
                 <span className={styles.optsBadge}>
                   {t('optionsCount', {
                     count:    group.options?.length || 0,
@@ -315,18 +321,22 @@ export default function ExtrasManagement() {
 
               {isExpanded && (
                 <div className={styles.optionsList}>
-                  {(group.options || []).map((opt, idx) => (
+                  {(group.options || []).map((opt, idx) => {
+                    const primary   = local(opt, 'name') || opt.name;
+                    const secondary = opt.name && opt.name !== primary ? opt.name : null;
+                    return (
                     <div key={String(opt._id || idx)} className={styles.optionRow}>
-                      <span>{opt.name}</span>
-                      {opt.name_en && opt.name_en !== opt.name && (
-                        <span className={styles.optPrice}>/ {opt.name_en}</span>
+                      <span>{primary}</span>
+                      {secondary && (
+                        <span className={styles.optPrice}>/ {secondary}</span>
                       )}
                       {opt.priceModifier !== 0 && (
                         <span className={styles.optPrice}>{opt.priceModifier > 0 ? '+' : ''}{opt.priceModifier} ₴</span>
                       )}
                       {opt.isDefault && <span className={styles.badge}>{t('defaultOption')}</span>}
                     </div>
-                  ))}
+                    );
+                  })}
                   <div className={styles.usageInline}>{renderUsageList(group, 'componentGroups')}</div>
                 </div>
               )}
@@ -450,9 +460,12 @@ export default function ExtrasManagement() {
               {confirmDialog.type === 'delete' ? t('confirmDelete') : t('confirmDeleteTitle')}
             </p>
             <p className={styles.dialogSub}>
-              {confirmDialog.type === 'delete'
-                ? t('confirmDeleteItemSub', { name: confirmDialog.item?.name || '' })
-                : t('confirmDeleteSub', { name: confirmDialog.item?.name || '', count: confirmDialog.count || 0 })}
+              {(() => {
+                const nm = confirmDialog.item ? (local(confirmDialog.item, 'name') || confirmDialog.item.name || '') : '';
+                return confirmDialog.type === 'delete'
+                  ? t('confirmDeleteItemSub', { name: nm })
+                  : t('confirmDeleteSub', { name: nm, count: confirmDialog.count || 0 });
+              })()}
             </p>
             <div className={styles.dialogActions}>
               <button className={styles.dialogCancel} onClick={() => setConfirmDialog(null)}>

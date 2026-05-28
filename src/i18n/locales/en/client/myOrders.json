@@ -6,9 +6,10 @@
     "loading": "Loading…",
     "empty": "No orders yet",
     "status_open": "In progress",
+    "status_open_paid": "Paid · Waiting",
     "status_cancelled": "Cancelled",
-    "status_completed_cash": "Paid (cash)",
-    "status_completed_epay": "Paid (online)",
+    "status_completed_cash": "Paid · Cash",
+    "status_completed_epay": "Paid · Online",
     "status_void": "Cancelled",
     "status_payment": "Awaiting payment"
 }

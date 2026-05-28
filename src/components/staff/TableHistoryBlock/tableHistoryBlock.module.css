@@ -56,6 +56,7 @@
 }
 
 .active    { background: #e8f4ff; color: #1d7afc; }
+.paid      { background: #f0fdf4; color: #16a34a; }
 .completed { background: #e8f5e9; color: #2e7d32; }
 .void      { background: #fef2f2; color: #dc2626; }
 

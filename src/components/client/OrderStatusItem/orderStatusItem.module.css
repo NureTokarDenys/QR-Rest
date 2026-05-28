@@ -1,50 +1,133 @@
-.row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.item {
   padding: 10px 0;
   border-bottom: 1px solid var(--border);
+}
+.item:last-child {
+  border-bottom: none;
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .name {
   font-size: 15px;
   color: var(--primary-text);
+  flex: 1;
+  line-height: 1.4;
 }
 
-.badge {
-  font-size: 13px;
+/* Price + buttons stacked on the right */
+.right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.price {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent-color);
+  white-space: nowrap;
+}
+
+/* Row of small action buttons: details toggle + cancel × */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.detailsBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 11px;
   font-weight: 600;
-  padding: 4px 10px;
+  color: var(--secondary-text);
+  font-family: inherit;
+  padding: 0;
+  transition: color 0.1s;
+  white-space: nowrap;
+}
+.detailsBtn:hover { color: var(--primary-text); }
+.detailsBtn svg { font-size: 13px; }
+
+/* × cancel trigger — small icon button */
+.cancelTriggerBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  font-size: 15px;
+  color: var(--secondary-text);
+  opacity: 0.6;
+  border-radius: 4px;
+  transition: color 0.1s, opacity 0.1s;
+  line-height: 1;
+}
+.cancelTriggerBtn:hover {
+  color: var(--danger-color, #dc2626);
+  opacity: 1;
+}
+
+/* ── Expanded details block ── */
+.details {
+  margin-top: 7px;
+  padding: 8px 10px;
+  background: var(--bg-color);
   border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.waiting {
-  background: var(--order-status-waiting-bg);
-  color: var(--order-status-waiting-text);
+/* "Без: tomato, onion" — single line */
+.detailLine {
+  font-size: 12px;
+  color: var(--primary-text);
+  margin: 0;
+  line-height: 1.5;
 }
 
-.cooking {
-  background: var(--order-status-cooking-bg);
-  color: var(--order-status-cooking-text);
+/* Row of chips for addons / options */
+.detailSection {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
 }
 
-.ready {
-  background: var(--order-status-ready-bg);
-  color: var(--order-status-ready-text);
+.detailLabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--secondary-text);
+  margin-right: 2px;
+  flex-shrink: 0;
 }
 
-.served {
-  background: var(--order-status-served-bg);
-  color: var(--order-status-served-text);
+.detailChip {
+  font-size: 11px;
+  background: var(--surface-color);
+  border: 1px solid var(--separator-color);
+  border-radius: 6px;
+  padding: 2px 7px;
+  color: var(--primary-text);
+  white-space: nowrap;
 }
 
 @media (max-width: 480px) {
-  .name {
-    font-size: 14px;
-  }
-
-  .badge {
-    font-size: 12px;
-    padding: 3px 8px;
-  }
+  .name  { font-size: 14px; }
+  .price { font-size: 13px; }
 }

@@ -86,6 +86,7 @@
   "ws_ping": "Пінг",
 
   "notif_order_new":        "Нове замовлення — Стіл #{{table}}",
+  "notif_order_items_added": "Додано страви — Стіл #{{table}}",
   "notif_waiter_call":      "Стіл #{{table}} кличе офіціанта",
   "notif_waiter_call_cash": "Стіл #{{table}} просить оплату готівкою",
   "notif_order_void":       "Замовлення #{{order}} скасовано",

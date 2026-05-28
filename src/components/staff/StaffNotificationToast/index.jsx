@@ -8,10 +8,10 @@ import { MdCheck } from 'react-icons/md';
 import styles from './staffNotificationToast.module.css';
 
 const ROLE_SHOW = {
-  cook:        ['ORDER_NEW'],
+  cook:        ['ORDER_NEW', 'ORDER_ITEMS_ADDED'],
   waiter:      ['WAITER_CALL', 'WAITER_CALL_CASH'],
-  waiter_cook: ['ORDER_NEW', 'WAITER_CALL', 'WAITER_CALL_CASH'],
-  admin:       ['ORDER_NEW', 'WAITER_CALL', 'WAITER_CALL_CASH'],
+  waiter_cook: ['ORDER_NEW', 'ORDER_ITEMS_ADDED', 'WAITER_CALL', 'WAITER_CALL_CASH'],
+  admin:       ['ORDER_NEW', 'ORDER_ITEMS_ADDED', 'WAITER_CALL', 'WAITER_CALL_CASH'],
 };
 
 const CALL_TYPES = new Set(['WAITER_CALL', 'WAITER_CALL_CASH']);

@@ -1,22 +1,25 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import DishEditModal from '../../../components/staff/DishEditModal';
+import ConfirmDialog from '../../../components/ConfirmDialog';
 import { useTranslation } from 'react-i18next';
 import StaffShell from '../../../components/staff/StaffShell';
 import MicroStat from '../../../components/staff/MicroStat';
 import WsStatusBanner from '../../../components/WsStatusBanner';
-import { fieldFor } from '../../../i18n/langs';
+import { useLocalField } from '../../../i18n/useLang';
 import { useAuth } from '../../../context/AuthContext';
 import {
   getOrder,
-  addOrderItems, updateOrderItem, deleteOrderItem,
-  voidOrder,
+  addOrderItems, deleteOrderItem,
+  voidOrder, closeOrder, revertPayment,
 } from '../../../api/orders';
 import { useStaffData } from '../../../context/StaffDataContext';
 import { updateItemStatus, updateGroupStatus } from '../../../api/kitchen';
 import { useWebSocket } from '../../../hooks/useWebSocket';
 import styles from './orderDetail.module.css';
 
-import { MdEdit, MdDelete, MdAdd, MdCheck, MdClose, MdSearch, MdBlock } from 'react-icons/md';
+import { MdEdit, MdDelete, MdAdd, MdCheck, MdClose, MdSearch, MdBlock, MdPayments, MdUndo } from 'react-icons/md';
+// MdCheck, MdClose kept for void form buttons
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -51,53 +54,55 @@ function getGroupStatus(items) {
   return 'waiting';
 }
 
-function nameOf(obj, lang) {
-  if (!obj) return '';
-  if (typeof obj === 'string') return obj;
-  const key = fieldFor('name', lang);
-  return obj[key] || obj.name || obj.name_en || '';
-}
-
-function normaliseOrder(raw, lang) {
+function normaliseOrder(raw) {
   if (!raw) return null;
   const orderData = raw.order || raw;
   const rawItems  = raw.items || orderData.items || [];
   const orderId   = orderData._id || orderData.id;
 
-  const items = rawItems.map(i => ({
-    id:             i._id || i.id,
-    orderId,
-    name:           nameOf(i.menuItemId, lang) || nameOf(i, lang) || i.name || '—',
-    name_en:        (typeof i.menuItemId === 'object' ? i.menuItemId?.name_en : null) || i.name_en || null,
-    qty:            i.qty ?? i.quantity ?? 1,
-    price:          i.totalPrice ?? i.unitPrice ?? i.price ?? 0,
-    status:         i.dishStatus || i.status || 'waiting',
-    comment:        i.comment || '',
-    servingGroupId: i.servingGroupId ? String(i.servingGroupId) : null,
-    excludedIngredients:    i.excludedIngredients    || [],
-    addons:                 i.addons                 || [],
-    componentGroupChoices:  i.componentGroupChoices  || [],
-  }));
+  // Store both languages flat — the render layer picks the right one
+  // reactively via useLocalField. No language parameter needed here.
+  const items = rawItems.map(i => {
+    const mi = typeof i.menuItemId === 'object' ? i.menuItemId : null;
+    return {
+      id:             i._id || i.id,
+      orderId,
+      name:           mi?.name    || i.name    || '—',
+      name_en:        mi?.name_en || i.name_en || null,
+      qty:            i.qty ?? i.quantity ?? 1,
+      price:          i.totalPrice ?? i.unitPrice ?? i.price ?? 0,
+      status:         i.dishStatus || i.status || 'waiting',
+      comment:        i.comment || '',
+      servingGroupId: i.servingGroupId ? String(i.servingGroupId) : null,
+      menuItemId:     i.menuItemId_raw || (mi ? String(mi._id || '') : String(i.menuItemId || '')),
+      excludedIngredients:    i.excludedIngredients    || [],
+      addons:                 i.addons                 || [],
+      componentGroupChoices:  i.componentGroupChoices  || [],
+    };
+  });
 
   const servingGroups = (raw.servingGroups || orderData.servingGroups || [])
     .slice()
     .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
     .map(g => ({
       id:        String(g._id || g.id),
-      name:      nameOf(g, lang) || '',
+      name:      g.name || '',
       sortOrder: g.sortOrder ?? 0,
       status:    getGroupStatus(items.filter(i => i.servingGroupId === String(g._id || g.id))),
     }));
 
   return {
-    id:      orderId,
-    tableId: orderData.table?.number ?? orderData.tableNumber ?? orderData.tableId ?? '—',
-    time:    orderData.createdAt
-               ? new Date(orderData.createdAt).toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })
-               : '—',
-    status:  orderData.status || 'active',
-    comment: orderData.comment || '',
-    total:   orderData.totalAmount ?? orderData.total ?? items.reduce((s, i) => s + i.price, 0),
+    id:            orderId,
+    tableNumber:   orderData.tableNumber ?? null,
+    tableObjectId: orderData.tableId ?? null,
+    tableId:       orderData.tableNumber ?? orderData.tableId ?? '—',
+    time:          orderData.createdAt
+                     ? new Date(orderData.createdAt).toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })
+                     : '—',
+    status:        orderData.status || 'active',
+    paymentMethod: orderData.paymentMethod ?? null,
+    comment:       orderData.comment || '',
+    total:         orderData.totalAmount ?? orderData.total ?? items.reduce((s, i) => s + i.price, 0),
     items,
     servingGroups,
   };
@@ -134,7 +139,7 @@ function StatusDots({ status, onChange }) {
               style={(isDone || isCurrent) ? { background: meta?.color, borderColor: meta?.color, '--dot-color': meta?.color } : undefined}
               disabled={!canClick}
               onClick={() => canClick && onChange(s)}
-              title={s}
+              title={s.charAt(0).toUpperCase() + s.slice(1)}
             >
               {isCurrent && <span className={styles.dotGlow} style={{ '--dot-color': meta?.color }} />}
             </button>
@@ -149,22 +154,31 @@ function StatusDots({ status, onChange }) {
 
 export default function OrderDetail() {
   const { id } = useParams();
-  const { t, i18n } = useTranslation('orderDetail');
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { t } = useTranslation('orderDetail');
+  const local = useLocalField();
   const { user } = useAuth();
   const { menuItems: cachedMenu } = useStaffData();
-  const lang = i18n.language;
 
   const canEdit = ['admin', 'waiter', 'waiter_cook'].includes(user?.role);
-  const backTo  = user?.role === 'cook' ? '/staff/cooking' : '/staff/orders';
+  const isAdmin = ['admin', 'root_admin'].includes(user?.role);
+  const defaultBack = user?.role === 'cook' ? '/staff/cooking' : '/staff/orders';
+  const backTo = location.state?.from ?? defaultBack;
 
   const [order,   setOrder]   = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const [editItem,    setEditItem]    = useState(null); // { itemId, qty, comment }
+  const [editingItem,    setEditingItem]    = useState(null); // full item for DishEditModal
+  const [deletingItemId, setDeletingItemId] = useState(null);
+  const [closingOrder,   setClosingOrder]   = useState(false); // confirm dialog open
   const [voidingOpen, setVoidingOpen] = useState(false);
   const [voidReason,  setVoidReason]  = useState('');
   const [voidSaving,  setVoidSaving]  = useState(false);
   const [voidError,   setVoidError]   = useState('');
+
+  const [revertConfirm, setRevertConfirm] = useState(false);
+  const [revertLoading, setRevertLoading] = useState(false);
 
   const [addOpen,      setAddOpen]      = useState(false);
   const [allMenuItems, setAllMenuItems] = useState([]);
@@ -176,19 +190,19 @@ export default function OrderDetail() {
     if (!id) { setLoading(false); return; }
     try {
       const raw  = await getOrder(id);
-      const norm = normaliseOrder(raw, lang);
+      const norm = normaliseOrder(raw);
       if (norm) setOrder(norm);
     } catch (err) {
       console.error('getOrder error:', err);
     } finally {
       setLoading(false);
     }
-  }, [id, lang]);
+  }, [id]);
 
   useEffect(() => { load(); }, [load]);
 
   const handleWsMessage = useCallback((msg) => {
-    const RELOAD = new Set(['DISH_STATUS_UPDATED', 'GROUP_STATUS_UPDATED', 'ORDER_UPDATED', 'ORDER_ITEMS_ADDED']);
+    const RELOAD = new Set(['DISH_STATUS_UPDATED', 'GROUP_STATUS_UPDATED', 'ORDER_UPDATED', 'ORDER_ITEMS_ADDED', 'PAYMENT_COMPLETED']);
     if (!RELOAD.has(msg.event)) return;
     const p = msg.payload;
     if (p?.orderId && String(p.orderId) !== String(id)) return;
@@ -226,26 +240,35 @@ export default function OrderDetail() {
     }
   }
 
-  // ── Edit item ─────────────────────────────────────────────────────────────
+  // ── Edit item (full dish modal) ───────────────────────────────────────────
 
-  async function saveEdit() {
-    if (!editItem) return;
-    try {
-      await updateOrderItem(id, editItem.itemId, { qty: editItem.qty, comment: editItem.comment });
-      setEditItem(null);
-      load();
-    } catch (err) {
-      console.error('updateOrderItem error:', err);
-    }
+  async function handleEditSaved() {
+    setEditingItem(null);
+    load();
   }
 
-  async function handleDelete(itemId) {
-    if (!window.confirm(t('deleteItemConfirm', 'Видалити цю страву з замовлення?'))) return;
+  // ── Delete item (inline two-step confirm) ─────────────────────────────────
+
+  async function confirmDelete(itemId) {
     try {
       await deleteOrderItem(id, itemId);
+      setDeletingItemId(null);
       load();
     } catch (err) {
       console.error('deleteOrderItem error:', err);
+    }
+  }
+
+  // ── Close order (manual pay cash / complete pre-paid) ────────────────────
+
+  async function handleCloseOrder() {
+    try {
+      await closeOrder(id);
+      setClosingOrder(false);
+      load();
+    } catch (err) {
+      console.error('closeOrder error:', err);
+      setClosingOrder(false);
     }
   }
 
@@ -263,6 +286,21 @@ export default function OrderDetail() {
       setVoidError(err?.response?.data?.message || t('voidError', 'Помилка'));
     } finally {
       setVoidSaving(false);
+    }
+  }
+
+  // ── Revert cash payment ───────────────────────────────────────────────────
+
+  async function handleRevertPayment() {
+    setRevertLoading(true);
+    try {
+      await revertPayment(id);
+      setRevertConfirm(false);
+      load();
+    } catch (err) {
+      console.error('revertPayment error:', err);
+    } finally {
+      setRevertLoading(false);
     }
   }
 
@@ -301,22 +339,26 @@ export default function OrderDetail() {
   // ── Dish row renderer ─────────────────────────────────────────────────────
 
   function renderDishRow(item) {
-    const isEditing   = editItem?.itemId === item.id;
-    const displayName = item[fieldFor('name', lang)] || item.name;
-    const isOrderActive = ['pending', 'confirmed', 'active'].includes(order?.status);
-    const showEdit    = canEdit && isOrderActive && item.status === 'waiting';
+    const displayName        = local(item, 'name') || item.name;
+    const rowOrderActive     = order?.status === 'open';
+    const canAdvanceStatus   = isAdmin ? ['open', 'open_paid'].includes(order?.status) : rowOrderActive;
+    const showEdit           = isAdmin || (canEdit && rowOrderActive && item.status === 'waiting');
+    const isDeleting     = deletingItemId === item.id;
 
     const excluded = (item.excludedIngredients || [])
-      .map(x => nameOf(x, lang)).filter(Boolean);
+      .map(x => local(x, 'name')).filter(Boolean);
     const addonsList = (item.addons || [])
       .map(ao => {
-        const n = nameOf(typeof ao.addonId === 'object' ? ao.addonId : ao, lang) || nameOf(ao.addon, lang);
+        const src = typeof ao.addonId === 'object' && ao.addonId ? ao.addonId : ao;
+        const n   = local(src, 'name') || local(ao.addon, 'name') || ao.name;
         return n ? (ao.quantity > 1 ? `${n} ×${ao.quantity}` : n) : null;
       }).filter(Boolean);
     const choices = (item.componentGroupChoices || [])
       .map(c => {
-        const grp = nameOf(typeof c.groupId  === 'object' ? c.groupId  : null, lang) || c.groupName  || '';
-        const opt = nameOf(typeof c.optionId === 'object' ? c.optionId : null, lang) || c.optionName || '';
+        const grpSrc = typeof c.groupId  === 'object' && c.groupId  ? c.groupId  : null;
+        const optSrc = typeof c.optionId === 'object' && c.optionId ? c.optionId : null;
+        const grp    = local(grpSrc, 'name') || c.groupName  || '';
+        const opt    = local(optSrc, 'name') || c.optionName || '';
         return grp && opt ? `${grp}: ${opt}` : opt || grp || null;
       }).filter(Boolean);
 
@@ -326,16 +368,7 @@ export default function OrderDetail() {
       <div key={item.id} className={styles.dishRow}>
         <div className={styles.dishMain}>
           <div className={styles.dishInfo}>
-            <span className={styles.dishQty}>
-              ×{isEditing ? (
-                <input
-                  type="number" min={1}
-                  className={styles.qtyInlineInput}
-                  value={editItem.qty}
-                  onChange={e => setEditItem(p => ({ ...p, qty: Number(e.target.value) }))}
-                />
-              ) : item.qty}
-            </span>
+            <span className={styles.dishQty}>×{item.qty}</span>
             <span className={styles.dishName}>{displayName}</span>
           </div>
           <span className={styles.dishPrice}>{item.price.toFixed(0)}₴</span>
@@ -350,33 +383,18 @@ export default function OrderDetail() {
           </div>
         )}
 
-        {isEditing && (
-          <input
-            type="text"
-            className={styles.commentEditInput}
-            value={editItem.comment}
-            placeholder={t('commentPlaceholder', 'Коментар до страви…')}
-            onChange={e => setEditItem(p => ({ ...p, comment: e.target.value }))}
-          />
-        )}
-
         <div className={styles.dishBottom}>
           <StatusDots
             status={item.status}
-            onChange={isOrderActive ? newStatus => handleDishStatus(item.id, newStatus) : null}
+            onChange={canAdvanceStatus ? newStatus => handleDishStatus(item.id, newStatus) : null}
           />
           <div className={styles.dishActions}>
-            {isEditing ? (
+            {showEdit && (
               <>
-                <button className={styles.iconBtn} onClick={saveEdit} title={t('confirm', 'Зберегти')}><MdCheck /></button>
-                <button className={`${styles.iconBtn} ${styles.iconBtnCancel}`} onClick={() => setEditItem(null)} title={t('cancel', 'Скасувати')}><MdClose /></button>
+                <button className={styles.iconBtn} title={t('editItem')} onClick={() => setEditingItem(item)}><MdEdit /></button>
+                <button className={`${styles.iconBtn} ${styles.iconBtnDanger}`} title={t('deleteItem')} onClick={() => setDeletingItemId(item.id)}><MdDelete /></button>
               </>
-            ) : showEdit ? (
-              <>
-                <button className={styles.iconBtn} title={t('editItem', 'Редагувати')} onClick={() => setEditItem({ itemId: item.id, qty: item.qty, comment: item.comment })}><MdEdit /></button>
-                <button className={`${styles.iconBtn} ${styles.iconBtnDanger}`} title={t('deleteItem', 'Видалити')} onClick={() => handleDelete(item.id)}><MdDelete /></button>
-              </>
-            ) : null}
+            )}
           </div>
         </div>
       </div>
@@ -398,7 +416,7 @@ export default function OrderDetail() {
   );
 
   const orderStatusMeta = ORDER_STATUS_META[order.status] || ORDER_STATUS_META.active;
-  const isOrderActive   = ['pending', 'confirmed', 'active'].includes(order.status);
+  const isOrderActive   = order.status === 'open';
 
   return (
     <StaffShell
@@ -410,7 +428,19 @@ export default function OrderDetail() {
 
         {/* ── Stats ── */}
         <div className={styles.statsRow}>
-          <MicroStat label={t('table', 'Стіл')} value={`№ ${order.tableId}`} />
+          <MicroStat
+            label={t('table', 'Стіл')}
+            value={
+              order.tableObjectId ? (
+                <button
+                  className={styles.tableLinkBtn}
+                  onClick={() => navigate(`/staff/table/${order.tableObjectId}`)}
+                >
+                  № {order.tableId}
+                </button>
+              ) : `№ ${order.tableId}`
+            }
+          />
           <MicroStat label={t('time', 'Час')}   value={order.time} />
           <MicroStat label={t('total', 'Сума')} value={`${order.total}₴`} highlight />
           <div className={styles.orderStatusChip} style={{ background: orderStatusMeta.bg, color: orderStatusMeta.color }}>
@@ -420,19 +450,47 @@ export default function OrderDetail() {
         </div>
 
         {/* ── Action bar (waiter/admin only) ── */}
-        {canEdit && isOrderActive && (
-          <div className={styles.actionBar}>
-            <button className={styles.actionBtn} onClick={openAdd}>
-              <MdAdd /> {t('addDishes', 'Додати страви')}
-            </button>
-            <button
-              className={`${styles.actionBtn} ${styles.actionBtnDanger}`}
-              onClick={() => { setVoidingOpen(v => !v); setVoidReason(''); setVoidError(''); }}
-            >
-              <MdBlock /> {t('voidOrder', 'Анулювати')}
-            </button>
-          </div>
-        )}
+        {(() => {
+          const allServed   = order.items.length > 0 && order.items.every(i => i.status === 'served');
+          const showAddVoid  = isAdmin ? isOrderActive : (canEdit && isOrderActive);
+          const showPayClose = canEdit && ['open', 'open_paid'].includes(order.status);
+          const showRevert   = canEdit && ['open_paid', 'completed_cash'].includes(order.status) && order.paymentMethod === 'cash';
+          if (!showAddVoid && !showPayClose && !showRevert) return null;
+          return (
+            <div className={styles.actionBar}>
+              {showAddVoid && (
+                <>
+                  <button className={styles.actionBtn} onClick={openAdd}>
+                    <MdAdd /> {t('addDishes', 'Додати страви')}
+                  </button>
+                  <button
+                    className={`${styles.actionBtn} ${styles.actionBtnDanger}`}
+                    onClick={() => { setVoidingOpen(v => !v); setVoidReason(''); setVoidError(''); }}
+                  >
+                    <MdBlock /> {t('voidOrder', 'Анулювати')}
+                  </button>
+                </>
+              )}
+              {showPayClose && (
+                <button
+                  className={`${styles.actionBtn} ${allServed ? styles.actionBtnSuccess : styles.actionBtnWarning}`}
+                  onClick={() => setClosingOrder(true)}
+                >
+                  <MdPayments /> {order.status === 'open_paid' ? t('completeOrder') : t('payCash')}
+                </button>
+              )}
+              {showRevert && (
+                <button
+                  className={`${styles.actionBtn} ${styles.actionBtnDanger}`}
+                  onClick={() => setRevertConfirm(true)}
+                  disabled={revertLoading}
+                >
+                  <MdUndo /> {t('revertPayment')}
+                </button>
+              )}
+            </div>
+          );
+        })()}
 
         {/* ── Void form ── */}
         {voidingOpen && (
@@ -540,7 +598,7 @@ export default function OrderDetail() {
             <div className={styles.menuList}>
               {filteredMenu.map(mi => (
                 <div key={mi._id} className={styles.menuRow}>
-                  <span className={styles.menuName}>{mi[fieldFor('name', lang)] || mi.name}</span>
+                  <span className={styles.menuName}>{local(mi, 'name') || mi.name}</span>
                   <span className={styles.menuPrice}>{mi.basePrice}₴</span>
                   <div className={styles.qtyControl}>
                     <button className={styles.qtyBtn} onClick={() => setAddQtys(p => ({ ...p, [mi._id]: Math.max(0, (p[mi._id] || 0) - 1) }))}>−</button>
@@ -566,6 +624,49 @@ export default function OrderDetail() {
           </div>
         )}
       </div>
+
+      {/* ── Dish edit modal ── */}
+      {editingItem && (
+        <DishEditModal
+          orderId={id}
+          item={editingItem}
+          onClose={() => setEditingItem(null)}
+          onSaved={handleEditSaved}
+        />
+      )}
+
+      {/* ── Delete confirmation ── */}
+      <ConfirmDialog
+        open={!!deletingItemId}
+        title={t('deleteItemConfirm')}
+        confirmLabel={t('deleteYes')}
+        cancelLabel={t('cancel')}
+        onConfirm={() => confirmDelete(deletingItemId)}
+        onCancel={() => setDeletingItemId(null)}
+        danger
+      />
+
+      {/* ── Close order confirmation ── */}
+      <ConfirmDialog
+        open={closingOrder}
+        title={order?.status === 'open_paid' ? t('completeOrderConfirm') : t('payCashConfirm')}
+        confirmLabel={order?.status === 'open_paid' ? t('completeOrder') : t('payCash')}
+        cancelLabel={t('cancel')}
+        onConfirm={handleCloseOrder}
+        onCancel={() => setClosingOrder(false)}
+        danger={false}
+      />
+
+      {/* ── Revert payment confirmation ── */}
+      <ConfirmDialog
+        open={revertConfirm}
+        title={t('revertPaymentConfirm')}
+        confirmLabel={revertLoading ? '…' : t('revertPayment')}
+        cancelLabel={t('cancel')}
+        onConfirm={handleRevertPayment}
+        onCancel={() => setRevertConfirm(false)}
+        danger
+      />
     </StaffShell>
   );
 }

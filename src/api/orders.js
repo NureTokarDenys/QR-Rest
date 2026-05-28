@@ -24,12 +24,17 @@ export async function cancelOrder(orderId, reason, restaurantId = getStoredResta
   return res.data?.data;
 }
 
+export async function closeOrder(orderId, restaurantId = getStoredRestaurantId()) {
+  const res = await apiClient.post(`/${restaurantId}/orders/${orderId}/close`);
+  return res.data?.data;
+}
+
 export async function voidOrder(orderId, reason, restaurantId = getStoredRestaurantId()) {
   return cancelOrder(orderId, reason, restaurantId);
 }
 
-export async function addOrderItems(orderId, items, restaurantId = getStoredRestaurantId()) {
-  const res = await apiClient.post(`/${restaurantId}/orders/${orderId}/items`, { items });
+export async function addOrderItems(orderId, items, groupName, restaurantId = getStoredRestaurantId()) {
+  const res = await apiClient.post(`/${restaurantId}/orders/${orderId}/items`, { items, groupName });
   return res.data?.data;
 }
 
@@ -45,6 +50,11 @@ export async function cancelGuestOrder(orderId, sessionToken, restaurantId = get
 
 export async function cancelGuestServingGroup(orderId, groupId, sessionToken, restaurantId = getStoredRestaurantId()) {
   const res = await apiClient.post(`/${restaurantId}/orders/${orderId}/serving-groups/${groupId}/client-cancel`, { sessionToken });
+  return res.data?.data;
+}
+
+export async function cancelGuestOrderItem(orderId, itemId, sessionToken, restaurantId = getStoredRestaurantId()) {
+  const res = await apiClient.post(`/${restaurantId}/orders/${orderId}/items/${itemId}/client-cancel`, { sessionToken });
   return res.data?.data;
 }
 
@@ -77,6 +87,11 @@ export async function initiatePayment(orderId, restaurantId = getStoredRestauran
   return res.data?.data; // { data, signature, publicKey }
 }
 
+export async function checkCardAvailable(restaurantId = getStoredRestaurantId()) {
+  const res = await apiClient.get(`/${restaurantId}/payments/card-available`);
+  return res.data?.data; // { available: bool, reason: 'ok' | 'not_configured' | 'invalid_credentials' }
+}
+
 export async function getWaiterCalls(params = {}, restaurantId = getStoredRestaurantId()) {
   const res = await apiClient.get(`/${restaurantId}/waiter/calls`, { params });
   return res.data?.data ?? [];
@@ -84,6 +99,11 @@ export async function getWaiterCalls(params = {}, restaurantId = getStoredRestau
 
 export async function resolveWaiterCall(callId, restaurantId = getStoredRestaurantId()) {
   const res = await apiClient.patch(`/${restaurantId}/waiter/calls/${callId}/resolve`);
+  return res.data?.data;
+}
+
+export async function revertPayment(orderId, restaurantId = getStoredRestaurantId()) {
+  const res = await apiClient.post(`/${restaurantId}/orders/${orderId}/revert-payment`);
   return res.data?.data;
 }
 
@@ -101,4 +121,10 @@ export async function markNotificationsRead(orderId, restaurantId = getStoredRes
 export async function openTableRecovery(tableId, restaurantId = getStoredRestaurantId()) {
   const res = await apiClient.post(`/${restaurantId}/waiter/tables/${tableId}/session/recovery`);
   return res.data?.data; // { tableId, tableNumber, recoveryWindowClosesAt }
+}
+
+// Waiter creates an empty order for a free table (guest accesses via session recovery)
+export async function createWaiterOrder(tableId, restaurantId = getStoredRestaurantId()) {
+  const res = await apiClient.post(`/${restaurantId}/waiter/tables/${tableId}/order`);
+  return res.data?.data; // { orderId, sessionToken }
 }

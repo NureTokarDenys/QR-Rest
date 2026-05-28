@@ -14,6 +14,13 @@
   color: var(--secondary-text);
 }
 
+.valueRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .value {
   font-size: 18px;
   font-weight: 700;

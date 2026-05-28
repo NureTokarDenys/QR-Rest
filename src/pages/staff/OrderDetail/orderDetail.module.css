@@ -4,6 +4,18 @@
   gap: 16px;
 }
 
+/* ── Table link inside MicroStat ─────────────────────────────────────────── */
+.tableLinkBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  color: var(--accent-color, #1d7afc);
+  font-weight: 700;
+}
+.tableLinkBtn:hover { text-decoration: underline; }
+
 /* ── Stats row ───────────────────────────────────────────────────────────── */
 
 .statsRow {
@@ -63,6 +75,14 @@
 
 .actionBtnDanger {
   background: #ef4444;
+}
+
+.actionBtnSuccess {
+  background: #16a34a;
+}
+
+.actionBtnWarning {
+  background: #d97706;
 }
 
 /* ── Void form ───────────────────────────────────────────────────────────── */
@@ -350,6 +370,36 @@
 
 .iconBtnCancel:hover {
   background: var(--bg-color);
+}
+
+/* ── Inline delete confirm ── */
+.deleteConfirmInline {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.deleteConfirmYes {
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: none;
+  background: #dc2626;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.deleteConfirmNo {
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--separator-color, #ddd);
+  background: var(--surface-color, #fff);
+  color: var(--secondary-text, #666);
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
 }
 
 /* ── 4-dot status component ──────────────────────────────────────────────── */

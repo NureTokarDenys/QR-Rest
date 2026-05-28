@@ -366,7 +366,7 @@ export default function Profile() {
           <div className={styles.guestSection}>
             <p className={styles.guestMessage}>{t('guest_message')}</p>
             <PrimaryButton label={t('sign_in')} onClick={() => navigate('/login')} />
-            <SecondaryButton label={t('create_account')} onClick={() => navigate('/login')} />
+            <SecondaryButton label={t('create_account')} onClick={() => navigate('/register')} />
           </div>
 
           {settingsBlock}

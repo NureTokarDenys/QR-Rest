@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import StaffShell from '../../../components/staff/StaffShell';
 import MicroStat from '../../../components/staff/MicroStat';
@@ -7,22 +7,27 @@ import TableQrBlock from '../../../components/staff/TableQrBlock';
 import TableHistoryBlock from '../../../components/staff/TableHistoryBlock';
 import WsStatusBanner from '../../../components/WsStatusBanner';
 import { Skel } from '../../../components/staff/Skeleton';
-import { fieldFor } from '../../../i18n/langs';
+import { useLocalField } from '../../../i18n/useLang';
 import { useAuth } from '../../../context/AuthContext';
 import { updateTable } from '../../../api/admin';
 import { useStaffData } from '../../../context/StaffDataContext';
 import {
   getOrder, getTableOrders,
-  addOrderItems, updateOrderItem, deleteOrderItem,
-  voidOrder,
+  addOrderItems, deleteOrderItem,
+  voidOrder, closeOrder,
   getWaiterCalls, resolveWaiterCall,
   openTableRecovery,
+  createWaiterOrder,
+  revertPayment,
 } from '../../../api/orders';
 import { updateGroupStatus } from '../../../api/kitchen';
 import { useWebSocket } from '../../../hooks/useWebSocket';
+import MenuPickerModal from '../../../components/staff/MenuPickerModal';
+import DishEditModal from '../../../components/staff/DishEditModal';
+import ConfirmDialog from '../../../components/ConfirmDialog';
 import styles from './tableDetail.module.css';
 
-import { MdEdit, MdDelete, MdAdd, MdCheck, MdClose, MdSearch, MdBlock, MdAccountCircle } from 'react-icons/md';
+import { MdEdit, MdDelete, MdAdd, MdBlock, MdAccountCircle, MdPayments, MdUndo, MdCheck } from 'react-icons/md';
 
 function mapStatus(s) {
   if (!s) return 'free';
@@ -54,7 +59,9 @@ function timeAgo(dateStr, t) {
 
 export default function TableDetail() {
   const { id } = useParams();
-  const { t, i18n } = useTranslation('tableDetail');
+  const navigate = useNavigate();
+  const { t } = useTranslation('tableDetail');
+  const local = useLocalField();
   const { user } = useAuth();
   const isAdmin = ['admin', 'root_admin'].includes(user?.role);
   // Shared cache: tables + menu items are lazy-loaded the first time this page
@@ -77,8 +84,10 @@ export default function TableDetail() {
   const [resolvedCall, setResolvedCall]   = useState(null); // { resolvedAt: Date }
   const [callNow, setCallNow]             = useState(() => Date.now());
 
-  // inline edit state
-  const [editItem, setEditItem] = useState(null);
+  // dish edit modal state
+  const [editingItem,    setEditingItem]    = useState(null); // full item passed to DishEditModal
+  // delete confirm state — { orderId, itemId } or null
+  const [deletingTarget, setDeletingTarget] = useState(null);
 
   // void order state
   const [voidingOrderId, setVoidingOrderId] = useState(null);
@@ -86,17 +95,23 @@ export default function TableDetail() {
   const [voidSaving, setVoidSaving]         = useState(false);
   const [voidError, setVoidError]           = useState('');
 
+  // close (pay cash / complete) order state
+  const [closingOrderId, setClosingOrderId] = useState(null); // orderId pending confirmation
+
+  // revert cash payment state
+  const [revertingOrderId, setRevertingOrderId] = useState(null);
+  const [revertLoading,    setRevertLoading]     = useState(false);
+
+  // create-order state
+  const [creatingOrder, setCreatingOrder] = useState(false);
+
   // recovery-window state
   const [recoveryWindowUntil, setRecoveryWindowUntil] = useState(null); // Date | null
   const [recoveryOpening, setRecoveryOpening]         = useState(false);
   const [countdown, setCountdown]                     = useState(null); // seconds remaining | null
 
-  // add-items panel state
-  const [addOrderId, setAddOrderId]   = useState(null);
-  const [allMenuItems, setAllMenuItems] = useState([]);
-  const [search, setSearch]           = useState('');
-  const [addQtys, setAddQtys]         = useState({});
-  const [addSaving, setAddSaving]     = useState(false);
+  // menu-picker modal state
+  const [addOrderId, setAddOrderId] = useState(null);
 
   // table info inline edit state (admin-only)
   const [tableEditing, setTableEditing]   = useState(false);
@@ -127,6 +142,13 @@ export default function TableDetail() {
     return () => clearInterval(id);
   }, [pendingCall?._id]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Auto-dismiss the "call accepted" banner after 10 seconds
+  useEffect(() => {
+    if (!resolvedCall) return;
+    const id = setTimeout(() => setResolvedCall(null), 10_000);
+    return () => clearTimeout(id);
+  }, [resolvedCall]);
+
   function formatElapsed(ms) {
     if (ms < 0) return '0s';
     const s = Math.floor(ms / 1000);
@@ -153,6 +175,22 @@ export default function TableDetail() {
       console.error('openRecoveryWindow error:', err);
     } finally {
       setRecoveryOpening(false);
+    }
+  }
+
+  // ── Create order (waiter) ────────────────────────────────────────────────────
+  async function handleCreateOrder() {
+    if (!tableInfo._id) return;
+    setCreatingOrder(true);
+    try {
+      const data = await createWaiterOrder(tableInfo._id);
+      if (data?.orderId) openAddPanel(data.orderId);
+      await refreshTables();
+      await load();
+    } catch (err) {
+      console.error('createWaiterOrder error:', err);
+    } finally {
+      setCreatingOrder(false);
     }
   }
 
@@ -225,6 +263,18 @@ export default function TableDetail() {
     }
   }
 
+  // ── Order status label map ────────────────────────────────────────────────────
+  function orderStatusLabel(status) {
+    switch (status) {
+      case 'open':           return t('orderStatusOpen');
+      case 'open_paid':      return t('orderStatusOpenPaid');
+      case 'completed_cash': return t('orderStatusCompletedCash');
+      case 'completed_epay': return t('orderStatusCompletedEpay');
+      case 'cancelled':      return t('orderStatusCancelled');
+      default:               return '—';
+    }
+  }
+
   // ── Load ────────────────────────────────────────────────────────────────────
   const load = useCallback(async () => {
     try {
@@ -258,16 +308,25 @@ export default function TableDetail() {
       const [loaded, hist, allCalls] = await Promise.all([
         ref
           ? getOrder(ref._id).then(data => {
-              const items = (data?.items || []).map(i => ({
-                id:             i._id,
-                name:           i.menuItemId?.name || i.menuItemName || '—',
-                name_en:        i.menuItemId?.name_en || i.menuItemName_en || null,
-                qty:            i.qty ?? i.quantity ?? 1,
-                price:          i.totalPrice ?? 0,
-                status:         i.dishStatus || 'waiting',
-                comment:        i.comment || '',
-                servingGroupId: i.servingGroupId || null,
-              }));
+              // Store both languages flat — the render layer picks the right
+              // one reactively via useLocalField. No need to re-fetch on lang change.
+              const items = (data?.items || []).map(i => {
+                const mi = typeof i.menuItemId === 'object' ? i.menuItemId : null;
+                return ({
+                id:                    i._id,
+                name:                  mi?.name    || i.name    || i.menuItemName    || '—',
+                name_en:               mi?.name_en || i.name_en || i.menuItemName_en || null,
+                qty:                   i.qty ?? i.quantity ?? 1,
+                price:                 i.totalPrice ?? 0,
+                status:                i.dishStatus || 'waiting',
+                comment:               i.comment || '',
+                servingGroupId:        i.servingGroupId || null,
+                menuItemId:            i.menuItemId_raw || (i.menuItemId?._id ? String(i.menuItemId._id) : null),
+                excludedIngredients:   i.excludedIngredients   || [],
+                addons:                i.addons                || [],
+                componentGroupChoices: i.componentGroupChoices || [],
+              });
+              });
               const servingGroups = (data?.servingGroups || data?.order?.servingGroups || [])
                 .slice()
                 .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
@@ -297,7 +356,7 @@ export default function TableDetail() {
     } finally {
       setLoading(false);
     }
-  }, [id, cachedTables]);
+  }, [id, cachedTables]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => { load(); }, [load]);
 
@@ -307,8 +366,9 @@ export default function TableDetail() {
   useEffect(() => { tableInfoRef.current = tableInfo; }, [tableInfo]);
 
   const RELOAD_EVENTS = new Set([
-    'ORDER_NEW', 'ORDER_UPDATED', 'ORDER_VOID', 'ORDER_CANCELLED',
+    'ORDER_NEW', 'ORDER_UPDATED', 'ORDER_VOID', 'ORDER_CANCELLED', 'ORDER_COMPLETED',
     'DISH_STATUS_UPDATED', 'GROUP_STATUS_UPDATED', 'ORDER_ITEMS_ADDED',
+    'PAYMENT_COMPLETED',
     'WAITER_CALL', 'WAITER_CALL_CASH', 'WAITER_CALL_RESOLVED',
   ]);
 
@@ -336,7 +396,7 @@ export default function TableDetail() {
     setAcceptingCall(true);
     try {
       await resolveWaiterCall(pendingCall._id);
-      setResolvedCall({ resolvedAt: new Date() });
+      setResolvedCall({ resolvedAt: new Date(), type: pendingCall.type });
       setPendingCall(null);
       load();
     } catch (err) {
@@ -346,19 +406,16 @@ export default function TableDetail() {
     }
   }
 
-  // ── Edit item ────────────────────────────────────────────────────────────────
-  async function saveEdit() {
-    if (!editItem) return;
-    try {
-      await updateOrderItem(editItem.orderId, editItem.itemId, {
-        qty:     editItem.qty,
-        comment: editItem.comment,
-      });
-      setEditItem(null);
-      load();
-    } catch (err) {
-      console.error('updateOrderItem error:', err);
-    }
+  // ── Edit item (full dish modal) ──────────────────────────────────────────────
+  function openEditItem(item) {
+    setEditingItem(item);
+    setDeletingTarget(null);
+  }
+
+  async function handleEditSaved() {
+    setEditingItem(null);
+    await refreshTables();
+    await load();
   }
 
   // ── Void order ───────────────────────────────────────────────────────────────
@@ -375,7 +432,10 @@ export default function TableDetail() {
   }
 
   async function handleVoidOrder() {
-    if (voidReason.trim().length < 10) {
+    const currentItems = orders[0]?.items || [];
+    const allWaiting = currentItems.length === 0 || currentItems.every(i => i.status === 'waiting');
+
+    if (!allWaiting && voidReason.trim().length < 10) {
       setVoidError(t('voidReasonTooShort'));
       return;
     }
@@ -384,20 +444,58 @@ export default function TableDetail() {
     try {
       await voidOrder(voidingOrderId, voidReason.trim());
       cancelVoid();
-      load();
+      await refreshTables();
+      await load();
     } catch (err) {
       console.error('voidOrder error:', err);
-      setVoidError(err?.response?.data?.message || t('voidReasonTooShort'));
+      setVoidError(
+        err?.response?.data?.error?.message ||
+        err?.response?.data?.message ||
+        t('voidReasonTooShort')
+      );
     } finally {
       setVoidSaving(false);
     }
   }
 
-  // ── Delete item ──────────────────────────────────────────────────────────────
-  async function handleDelete(orderId, itemId) {
-    if (!window.confirm(t('deleteItemConfirm'))) return;
+  // ── Close (pay cash / complete pre-paid) order ───────────────────────────────
+  async function handleCloseOrder() {
+    if (!closingOrderId) return;
+    try {
+      await closeOrder(closingOrderId);
+      setClosingOrderId(null);
+      await refreshTables();
+      await load();
+    } catch (err) {
+      console.error('closeOrder error:', err);
+      setClosingOrderId(null);
+    }
+  }
+
+  // ── Revert cash payment ──────────────────────────────────────────────────────
+  async function handleRevertPayment() {
+    if (!revertingOrderId) return;
+    setRevertLoading(true);
+    try {
+      await revertPayment(revertingOrderId);
+      setRevertingOrderId(null);
+      await refreshTables();
+      await load();
+    } catch (err) {
+      console.error('revertPayment error:', err);
+      setRevertingOrderId(null);
+    } finally {
+      setRevertLoading(false);
+    }
+  }
+
+  // ── Delete item (inline two-step confirm) ────────────────────────────────────
+  async function confirmDelete() {
+    if (!deletingTarget) return;
+    const { orderId, itemId } = deletingTarget;
     try {
       await deleteOrderItem(orderId, itemId);
+      setDeletingTarget(null);
       load();
     } catch (err) {
       console.error('deleteOrderItem error:', err);
@@ -414,39 +512,20 @@ export default function TableDetail() {
     }
   }
 
-  // ── Add-items panel ──────────────────────────────────────────────────────────
-  async function openAddPanel(orderId) {
+  // ── Menu picker ──────────────────────────────────────────────────────────────
+  function openAddPanel(orderId) {
     setAddOrderId(orderId);
-    setAddQtys({});
-    setSearch('');
-    // Use the shared cache instead of fetching the entire menu again
-    if (!allMenuItems.length && Array.isArray(cachedMenu)) {
-      setAllMenuItems(cachedMenu.filter(m => m.isAvailable && !m.isDeleted));
-    }
   }
 
-  async function submitAdd() {
-    const items = Object.entries(addQtys)
-      .filter(([, qty]) => qty > 0)
-      .map(([menuItemId, qty]) => ({ menuItemId, qty }));
-    if (!items.length) return;
-    setAddSaving(true);
-    try {
-      await addOrderItems(addOrderId, items);
-      setAddOrderId(null);
-      load();
-    } catch (err) {
-      console.error('addOrderItems error:', err);
-    } finally {
-      setAddSaving(false);
-    }
+  async function handleMenuPickerConfirm(items) {
+    await addOrderItems(addOrderId, items, t('addedByWaiter'));
+    setAddOrderId(null);
+    await refreshTables();
+    await load();
   }
 
   // ── Computed ─────────────────────────────────────────────────────────────────
-  const grandTotal   = orders[0]?.items.reduce((s, i) => s + (i.price || 0), 0) ?? 0;
-  const filteredMenu = allMenuItems.filter(m =>
-    !search || m.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const grandTotal = orders[0]?.items.reduce((s, i) => s + (i.price || 0), 0) ?? 0;
 
   const isWaiterCall = tableInfo.status === 'waiter';
 
@@ -668,10 +747,12 @@ export default function TableDetail() {
 
         {/* ── Waiter call banner ── */}
         {(pendingCall || isWaiterCall || resolvedCall) && (
-          <div className={`${styles.waiterCallBanner} ${resolvedCall ? styles.waiterCallBannerResolved : ''}`}>
+          <div className={`${styles.waiterCallBanner} ${resolvedCall ? styles.waiterCallBannerResolved : ''} ${(pendingCall?.type === 'cash_payment' || resolvedCall?.type === 'cash_payment') ? styles.waiterCallBannerCash : ''}`}>
             <div className={styles.waiterCallInfo}>
               <span className={styles.waiterCallText}>
-                {resolvedCall ? `✅ ${t('callAnswered')}` : `🔔 ${t('waiterCall')}`}
+                {resolvedCall
+                  ? (resolvedCall.type === 'cash_payment' ? `✅ ${t('callAnsweredCash')}` : `✅ ${t('callAnswered')}`)
+                  : (pendingCall?.type === 'cash_payment'  ? `💳 ${t('waiterCallCash')}` : `🔔 ${t('waiterCall')}`)}
               </span>
               {pendingCall?.createdAt && (
                 <span className={styles.waiterCallMeta}>
@@ -701,11 +782,29 @@ export default function TableDetail() {
         {/* ── Stats ── */}
         <div className={styles.statsRow}>
           <MicroStat
-            label={t('status')}
+            label={t('tableStatus')}
             value={tableStatusLabel(tableInfo.status)}
             highlight={isWaiterCall}
           />
-          <MicroStat label={t('currentOrder')} value={orders.length ? `#${orders[0].orderId}` : '—'} />
+          <MicroStat
+            label={t('orderStatus')}
+            value={orders.length ? orderStatusLabel(orders[0].order?.status) : '—'}
+            action={
+              orders.length &&
+              ['open_paid', 'completed_cash'].includes(orders[0].order?.status) &&
+              orders[0].order?.paymentMethod === 'cash'
+                ? (
+                  <button
+                    className={styles.revertBtn}
+                    onClick={() => setRevertingOrderId(orders[0].orderId)}
+                    disabled={revertLoading}
+                  >
+                    <MdUndo /> {t('revertPayment')}
+                  </button>
+                )
+                : null
+            }
+          />
           <MicroStat label={t('total')} value={`${grandTotal.toFixed(0)}₴`} highlight />
         </div>
 
@@ -713,24 +812,55 @@ export default function TableDetail() {
         {loading ? (
           <div className={styles.noOrder}>{t('loading')}</div>
         ) : orders.length === 0 ? (
-          <div className={styles.noOrder}>{t('noOrder')}</div>
+          <div className={styles.noOrder}>
+            <span>{t('noOrder')}</span>
+            {tableInfo.status === 'free' && (
+              <button
+                className={styles.createOrderBtn}
+                onClick={handleCreateOrder}
+                disabled={creatingOrder}
+              >
+                <MdAdd /> {creatingOrder ? '…' : t('createOrder')}
+              </button>
+            )}
+          </div>
         ) : (() => {
           const o = orders[0];
-          const subTotal = o.items.reduce((s, i) => s + (i.price || 0), 0);
+          const subTotal  = o.items.reduce((s, i) => s + (i.price || 0), 0);
+          const isPaid    = o.order?.status === 'open_paid';
+          const allServed = o.items.length > 0 && o.items.every(i => i.status === 'served');
+          const canClose  = o.order?.status === 'open' || o.order?.status === 'open_paid';
           return (
           <div className={styles.orderBox}>
             <div className={styles.orderHeader}>
-              <p className={styles.orderTitle}>{t('currentOrder')} #{o.orderId}</p>
+              <button
+                className={styles.orderIdLink}
+                onClick={() => navigate(`/staff/order/${o.orderId}`, { state: { from: `/staff/table/${id}` } })}
+              >
+                {t('currentOrder')} #{o.orderId}
+              </button>
               <div className={styles.sepActions}>
-                <button className={styles.addBtn} onClick={() => openAddPanel(o.orderId)}>
-                  <MdAdd /> {t('addDishes')}
-                </button>
-                <button
-                  className={`${styles.addBtn} ${styles.voidBtn}`}
-                  onClick={() => voidingOrderId === o.orderId ? cancelVoid() : openVoid(o.orderId)}
-                >
-                  <MdBlock /> {t('voidOrder')}
-                </button>
+                {(isAdmin || !isPaid) && (
+                  <>
+                    <button className={styles.addBtn} onClick={() => openAddPanel(o.orderId)}>
+                      <MdAdd /> {t('addDishes')}
+                    </button>
+                    <button
+                      className={`${styles.addBtn} ${styles.voidBtn}`}
+                      onClick={() => voidingOrderId === o.orderId ? cancelVoid() : openVoid(o.orderId)}
+                    >
+                      <MdBlock /> {t('voidOrder')}
+                    </button>
+                  </>
+                )}
+                {canClose && (
+                  <button
+                    className={`${styles.addBtn} ${allServed ? styles.payBtn : styles.payBtnPending}`}
+                    onClick={() => setClosingOrderId(o.orderId)}
+                  >
+                    <MdPayments /> {isPaid ? t('completeOrder') : t('payCash')}
+                  </button>
+                )}
               </div>
             </div>
 
@@ -770,22 +900,11 @@ export default function TableDetail() {
                   </thead>
                   <tbody>
                     {items.map(item => {
-                      const isEditing = editItem?.itemId === item.id && editItem?.orderId === o.orderId;
-                      const displayName = item[fieldFor('name', i18n.language)] || item.name;
+                      const displayName = local(item, 'name') || item.name;
                       return (
                         <tr key={item.id} className={styles.tableRow}>
                           <td className={styles.td}>{displayName}</td>
-                          <td className={styles.td}>
-                            {isEditing ? (
-                              <input
-                                type="number"
-                                min={1}
-                                className={styles.qtyInput}
-                                value={editItem.qty}
-                                onChange={e => setEditItem(p => ({ ...p, qty: Number(e.target.value) }))}
-                              />
-                            ) : item.qty}
-                          </td>
+                          <td className={styles.td}>{item.qty}</td>
                           <td className={`${styles.td} ${styles.priceCell}`}>{item.price.toFixed(0)}₴</td>
                           <td className={styles.td}>
                             <span className={`${styles.badge} ${styles[item.status]}`}>
@@ -793,29 +912,24 @@ export default function TableDetail() {
                             </span>
                           </td>
                           <td className={styles.td}>
-                            {isEditing ? (
-                              <div className={styles.rowActions}>
-                                <button className={styles.saveBtn} onClick={saveEdit} title={t('confirm')}><MdCheck /></button>
-                                <button className={styles.cancelBtn} onClick={() => setEditItem(null)} title={t('cancel')}><MdClose /></button>
-                              </div>
-                            ) : item.status === 'waiting' ? (
+                            {(isAdmin || (!isPaid && item.status === 'waiting')) && (
                               <div className={styles.rowActions}>
                                 <button
                                   className={styles.iconBtn}
                                   title={t('editOrder')}
-                                  onClick={() => setEditItem({ orderId: o.orderId, itemId: item.id, qty: item.qty, comment: item.comment })}
+                                  onClick={() => openEditItem(item)}
                                 >
                                   <MdEdit />
                                 </button>
                                 <button
                                   className={`${styles.iconBtn} ${styles.deleteIconBtn}`}
-                                  title={t('voidOrder')}
-                                  onClick={() => handleDelete(o.orderId, item.id)}
+                                  title={t('deleteItem')}
+                                  onClick={() => setDeletingTarget({ orderId: o.orderId, itemId: item.id })}
                                 >
                                   <MdDelete />
                                 </button>
                               </div>
-                            ) : null}
+                            )}
                           </td>
                         </tr>
                       );
@@ -874,64 +988,63 @@ export default function TableDetail() {
           );
         })()}
 
-        {/* ── Add-items panel ── */}
+        {/* ── Menu picker modal ── */}
         {addOrderId && (
-          <div className={styles.addPanel}>
-            <div className={styles.addPanelHeader}>
-              <span className={styles.addPanelTitle}>{t('addDishesTo', { id: addOrderId })}</span>
-              <button className={styles.closePanelBtn} onClick={() => setAddOrderId(null)}>
-                <MdClose />
-              </button>
-            </div>
-
-            <div className={styles.searchRow}>
-              <MdSearch className={styles.searchIcon} />
-              <input
-                autoFocus
-                className={styles.searchInput}
-                placeholder={t('searchDish')}
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-              />
-            </div>
-
-            <div className={styles.menuList}>
-              {filteredMenu.map(mi => (
-                <div key={mi._id} className={styles.menuRow}>
-                  <span className={styles.menuName}>{mi.name}</span>
-                  <span className={styles.menuPrice}>{mi.basePrice}₴</span>
-                  <div className={styles.qtyControl}>
-                    <button
-                      className={styles.qtyBtn}
-                      onClick={() => setAddQtys(p => ({ ...p, [mi._id]: Math.max(0, (p[mi._id] || 0) - 1) }))}
-                    >−</button>
-                    <span className={styles.qtyVal}>{addQtys[mi._id] || 0}</span>
-                    <button
-                      className={styles.qtyBtn}
-                      onClick={() => setAddQtys(p => ({ ...p, [mi._id]: (p[mi._id] || 0) + 1 }))}
-                    >+</button>
-                  </div>
-                </div>
-              ))}
-              {filteredMenu.length === 0 && (
-                <p className={styles.noResults}>{t('noResults')}</p>
-              )}
-            </div>
-
-            <div className={styles.addPanelFooter}>
-              <button
-                className={styles.submitAddBtn}
-                disabled={addSaving || !Object.values(addQtys).some(q => q > 0)}
-                onClick={submitAdd}
-              >
-                {addSaving ? t('saving') : t('confirm')}
-              </button>
-              <button className={styles.cancelAddBtn} onClick={() => setAddOrderId(null)}>
-                {t('cancel')}
-              </button>
-            </div>
-          </div>
+          <MenuPickerModal
+            orderId={addOrderId}
+            onClose={() => setAddOrderId(null)}
+            onConfirm={handleMenuPickerConfirm}
+          />
         )}
+
+        {/* ── Dish edit modal ── */}
+        {editingItem && orders[0] && (
+          <DishEditModal
+            orderId={orders[0].orderId}
+            item={editingItem}
+            onClose={() => setEditingItem(null)}
+            onSaved={handleEditSaved}
+          />
+        )}
+
+        {/* ── Delete confirmation ── */}
+        <ConfirmDialog
+          open={!!deletingTarget}
+          title={t('deleteItemConfirm')}
+          confirmLabel={t('deleteYes')}
+          cancelLabel={t('cancel')}
+          onConfirm={confirmDelete}
+          onCancel={() => setDeletingTarget(null)}
+          danger
+        />
+
+        {/* ── Close order confirmation ── */}
+        <ConfirmDialog
+          open={!!closingOrderId}
+          title={(() => {
+            const o = orders[0];
+            return (o?.order?.status === 'open_paid') ? t('completeOrderConfirm') : t('payCashConfirm');
+          })()}
+          confirmLabel={(() => {
+            const o = orders[0];
+            return (o?.order?.status === 'open_paid') ? t('completeOrder') : t('payCash');
+          })()}
+          cancelLabel={t('cancel')}
+          onConfirm={handleCloseOrder}
+          onCancel={() => setClosingOrderId(null)}
+          danger={false}
+        />
+
+        {/* ── Revert payment confirmation ── */}
+        <ConfirmDialog
+          open={!!revertingOrderId}
+          title={t('revertPaymentConfirm')}
+          confirmLabel={t('revertPayment')}
+          cancelLabel={t('cancel')}
+          onConfirm={handleRevertPayment}
+          onCancel={() => setRevertingOrderId(null)}
+          danger={true}
+        />
 
         <div className={styles.bottomRow}>
           <TableQrBlock

@@ -74,5 +74,8 @@
   "google_connected": "Google",
   "google_connected_value": "Connected",
   "google_add": "Connect",
-  "google_no_password": "Your account uses Google only — contact an admin to set a password."
+  "google_disconnect": "Disconnect Google",
+  "google_link_success": "Google account connected successfully.",
+  "google_no_password": "Your account uses Google only — contact an admin to set a password.",
+  "disconnect": "Disconnect"
 }

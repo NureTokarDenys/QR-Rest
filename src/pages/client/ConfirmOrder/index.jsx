@@ -200,7 +200,7 @@ export default function ConfirmOrder() {
         // Menu changed between our frontend check and the API call — re-run the
         // check with truly fresh data so the user sees the updated diff banner.
         triggerFreshCheck();
-      } else if (code === 'TABLE_ORDER_LOCKED' && orderId) {
+      } else if ((code === 'ACTIVE_ORDER_EXISTS' || code === 'TABLE_ORDER_LOCKED') && orderId) {
         setLockedOrderId(orderId);
       } else {
         setError(true);
