@@ -85,6 +85,7 @@
   "ws_offline_desc": "Не вдалося підключитися. Перезавантажте сторінку.",
   "ws_ping": "Пінг",
 
+  "notif_table_changed":    "Замовлення зі столу #{{from}} переміщено на стіл #{{to}}",
   "notif_order_new":        "Нове замовлення — Стіл #{{table}}",
   "notif_order_items_added": "Додано страви — Стіл #{{table}}",
   "notif_waiter_call":      "Стіл #{{table}} кличе офіціанта",

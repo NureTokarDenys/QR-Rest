@@ -17,7 +17,7 @@ import styles from './profile.module.css';
 import { useTranslation } from 'react-i18next';
 import { SUPPORTED_LANGS } from '../../../i18n/langs';
 
-import { MdPerson, MdEmail, MdLanguage, MdPalette, MdLock, MdDeleteSweep, MdNotifications } from 'react-icons/md';
+import { MdPerson, MdEmail, MdLanguage, MdPalette, MdLock, MdDeleteSweep, MdNotifications, MdTableRestaurant } from 'react-icons/md';
 
 // Inline Google icon (reuse from login)
 function GoogleIcon({ size = 18 }) {
@@ -42,7 +42,7 @@ export default function Profile() {
   const [resetSent,      setResetSent]      = useState(false);
   const [resetSending,   setResetSending]   = useState(false);
   const [resetSendError, setResetSendError] = useState('');
-  const { restaurantLangs }     = useApp();
+  const { restaurantLangs, tableId, tableNumber, initSession } = useApp();
 
   // ── Confirm dialog ────────────────────────────────
   // dialog: null | 'logout' | 'clearCache'
@@ -147,6 +147,8 @@ export default function Profile() {
     setEmailStep(1);
     setEmailInput('');
     setEmailError('');
+    setTableCodeInput('');
+    setTableCodeError('');
     setSheet(type);
   }
 
@@ -240,6 +242,11 @@ export default function Profile() {
     }
   }
 
+  // ── Table QR code entry ───────────────────────────
+  const [tableCodeInput,   setTableCodeInput]   = useState('');
+  const [tableCodeError,   setTableCodeError]   = useState('');
+  const [tableCodeLoading, setTableCodeLoading] = useState(false);
+
   // ── Sound notifications ───────────────────────────
   const [soundEnabled, setSoundEnabled] = useState(() => localStorage.getItem(SOUND_KEY) !== 'false');
 
@@ -247,6 +254,38 @@ export default function Profile() {
     setSoundEnabled(val);
     localStorage.setItem(SOUND_KEY, val ? 'true' : 'false');
   }
+
+  async function handleTableCodeSubmit() {
+    const shortCode = tableCodeInput.trim();
+    if (!shortCode) { setTableCodeError(t('table_code_error_empty')); return; }
+    setTableCodeLoading(true);
+    setTableCodeError('');
+    try {
+      await initSession(shortCode, { rejectIfOccupied: true, skipErrorToast: true });
+      setSheet(null);
+    } catch (err) {
+      if (err?.code === 'TABLE_OCCUPIED') {
+        setTableCodeError(t('table_code_error_occupied'));
+      } else {
+        const errCode = err?.response?.data?.error?.code;
+        setTableCodeError(tErr(`code.${errCode}`, { defaultValue: t('table_code_error_generic') }));
+      }
+    } finally {
+      setTableCodeLoading(false);
+    }
+  }
+
+  // ── Table section (shown in both guest + auth views) ────────────────────
+  const tableBlock = (
+    <SettingsSection title={t('table_section')}>
+      <SettingsRow
+        icon={<MdTableRestaurant />}
+        label={tableId ? t('table_connected', { number: tableNumber || '—' }) : t('enter_code')}
+        value={tableId ? t('change') : undefined}
+        onClick={() => openSheet('table')}
+      />
+    </SettingsSection>
+  );
 
   // ── Shared settings rows (guests can still change language / theme) ──────
   const settingsBlock = (
@@ -369,11 +408,42 @@ export default function Profile() {
             <SecondaryButton label={t('create_account')} onClick={() => navigate('/register')} />
           </div>
 
+          {tableBlock}
           {settingsBlock}
           {storageBlock}
         </div>
 
         {dialogs}
+
+        {/* ── Table QR code sheet (guests only need the 'table' case) ── */}
+        {sheet === 'table' && (
+          <div className={styles.sheetOverlay} onClick={closeSheet}>
+            <div className={styles.sheet} onClick={e => e.stopPropagation()}>
+              <div className={styles.sheetHandle} />
+              <h3 className={styles.sheetTitle}>{t('table_code_title')}</h3>
+              <InputField
+                label={t('table_code_label')}
+                placeholder={t('table_code_placeholder')}
+                value={tableCodeInput}
+                onChange={e => setTableCodeInput(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleTableCodeSubmit()}
+                autoCapitalize="characters"
+                autoCorrect="off"
+                spellCheck={false}
+              />
+              {tableCodeError && <p className={styles.sheetError}>{tableCodeError}</p>}
+              <div className={styles.sheetActions}>
+                <PrimaryButton
+                  label={tableCodeLoading ? '...' : t('table_code_submit')}
+                  onClick={handleTableCodeSubmit}
+                  disabled={tableCodeLoading}
+                />
+                <SecondaryButton label={t('cancel')} onClick={closeSheet} />
+              </div>
+            </div>
+          </div>
+        )}
+
         <Footer />
       </div>
     );
@@ -490,6 +560,9 @@ export default function Profile() {
           )}
         </SettingsSection>
 
+        {/* ── Table ── */}
+        {tableBlock}
+
         {/* ── App settings ── */}
         {settingsBlock}
 
@@ -517,10 +590,28 @@ export default function Profile() {
           <div className={styles.sheet} onClick={e => e.stopPropagation()}>
             <div className={styles.sheetHandle} />
             <h3 className={styles.sheetTitle}>
-              {sheet === 'name'     ? t('edit_name') :
-               sheet === 'email'   ? t('email_change_title') :
-                                     t('change_password_title')}
+              {sheet === 'name'   ? t('edit_name') :
+               sheet === 'email'  ? t('email_change_title') :
+               sheet === 'table'  ? t('table_code_title') :
+                                    t('change_password_title')}
             </h3>
+
+            {/* ── Table QR code ── */}
+            {sheet === 'table' && (
+              <>
+                <InputField
+                  label={t('table_code_label')}
+                  placeholder={t('table_code_placeholder')}
+                  value={tableCodeInput}
+                  onChange={e => setTableCodeInput(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && handleTableCodeSubmit()}
+                  autoCapitalize="characters"
+                  autoCorrect="off"
+                  spellCheck={false}
+                />
+                {tableCodeError && <p className={styles.sheetError}>{tableCodeError}</p>}
+              </>
+            )}
 
             {/* ── Name ── */}
             {sheet === 'name' && (
@@ -589,6 +680,18 @@ export default function Profile() {
             )}
 
             <div className={styles.sheetActions}>
+              {/* Table code actions */}
+              {sheet === 'table' && (
+                <>
+                  <PrimaryButton
+                    label={tableCodeLoading ? '...' : t('table_code_submit')}
+                    onClick={handleTableCodeSubmit}
+                    disabled={tableCodeLoading}
+                  />
+                  <SecondaryButton label={t('cancel')} onClick={closeSheet} />
+                </>
+              )}
+
               {/* Email flow actions */}
               {sheet === 'email' && emailStep === 1 && (
                 <>

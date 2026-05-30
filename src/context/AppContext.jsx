@@ -327,7 +327,14 @@ export function AppProvider({ children }) {
   // Strategy 2: GET /user/orders → find first non-terminal order → GET /orders/:id
   const STAFF_ROLES = new Set(['admin', 'root_admin', 'cook', 'waiter', 'waiter_cook']);
   useEffect(() => {
-    if (!accessToken || STAFF_ROLES.has(user?.role)) {
+    if (!accessToken) {
+      // Guest (session-token only) — leave orderId in localStorage so the
+      // guest restore effect below can fetch the order on reload.
+      setCurrentOrder(null);
+      setRestoringOrder(false);
+      return;
+    }
+    if (STAFF_ROLES.has(user?.role)) {
       setCurrentOrder(null);
       setRestoringOrder(false);
       localStorage.removeItem('orderId');
@@ -638,9 +645,9 @@ export function AppProvider({ children }) {
 
   // ─── session ─────────────────────────────────────────────────────────────
 
-  async function initSession(shortCode) {
+  async function initSession(shortCode, { rejectIfOccupied = false, skipErrorToast = false } = {}) {
     try {
-      const data = await scanQR(shortCode);
+      const data = await scanQR(shortCode, { skipErrorToast });
       // restaurantId in the QR response is now the 8-char publicId (e.g. "BR5CH3OK")
       const {
         sessionToken: st,
@@ -655,6 +662,15 @@ export function AppProvider({ children }) {
         defaultLanguage,
         enabledLanguages,
       } = data;
+
+      // Security: manual code entry must not grant access to tables with an
+      // active order belonging to a different guest.
+      if (rejectIfOccupied && occupied) {
+        const err = new Error('TABLE_OCCUPIED');
+        err.code = 'TABLE_OCCUPIED';
+        throw err;
+      }
+
       localStorage.setItem('sessionToken',   st);
       localStorage.setItem('tableId',        String(tid));
       localStorage.setItem('tableNumber',    String(tn));
@@ -946,6 +962,18 @@ export function AppProvider({ children }) {
     }
   }
 
+  function applyTableChange(newTableId, newTableNumber) {
+    const tid  = String(newTableId);
+    const tnum = String(newTableNumber ?? '');
+    setTableId(tid);
+    setTableNumber(tnum);
+    localStorage.setItem('tableId',     tid);
+    localStorage.setItem('tableNumber', tnum);
+    setCurrentOrder(prev =>
+      prev ? { ...prev, tableId: newTableId, tableNumber: newTableNumber } : prev
+    );
+  }
+
   function cancelEditingOrder() {
     setEditingOrder(null);
     setCart([]);
@@ -1174,7 +1202,7 @@ export function AppProvider({ children }) {
       tableHasActiveOrder, setTableHasActiveOrder,
       restoringOrder,
       restaurantLangs, restaurantDefaultLang, setRestaurantMeta,
-      initSession, selectRestaurant,
+      initSession, selectRestaurant, applyTableChange,
       submitOrder,
       currentOrder, setCurrentOrder,
       orderHistory, addOrderToHistory,

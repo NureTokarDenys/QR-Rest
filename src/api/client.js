@@ -64,6 +64,10 @@ const SUPPRESSED_CODES = new Set([
  *   • cancelled requests (axios CanceledError)
  */
 function dispatchApiError(error) {
+  // Per-request opt-out: the call-site shows the error in its own UI
+  // (e.g. manual table-code entry) and doesn't want a duplicate global toast.
+  if (error.config?.skipErrorToast) return;
+
   if (!error.response) {
     // Network / timeout / cancelled
     if (axios.isCancel(error)) return;

@@ -96,5 +96,21 @@
     "cancel_item": "Скасувати",
     "cancel_item_confirm": "Прибрати цю страву із замовлення?",
     "cancel_continue": "Продовжити →",
-    "cancel_step2_hint": "Підтвердіть ще раз — цю дію не можна скасувати"
+    "cancel_step2_hint": "Підтвердіть ще раз — цю дію не можна скасувати",
+
+    "change_table_btn": "Змінити столик",
+    "change_table_blocked": "Спершу скасуйте виклик офіціанта",
+    "change_table_title": "Оберіть новий столик",
+    "change_table_free": "Вільний",
+    "change_table_occupied": "Зайнятий",
+    "change_table_current": "Ваш столик",
+    "change_table_load_error": "Не вдалося завантажити столики",
+    "change_table_confirm1_title": "Перейти до столика #{{number}}?",
+    "change_table_confirm1_msg": "Офіціанта та кухню буде сповіщено про зміну столика.",
+    "change_table_confirm2_title": "Підтвердіть зміну столика",
+    "change_table_confirm2_msg": "Ця дія незворотна. Усіх співробітників буде повідомлено негайно.",
+    "change_table_confirm": "Змінити столик",
+    "change_table_cancel": "Скасувати",
+    "change_table_success": "Столик успішно змінено",
+    "change_table_error": "Не вдалося змінити столик. Спробуйте ще раз."
 }

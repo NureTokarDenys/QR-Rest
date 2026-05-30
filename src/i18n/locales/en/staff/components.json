@@ -84,6 +84,7 @@
   "ws_offline_desc": "Could not connect. Reload the page to retry.",
   "ws_ping": "Ping",
 
+  "notif_table_changed":    "Order moved from Table #{{from}} to Table #{{to}}",
   "notif_order_new":        "New order — Table #{{table}}",
   "notif_order_items_added": "Items added — Table #{{table}}",
   "notif_waiter_call":      "Table #{{table}} needs assistance",

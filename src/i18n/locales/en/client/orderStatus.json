@@ -96,5 +96,21 @@
     "cancel_item": "Cancel",
     "cancel_item_confirm": "Remove this dish from the order?",
     "cancel_continue": "Continue →",
-    "cancel_step2_hint": "Confirm again — this cannot be undone"
+    "cancel_step2_hint": "Confirm again — this cannot be undone",
+
+    "change_table_btn": "Change table",
+    "change_table_blocked": "Cancel the waiter call first",
+    "change_table_title": "Choose a new table",
+    "change_table_free": "Free",
+    "change_table_occupied": "Occupied",
+    "change_table_current": "Your table",
+    "change_table_load_error": "Could not load tables",
+    "change_table_confirm1_title": "Move to Table #{{number}}?",
+    "change_table_confirm1_msg": "The waiter and kitchen will be notified of the table change.",
+    "change_table_confirm2_title": "Confirm table change",
+    "change_table_confirm2_msg": "This cannot be undone. All staff will be notified immediately.",
+    "change_table_confirm": "Change table",
+    "change_table_cancel": "Cancel",
+    "change_table_success": "Table changed successfully",
+    "change_table_error": "Could not change table. Please try again."
 }

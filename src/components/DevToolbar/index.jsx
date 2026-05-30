@@ -11,7 +11,7 @@
  *   C       — clear localStorage + reload  (red, full-width)
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -52,11 +52,23 @@ export default function DevToolbar() {
 }
 
 function DevToolbarInner() {
+  const [visible, setVisible] = useState(true);
   const { login, loginAsGuest } = useAuth();
   const { theme, setTheme } = useTheme();
   const { i18n } = useTranslation();
   const { fireTestNotification } = useStaffNotifications();
   const [busy, setBusy] = useState(null);
+
+  useEffect(() => {
+    function onKeyDown(e) {
+      if (e.key === 'F8') {
+        e.preventDefault();
+        setVisible(v => !v);
+      }
+    }
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, []);
 
   const currentLangLabel = i18n.language?.toUpperCase() ?? 'UA';
 
@@ -169,6 +181,8 @@ function DevToolbarInner() {
       default: break;
     }
   }
+
+  if (!visible) return null;
 
   const isUtil = id => ['clear', 'lang', 'theme'].includes(id);
 

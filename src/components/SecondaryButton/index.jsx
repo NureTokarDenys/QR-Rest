@@ -1,9 +1,9 @@
 import React from 'react';
 import styles from './secondaryButton.module.css';
 
-export default function SecondaryButton({ label, onClick, type = 'button', className = styles.button, disabled = false }) {
+export default function SecondaryButton({ label, onClick, type = 'button', className = styles.button, disabled = false, title }) {
   return (
-    <button className={className} onClick={onClick} type={type} disabled={disabled}>
+    <button className={className} onClick={onClick} type={type} disabled={disabled} title={title}>
       {label}
     </button>
   );

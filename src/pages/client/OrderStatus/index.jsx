@@ -3,7 +3,7 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useApp } from '../../../context/AppContext';
 import { normalizeApiOrder } from '../../../context/AppContext';
 import { usePlan } from '../../../hooks/usePlan';
-import { getOrder, cancelGuestOrder, cancelGuestServingGroup, cancelGuestOrderItem, waiterCall } from '../../../api/orders';
+import { getOrder, cancelGuestOrder, cancelGuestServingGroup, cancelGuestOrderItem, waiterCall, changeOrderTable } from '../../../api/orders';
 import Header from '../../../components/client/Header';
 import OrderStatusItem from '../../../components/client/OrderStatusItem';
 import ConfirmDialog from '../../../components/ConfirmDialog';
@@ -13,11 +13,12 @@ import SecondaryButton from '../../../components/SecondaryButton';
 import Footer from '../../../components/client/Footer';
 import OrderReviews from '../../../components/client/OrderReviews';
 import PaymentSheet from '../../../components/client/PaymentSheet';
+import TablePickerSheet from '../../../components/client/TablePickerSheet';
 import styles from './orderStatus.module.css';
 import { useLocalField } from '../../../i18n/useLang';
 import { useTranslation } from 'react-i18next';
 
-import { MdNotificationsActive, MdInfoOutline, MdLocalFireDepartment, MdCheck, MdCheckCircle, MdNotifications, MdStorefront, MdPayments, MdHourglassTop } from "react-icons/md";
+import { MdNotificationsActive, MdInfoOutline, MdLocalFireDepartment, MdCheck, MdCheckCircle, MdNotifications, MdStorefront, MdPayments, MdHourglassTop, MdSwapHoriz } from "react-icons/md";
 
 const DISH_STATUSES = ['waiting', 'cooking', 'ready', 'served'];
 // 5-step progress bar shown to the guest: dish-progression + final paid step.
@@ -34,10 +35,11 @@ export default function OrderStatus() {
   const navigate = useNavigate();
   const location = useLocation();
   const {
-    currentOrder, setCurrentOrder, tableNumber, orderHistory, sessionToken, startEditingOrder,
+    currentOrder, setCurrentOrder, tableNumber, tableId, orderHistory, sessionToken, startEditingOrder,
     addWsListener, removeWsListener, wsStatus, wsLatency,
     notifications, unreadCount, markAllRead, refreshNotifications,
     restaurantName, restaurantName_en, restaurantId,
+    applyTableChange,
   } = useApp();
 
   // ── Waiter call state ─────────────────────────────────────────────────────
@@ -127,6 +129,49 @@ export default function OrderStatus() {
     }
   }
 
+  // ── Change-table state ────────────────────────────────────────────────────
+  const [tablePickerOpen,   setTablePickerOpen]   = useState(false);
+  const [pickedTable,       setPickedTable]       = useState(null);
+  const [tableConfirmStep,  setTableConfirmStep]  = useState(0); // 0=closed, 1=first confirm, 2=second confirm
+  const [tableChangeLoading, setTableChangeLoading] = useState(false);
+  const [tableChangeError,  setTableChangeError]  = useState('');
+
+  function openTablePicker() {
+    setPickedTable(null);
+    setTableConfirmStep(0);
+    setTableChangeError('');
+    setTablePickerOpen(true);
+  }
+
+  function handleTablePicked(table) {
+    setPickedTable(table);
+    setTablePickerOpen(false);
+    setTableChangeError('');
+    setTableConfirmStep(1);
+  }
+
+  function closeTableChange() {
+    setTablePickerOpen(false);
+    setPickedTable(null);
+    setTableConfirmStep(0);
+    setTableChangeError('');
+    setTableChangeLoading(false);
+  }
+
+  async function executeTableChange() {
+    if (!activeOrder || !pickedTable) return;
+    setTableChangeLoading(true);
+    setTableChangeError('');
+    try {
+      const result = await changeOrderTable(activeOrder.id, pickedTable._id);
+      applyTableChange(result?.newTableId ?? pickedTable._id, result?.newTableNumber ?? pickedTable.number);
+      closeTableChange();
+    } catch (err) {
+      setTableChangeError(err?.response?.data?.error?.message || t('change_table_error'));
+      setTableChangeLoading(false);
+    }
+  }
+
   // ── Notification panel ─────────────────────────────────────────────────────
   const [showNotifs, setShowNotifs] = useState(false);
   const isEn = i18n.language === 'en';
@@ -184,6 +229,14 @@ export default function OrderStatus() {
       return;
     }
 
+    if (event === 'TABLE_CHANGED') {
+      const isRelevant = !payload.orderId || String(payload.orderId) === String(activeOrderIdRef.current);
+      if (isRelevant && payload.newTableId) {
+        applyTableChange(payload.newTableId, payload.newTableNumber);
+      }
+      return;
+    }
+
     function applyEvent(prev) {
       if (!prev) return prev;
       const isRelevant = !payload.orderId || String(payload.orderId) === String(prev.id);
@@ -226,7 +279,7 @@ export default function OrderStatus() {
 
     setCurrentOrder(applyEvent);
     setFetchedOrder(applyEvent);
-  }, [setCurrentOrder, setFetchedOrder, setCallState, setCallInfo]);
+  }, [setCurrentOrder, setFetchedOrder, setCallState, setCallInfo, applyTableChange]);
 
   useEffect(() => {
     addWsListener(handleWsMessage);
@@ -639,6 +692,13 @@ export default function OrderStatus() {
               label={`+ ${t('add_more')}`}
               onClick={() => { startEditingOrder(activeOrder); navigate('/menu'); }}
             />
+
+            <SecondaryButton
+              label={<><MdSwapHoriz /> {t('change_table_btn')}</>}
+              onClick={callState === 'pending' ? undefined : openTablePicker}
+              disabled={callState === 'pending'}
+              title={callState === 'pending' ? t('change_table_blocked') : undefined}
+            />
           </>
         )}
 
@@ -666,6 +726,40 @@ export default function OrderStatus() {
         loading={cancelLoading}
         onConfirm={executeCancel}
         onCancel={closeCancel}
+      />
+
+      {/* ── Change-table flow ── */}
+      <TablePickerSheet
+        open={tablePickerOpen}
+        currentTableId={activeOrder.tableId || tableId}
+        onSelect={handleTablePicked}
+        onClose={closeTableChange}
+      />
+
+      {/* Step 1 — pick confirmation */}
+      <ConfirmDialog
+        open={tableConfirmStep === 1}
+        title={t('change_table_confirm1_title', { number: pickedTable?.number ?? '' })}
+        message={t('change_table_confirm1_msg')}
+        confirmLabel={t('change_table_confirm')}
+        cancelLabel={t('change_table_cancel')}
+        danger={false}
+        onConfirm={() => { setTableChangeError(''); setTableConfirmStep(2); }}
+        onCancel={closeTableChange}
+      />
+
+      {/* Step 2 — final confirmation with loading/error */}
+      <ConfirmDialog
+        open={tableConfirmStep === 2}
+        title={t('change_table_confirm2_title')}
+        message={t('change_table_confirm2_msg')}
+        error={tableChangeError}
+        confirmLabel={t('change_table_confirm')}
+        cancelLabel={t('change_table_cancel')}
+        danger={false}
+        loading={tableChangeLoading}
+        onConfirm={executeTableChange}
+        onCancel={closeTableChange}
       />
     </div>
   );

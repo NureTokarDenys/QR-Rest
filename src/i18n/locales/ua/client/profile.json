@@ -95,5 +95,16 @@
     "password_confirm_message": "Ми надішлемо посилання для скидання на {{email}}. Продовжити?",
     "password_confirm": "Надіслати посилання",
 
-    "close": "Закрити"
+    "close": "Закрити",
+
+    "table_section": "Столик",
+    "table_connected": "Столик {{number}}",
+    "enter_code": "Ввести код QR-столика",
+    "table_code_title": "Введіть код столика",
+    "table_code_label": "Короткий код (напр. AB1234)",
+    "table_code_placeholder": "Введіть код...",
+    "table_code_submit": "Підтвердити",
+    "table_code_error_empty": "Введіть код столика",
+    "table_code_error_generic": "Невірний або прострочений код. Перевірте і спробуйте ще раз.",
+    "table_code_error_occupied": "Цей столик вже має активне замовлення. Якщо ви сидите тут і втратили сесію — попросіть офіціанта відновити її для вас."
 }

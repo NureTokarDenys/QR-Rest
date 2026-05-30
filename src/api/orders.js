@@ -128,3 +128,13 @@ export async function createWaiterOrder(tableId, restaurantId = getStoredRestaur
   const res = await apiClient.post(`/${restaurantId}/waiter/tables/${tableId}/order`);
   return res.data?.data; // { orderId, sessionToken }
 }
+
+/**
+ * Move an active order to a different table.
+ * Session token is forwarded automatically via the X-Session-Token header.
+ * Returns { newTableId, newTableNumber } on success.
+ */
+export async function changeOrderTable(orderId, newTableId, restaurantId = getStoredRestaurantId()) {
+  const res = await apiClient.post(`/${restaurantId}/orders/${orderId}/change-table`, { newTableId });
+  return res.data?.data;
+}

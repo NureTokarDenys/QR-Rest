@@ -33,5 +33,6 @@
     "locked_section_label": "Already ordered",
     "new_items_label": "New items",
     "confirm_add": "Add to order",
-    "cancel_editing": "Cancel"
+    "cancel_editing": "Cancel",
+    "enter_code_manually": "or enter the code manually"
 }

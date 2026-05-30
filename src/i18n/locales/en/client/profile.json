@@ -95,5 +95,16 @@
     "password_confirm_message": "We'll send a reset link to {{email}}. Continue?",
     "password_confirm": "Send link",
 
-    "close": "Close"
+    "close": "Close",
+
+    "table_section": "Table",
+    "table_connected": "Table {{number}}",
+    "enter_code": "Enter table QR code",
+    "table_code_title": "Enter table code",
+    "table_code_label": "Short code (e.g. AB1234)",
+    "table_code_placeholder": "Enter code...",
+    "table_code_submit": "Confirm",
+    "table_code_error_empty": "Please enter a table code",
+    "table_code_error_generic": "Invalid or expired code. Please check and try again.",
+    "table_code_error_occupied": "This table already has an active order. If you're sitting here and lost your session, ask a waiter to restore it for you."
 }

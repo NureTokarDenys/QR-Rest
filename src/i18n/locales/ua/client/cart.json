@@ -34,5 +34,6 @@
     "locked_section_label": "Вже замовлено",
     "new_items_label": "Нові позиції",
     "confirm_add": "Додати до замовлення",
-    "cancel_editing": "Скасувати"
+    "cancel_editing": "Скасувати",
+    "enter_code_manually": "або введіть код вручну"
 }

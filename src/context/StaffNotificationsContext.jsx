@@ -15,6 +15,7 @@ const TEST_TYPES = [
   'PAYMENT_COMPLETED',
   'ORDER_VOID',
   'ORDER_CANCELLED',
+  'TABLE_CHANGED',
 ];
 
 const MOCK_PAYLOAD = {
@@ -25,11 +26,11 @@ const MOCK_PAYLOAD = {
 };
 
 const ROLE_EVENTS = {
-  cook:        ['ORDER_NEW', 'ORDER_ITEMS_ADDED'],
-  waiter:      ['ORDER_NEW', 'WAITER_CALL', 'WAITER_CALL_CASH'],
-  waiter_cook: ['ORDER_NEW', 'ORDER_ITEMS_ADDED', 'WAITER_CALL', 'WAITER_CALL_CASH'],
+  cook:        ['ORDER_NEW', 'ORDER_ITEMS_ADDED', 'TABLE_CHANGED'],
+  waiter:      ['ORDER_NEW', 'WAITER_CALL', 'WAITER_CALL_CASH', 'TABLE_CHANGED'],
+  waiter_cook: ['ORDER_NEW', 'ORDER_ITEMS_ADDED', 'WAITER_CALL', 'WAITER_CALL_CASH', 'TABLE_CHANGED'],
   admin:       ['ORDER_NEW', 'ORDER_ITEMS_ADDED', 'WAITER_CALL', 'WAITER_CALL_CASH',
-                'ORDER_VOID', 'ORDER_CANCELLED', 'PAYMENT_COMPLETED'],
+                'ORDER_VOID', 'ORDER_CANCELLED', 'PAYMENT_COMPLETED', 'TABLE_CHANGED'],
 };
 
 function buildNotif(event, payload, t) {
@@ -43,6 +44,10 @@ function buildNotif(event, payload, t) {
     ORDER_VOID:         t('notif_order_void',           { order: orderId }),
     ORDER_CANCELLED:    t('notif_order_cancelled'),
     PAYMENT_COMPLETED:  t('notif_payment_done',         { table }),
+    TABLE_CHANGED:      t('notif_table_changed', {
+      from: payload.oldTableNumber ?? '?',
+      to:   payload.newTableNumber ?? '?',
+    }),
   };
   return {
     id:        `${event}_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,

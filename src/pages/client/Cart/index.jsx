@@ -292,9 +292,14 @@ export default function Cart() {
               disabled={!canOrder}
             />
             {!canOrder && (
-              <p className={styles.noTableHint}>
-                📍 {t('no_table_hint') || 'Відскануйте QR-код на вашому столику, щоб зробити замовлення'}
-              </p>
+              <>
+                <p className={styles.noTableHint}>
+                  📍 {t('no_table_hint')}
+                </p>
+                <button className={styles.enterCodeLink} onClick={() => navigate('/profile')}>
+                  {t('enter_code_manually')}
+                </button>
+              </>
             )}
           </>
         )}

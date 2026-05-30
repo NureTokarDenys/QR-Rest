@@ -1,4 +1,4 @@
-import apiClient from './client';
+import apiClient, { getStoredRestaurantId } from './client';
 
 // ═══════════════════════════════════════════════════════════════════════════
 //  GET /api/restaurants — Public restaurant listing
@@ -50,4 +50,14 @@ export async function getRestaurants(q, page = 1, limit = 20) {
 export async function getRestaurantInfo(publicId) {
   const res = await apiClient.get(`/${publicId}/info`);
   return res.data;
+}
+
+/**
+ * Fetch all tables for a restaurant with their current statuses.
+ * The session token is forwarded automatically via the X-Session-Token header.
+ * Returns an array of { _id, number, label, name, status: 'free'|'occupied' }.
+ */
+export async function getRestaurantTables(restaurantId = getStoredRestaurantId()) {
+  const res = await apiClient.get(`/${restaurantId}/tables`);
+  return res.data?.data ?? [];
 }
