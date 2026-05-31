@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useSearchParams } from 'react-router-dom';
 import PremiumCelebrationModal from '../../../components/PremiumCelebrationModal';
 import UpgradeModal from '../../../components/UpgradeModal';
+import ConfirmDialog from '../../../components/ConfirmDialog';
 import StaffShell from '../../../components/staff/StaffShell';
 import PageSkeleton from '../../../components/staff/Skeleton';
 import InputField from '../../../components/InputField';
@@ -13,9 +14,10 @@ import LangTabs from '../../../components/staff/LangTabs';
 import TranslateOverlay from '../../../components/staff/TranslateOverlay';
 import { Dropdown } from '../../../components/Dropdown';
 import { updateRestaurant, uploadRestaurantLogo, translateText, saveLiqpayKeys } from '../../../api/admin';
+import { cancelSubscription } from '../../../api/subscriptions';
 import { usePlan } from '../../../hooks/usePlan';
 import { useStaffData } from '../../../context/StaffDataContext';
-import { MdPayment, MdCheckCircle, MdLock } from 'react-icons/md';
+import { MdPayment, MdCheckCircle, MdLock, MdWorkspacePremium } from 'react-icons/md';
 import { SUPPORTED_LANGS, SOURCE_LANG, fieldFor, emptyI18n, toApiLang } from '../../../i18n/langs';
 import styles from './restaurantSettings.module.css';
 import { MdStorefront } from 'react-icons/md';
@@ -114,6 +116,10 @@ export default function RestaurantSettings() {
   const [lqSaving,       setLqSaving]       = useState(false);
   const [lqSavedOk,      setLqSavedOk]      = useState(false);
   const [lqError,        setLqError]        = useState('');
+
+  // Subscription cancel state
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [cancelling,       setCancelling]       = useState(false);
 
   const lf = (base) => fieldFor(base, activeLang);
   const srcHint = (base) => {
@@ -279,6 +285,19 @@ export default function RestaurantSettings() {
     }
   }
 
+  async function handleCancelSubscription() {
+    setCancelDialogOpen(false);
+    setCancelling(true);
+    try {
+      await cancelSubscription();
+      // Backend emits RESTAURANT_UPDATED → StaffDataContext auto-refreshes cachedRestaurant
+    } catch (err) {
+      console.error('Cancel subscription error:', err);
+    } finally {
+      setCancelling(false);
+    }
+  }
+
   function toggleEnabledLang(code) {
     setEnabledLangs(prev =>
       prev.includes(code) ? prev.filter(c => c !== code) : [...prev, code]
@@ -325,6 +344,16 @@ export default function RestaurantSettings() {
 
         <PremiumCelebrationModal open={celebrationOpen} onClose={() => setCelebrationOpen(false)} />
         <UpgradeModal open={upgradeModalOpen} onClose={() => setUpgradeModalOpen(false)} />
+        <ConfirmDialog
+          open={cancelDialogOpen}
+          title={t('subscriptionCancelTitle')}
+          message={t('subscriptionCancelConfirm')}
+          confirmLabel={t('subscriptionCancelConfirmBtn')}
+          cancelLabel={t('cancel')}
+          onConfirm={handleCancelSubscription}
+          onCancel={() => setCancelDialogOpen(false)}
+          danger
+        />
 
         {verifying && (
           <div className={styles.verifyingBanner}>
@@ -512,6 +541,85 @@ export default function RestaurantSettings() {
               <p className={styles.fieldHint}>{t('enabledLanguagesHint')}</p>
             </div>
           </div>
+        </div>
+
+        {/* ── Subscription ── */}
+        <div className={styles.section}>
+          <p className={styles.sectionTitle}>
+            <MdWorkspacePremium style={{ verticalAlign: 'middle', marginRight: 6 }} />
+            {t('subscriptionTitle')}
+          </p>
+
+          {isPremium ? (
+            <div className={styles.subPremium}>
+              <div className={styles.subHeader}>
+                <span className={styles.subBadgePremium}>{t('subscriptionPremium')}</span>
+                <span className={
+                  cachedRestaurant?.subscriptionCancelled
+                    ? styles.subStatusCancelling
+                    : styles.subStatusActive
+                }>
+                  {cachedRestaurant?.subscriptionCancelled
+                    ? t('subscriptionStatusCancelling')
+                    : t('subscriptionStatusActive')}
+                </span>
+              </div>
+
+              <div className={styles.subDates}>
+                <div className={styles.subDateRow}>
+                  <span className={styles.subDateLabel}>{t('subscriptionStarted')}</span>
+                  <span className={styles.subDateValue}>
+                    {cachedRestaurant?.subscriptionStartDate
+                      ? new Date(cachedRestaurant.subscriptionStartDate).toLocaleDateString()
+                      : '—'}
+                  </span>
+                </div>
+                <div className={styles.subDateRow}>
+                  <span className={styles.subDateLabel}>
+                    {cachedRestaurant?.subscriptionCancelled
+                      ? t('subscriptionEndsOn')
+                      : t('subscriptionNextBilling')}
+                  </span>
+                  <span className={styles.subDateValue}>
+                    {cachedRestaurant?.subscriptionEndDate
+                      ? new Date(cachedRestaurant.subscriptionEndDate).toLocaleDateString()
+                      : '—'}
+                  </span>
+                </div>
+              </div>
+
+              {cachedRestaurant?.subscriptionCancelled ? (
+                <p className={styles.subCancelNote}>{t('subscriptionCancelNote')}</p>
+              ) : (
+                <button
+                  className={styles.subCancelBtn}
+                  onClick={() => setCancelDialogOpen(true)}
+                  disabled={cancelling}
+                >
+                  {t('subscriptionCancel')}
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className={styles.subFree}>
+              <div className={styles.subHeader}>
+                <span className={styles.subBadgeFree}>{t('subscriptionFree')}</span>
+              </div>
+              <p className={styles.subFreeDesc}>{t('subscriptionFreeDesc')}</p>
+              <ul className={styles.subFeatureList}>
+                <li>{t('subscriptionFreeLimit1')}</li>
+                <li>{t('subscriptionFreeLimit2')}</li>
+                <li>{t('subscriptionFreeLimit3')}</li>
+                <li>{t('subscriptionFreeLimit4')}</li>
+              </ul>
+              <button
+                className={styles.subUpgradeBtn}
+                onClick={() => setUpgradeModalOpen(true)}
+              >
+                {t('subscriptionUpgradeCta')}
+              </button>
+            </div>
+          )}
         </div>
 
         {/* ── LiqPay integration (premium only) ── */}

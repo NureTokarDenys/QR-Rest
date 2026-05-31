@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { MdLock } from 'react-icons/md';
 import { useAuth } from '../../../context/AuthContext';
 import { useLocalField } from '../../../i18n/useLang';
 import {
@@ -9,7 +10,9 @@ import {
 } from '../../../api/reviews';
 import styles from './orderReviews.module.css';
 
-const TERMINAL_OK = new Set(['completed_cash', 'completed_epay']);
+// Reviews open up once the order is paid: paid-in-advance (open_paid) or any
+// closed/completed state. They are NOT available before payment.
+const PAID_OK = new Set(['open_paid', 'completed_cash', 'completed_epay']);
 
 /**
  * Star picker — 1..5 stars. `value` is the currently selected rating (0 = none).
@@ -110,24 +113,24 @@ function ReviewForm({ title, subtitle, existing, onSubmit }) {
 }
 
 /**
- * Review panel — shown on completed orders for premium restaurants.
+ * Review panel — shown once an order is paid (open_paid or completed_*).
  * Lets the guest leave one rating for the restaurant + one for each dish.
  *
- * Hides itself silently for:
- *   - non-terminal orders (or cancelled)
- *   - free-plan restaurants (backend rejects the POST anyway)
- *   - unauthenticated guests (no userId means the backend can't attribute the review)
+ * Behaviour:
+ *   - Hidden entirely before payment (order not yet open_paid/completed).
+ *   - Free-plan restaurants: the panel is shown but locked (reviews are a
+ *     premium-only feature; the backend rejects the POST anyway).
+ *   - Premium restaurants: full review forms; unauthenticated guests are asked
+ *     to log in (no userId means the backend can't attribute the review).
  */
 export default function OrderReviews({ orderId, restaurantId, restaurantPlan, items, status }) {
   const { t } = useTranslation('orderStatus');
   const local = useLocalField();
   const { user } = useAuth();
 
-  const eligible =
-    TERMINAL_OK.has(status) &&
-    restaurantPlan === 'premium' &&
-    Boolean(orderId) &&
-    Boolean(restaurantId);
+  const paid       = PAID_OK.has(status) && Boolean(orderId) && Boolean(restaurantId);
+  const isPremium  = restaurantPlan === 'premium';
+  const eligible   = paid && isPremium;
 
   const [existing, setExisting] = useState(null); // { restaurantReview, dishReviews }
   const [loadFailed, setLoadFailed] = useState(false);
@@ -141,7 +144,22 @@ export default function OrderReviews({ orderId, restaurantId, restaurantPlan, it
     return () => { cancelled = true; };
   }, [eligible, orderId, restaurantId, user]);
 
-  if (!eligible) return null;
+  // Not yet paid — nothing to show.
+  if (!paid) return null;
+
+  // Free plan — the review UI is present but locked (premium-only feature).
+  if (!isPremium) {
+    return (
+      <div className={styles.wrapper}>
+        <p className={styles.title}>{t('reviews_title')}</p>
+        <div className={styles.lockedCard}>
+          <MdLock className={styles.lockedIcon} />
+          <p className={styles.lockedText}>{t('reviews_unavailable_free')}</p>
+          <StarPicker value={0} onChange={() => {}} disabled />
+        </div>
+      </div>
+    );
+  }
 
   if (!user) {
     return (

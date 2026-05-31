@@ -12,6 +12,8 @@
     "snipet_ready_subtitle": "Будь ласка, зачекайте — зараз страви понесуть до вашого столу.",
     "snipet_served_title": "Ваше замовлення подано",
     "snipet_served_subtitle": "Смачного!",
+    "snipet_completed_title": "Ваше замовлення завершено",
+    "snipet_completed_subtitle": "Дякуємо — чекаємо на вас знову!",
     "header": "Статус замовлення",
     "online": "Онлайн", 
     "order": "Замовлення",
@@ -68,6 +70,7 @@
     "reviews_error": "Не вдалося надіслати відгук. Спробуйте ще раз.",
     "reviews_login_required": "Увійдіть, щоб залишити відгук",
     "reviews_all_done": "Ви вже залишили всі відгуки на це замовлення. Дякуємо!",
+    "reviews_unavailable_free": "У цьому ресторані відгуки поки що недоступні.",
 
     "pay_now": "Оплатити",
     "pay_method_title": "Спосіб оплати",

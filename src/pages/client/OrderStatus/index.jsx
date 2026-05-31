@@ -423,7 +423,12 @@ export default function OrderStatus() {
     ready:   { icon: <MdCheck />,               label: t('status_ready'),   cls: styles.groupBadgeReady   },
     served:  { icon: <MdCheck />,               label: t('status_served'),  cls: styles.groupBadgeServed  },
   };
-  const currentBanner = bannerConfig[currentStatus] || bannerConfig.waiting;
+  // A finished-and-closed order (paid in cash or online and completed) gets a
+  // distinct "completed — come again" snippet rather than the "served" one.
+  const isOrderClosed = activeOrder.status === 'completed_cash' || activeOrder.status === 'completed_epay';
+  const currentBanner = isOrderClosed
+    ? { icon: <MdCheckCircle />, title: t('snipet_completed_title'), subtitle: t('snipet_completed_subtitle') }
+    : (bannerConfig[currentStatus] || bannerConfig.waiting);
 
 
   return (

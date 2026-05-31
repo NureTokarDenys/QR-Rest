@@ -368,6 +368,155 @@
 }
 .bannerAction:hover { background: rgba(0, 0, 0, 0.05); }
 
+/* ── Subscription section ── */
+.subPremium,
+.subFree {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.subHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.subBadgePremium {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #b45309;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 6px;
+  padding: 3px 8px;
+}
+
+.subBadgeFree {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--secondary-text);
+  background: var(--bg-color);
+  border: 1px solid var(--separator-color);
+  border-radius: 6px;
+  padding: 3px 8px;
+}
+
+.subStatus {
+  font-size: 13px;
+  color: var(--secondary-text);
+}
+
+.subStatusActive {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.subStatusCancelling {
+  color: #b45309;
+  font-weight: 600;
+}
+
+.subDates {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--bg-color);
+  border: 1px solid var(--separator-color);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.subDateRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.subDateLabel {
+  font-size: 13px;
+  color: var(--secondary-text);
+}
+
+.subDateValue {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--primary-text);
+}
+
+.subCancelNote {
+  font-size: 13px;
+  color: #b45309;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.subCancelBtn {
+  align-self: flex-start;
+  height: 34px;
+  padding: 0 14px;
+  border: 1px solid var(--danger-color);
+  border-radius: 8px;
+  background: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--danger-color);
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.subCancelBtn:hover    { background: rgba(239, 68, 68, 0.06); }
+.subCancelBtn:disabled { opacity: 0.5; cursor: default; }
+
+.subFreeDesc {
+  font-size: 14px;
+  color: var(--primary-text);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.subFeatureList {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.subFeatureList li {
+  font-size: 13px;
+  color: var(--secondary-text);
+  line-height: 1.5;
+}
+
+.subUpgradeBtn {
+  align-self: flex-start;
+  height: 38px;
+  padding: 0 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--accent-color);
+  color: #fff;
+  transition: opacity 0.12s;
+}
+.subUpgradeBtn:hover { opacity: 0.85; }
+
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .grid2 {

@@ -12,6 +12,8 @@
     "snipet_ready_subtitle": "Please wait while we prepare your order for serving",
     "snipet_served_title": "Your order has been served",
     "snipet_served_subtitle": "Enjoy your meal!",
+    "snipet_completed_title": "Your order is completed",
+    "snipet_completed_subtitle": "Thank you — come again!",
     "header": "Order Status",
     "online": "Online", 
     "order": "Order",
@@ -68,6 +70,7 @@
     "reviews_error": "Couldn't submit the review. Please try again.",
     "reviews_login_required": "Log in to leave a review",
     "reviews_all_done": "You've left reviews for everything in this order. Thank you!",
+    "reviews_unavailable_free": "Reviews aren't available at this restaurant yet.",
 
     "pay_now": "Pay Now",
     "pay_method_title": "Payment Method",
