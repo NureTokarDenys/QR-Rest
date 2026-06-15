@@ -6,4 +6,8 @@ node_modules
 logs
 coverage
 backups
+<<<<<<< HEAD
 dist
+=======
+dist
+>>>>>>> 1383c75 (Restructure repository into a monorepo with frontend, backend, and docs.)

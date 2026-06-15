@@ -1,6 +1,10 @@
 ================================================================================
   QR RESTAURANT API — ENDPOINT REFERENCE
+<<<<<<< HEAD
   Project: QR Ordering System
+=======
+  Project: Borshchechok QR Ordering System (SRS v4.2)
+>>>>>>> 1383c75 (Restructure repository into a monorepo with frontend, backend, and docs.)
   Base URL: http://localhost:3000/api   (or deployed root)
   Generated: 2026-05-05
 ================================================================================
