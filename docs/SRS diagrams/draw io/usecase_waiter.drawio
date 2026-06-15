@@ -1,0 +1,145 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="m9v5SuZXy6rKkHT-fuyc" name="Страница-1">
+    <mxGraphModel dx="1414" dy="777" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="860" background="#ffffff" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="leftGroup" parent="1" style="group;" value="" vertex="1">
+          <mxGeometry height="760" width="280" x="186" y="19" as="geometry" />
+        </mxCell>
+        <mxCell id="leftRect" parent="leftGroup" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="760" width="280" as="geometry" />
+        </mxCell>
+        <mxCell id="W9" parent="leftGroup" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1;fontSize=11;" value="Видаляти позиції замовлення" vertex="1">
+          <mxGeometry height="60" width="240" x="20" y="25" as="geometry" />
+        </mxCell>
+        <mxCell id="W8" parent="leftGroup" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1;fontSize=11;" value="Редагувати позиції замовлення" vertex="1">
+          <mxGeometry height="60" width="240" x="20" y="115" as="geometry" />
+        </mxCell>
+        <mxCell id="W7" parent="leftGroup" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1;fontSize=11;" value="Додавати позиції до активного замовлення" vertex="1">
+          <mxGeometry height="60" width="240" x="20" y="205" as="geometry" />
+        </mxCell>
+        <mxCell id="W6" parent="leftGroup" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1;fontSize=11;" value="Створювати замовлення від імені гостя" vertex="1">
+          <mxGeometry height="60" width="240" x="20" y="295" as="geometry" />
+        </mxCell>
+        <mxCell id="W4" parent="leftGroup" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1;fontSize=11;" value="Опрацьовувати виклики офіціанта" vertex="1">
+          <mxGeometry height="60" width="240" x="20" y="385" as="geometry" />
+        </mxCell>
+        <mxCell id="W3" parent="leftGroup" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1;fontSize=11;" value="Переглядати деталі замовлення столика" vertex="1">
+          <mxGeometry height="60" width="240" x="20" y="475" as="geometry" />
+        </mxCell>
+        <mxCell id="W2" parent="leftGroup" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1;fontSize=11;" value="Переглядати чергу активних замовлень" vertex="1">
+          <mxGeometry height="60" width="240" x="20" y="565" as="geometry" />
+        </mxCell>
+        <mxCell id="W1" parent="leftGroup" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1;fontSize=11;" value="Переглядати карту залу та стан столиків" vertex="1">
+          <mxGeometry height="60" width="240" x="20" y="655" as="geometry" />
+        </mxCell>
+        <mxCell id="rightGroup" parent="1" style="group;" value="" vertex="1">
+          <mxGeometry height="720" width="280" x="796" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="rightRect" parent="rightGroup" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="720" width="280" as="geometry" />
+        </mxCell>
+        <mxCell id="W17" parent="rightGroup" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1;fontSize=11;" value="Отримувати сповіщення у реальному часі" vertex="1">
+          <mxGeometry height="60" width="240" x="20" y="25" as="geometry" />
+        </mxCell>
+        <mxCell id="W16" parent="rightGroup" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1;fontSize=11;" value="Налаштовувати власний профіль" vertex="1">
+          <mxGeometry height="60" width="240" x="20" y="115" as="geometry" />
+        </mxCell>
+        <mxCell id="W15" parent="rightGroup" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1;fontSize=11;" value="Переглядати QR-код столика" vertex="1">
+          <mxGeometry height="60" width="240" x="20" y="205" as="geometry" />
+        </mxCell>
+        <mxCell id="W14" parent="rightGroup" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1;fontSize=11;" value="Відкривати вікно відновлення сесії гостя" vertex="1">
+          <mxGeometry height="60" width="240" x="20" y="295" as="geometry" />
+        </mxCell>
+        <mxCell id="W12" parent="rightGroup" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1;fontSize=11;" value="Приймати готівкову оплату та закривати замовлення" vertex="1">
+          <mxGeometry height="60" width="240" x="20" y="385" as="geometry" />
+        </mxCell>
+        <mxCell id="W11" parent="rightGroup" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1;fontSize=11;" value="Позначати групи подачі як подані (served)" vertex="1">
+          <mxGeometry height="60" width="240" x="20" y="475" as="geometry" />
+        </mxCell>
+        <mxCell id="W10" parent="rightGroup" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1;fontSize=11;" value="Скасовувати замовлення" vertex="1">
+          <mxGeometry height="60" width="240" x="20" y="565" as="geometry" />
+        </mxCell>
+        <mxCell id="e_W9" edge="1" parent="1" style="edgeStyle=none;html=1;exitX=0.0737;exitY=0.2388;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;endArrow=open;endFill=0;strokeColor=#000000;rounded=0;" target="W9">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="614.3180666417566" y="367.4939270289849" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_W8" edge="1" parent="1" style="edgeStyle=none;html=1;exitX=0.0392;exitY=0.3059;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;endArrow=open;endFill=0;strokeColor=#000000;rounded=0;" target="W8">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="612.2794950273437" y="371.5294462182111" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_W7" edge="1" parent="1" style="edgeStyle=none;html=1;exitX=0.0127;exitY=0.3880;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;endArrow=open;endFill=0;strokeColor=#000000;rounded=0;" target="W7">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="610.7602063131765" y="376.2892276784339" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_W6" edge="1" parent="1" style="edgeStyle=none;html=1;exitX=0.0004;exitY=0.4809;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;endArrow=open;endFill=0;strokeColor=#000000;rounded=0;" target="W6">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="610.0155965698123" y="382.0327611796713" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_W4" edge="1" parent="1" style="edgeStyle=none;html=1;exitX=0.0058;exitY=0.5757;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;endArrow=open;endFill=0;strokeColor=#000000;rounded=0;" target="W4">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="610.3111678978082" y="387.30966917612454" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_W3" edge="1" parent="1" style="edgeStyle=none;html=1;exitX=0.0273;exitY=0.6629;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;endArrow=open;endFill=0;strokeColor=#000000;rounded=0;" target="W3">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="611.5880236175262" y="392.63117843473674" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_W2" edge="1" parent="1" style="edgeStyle=none;html=1;exitX=0.0593;exitY=0.7363;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;endArrow=open;endFill=0;strokeColor=#000000;rounded=0;" target="W2">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="613.4629269854379" y="396.99227486222344" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_W1" edge="1" parent="1" style="edgeStyle=none;html=1;exitX=0.0957;exitY=0.7942;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;endArrow=open;endFill=0;strokeColor=#000000;rounded=0;" target="W1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="615.8847430239177" y="400.8452901623009" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_W17" edge="1" parent="1" style="edgeStyle=none;html=1;exitX=0.8815;exitY=0.1768;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=open;endFill=0;strokeColor=#000000;rounded=0;" target="W17">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="663.0466383879284" y="363.79446801005975" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_W16" edge="1" parent="1" style="edgeStyle=none;html=1;exitX=0.9321;exitY=0.2484;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=open;endFill=0;strokeColor=#000000;rounded=0;" target="W16">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="666.0175929050395" y="368.06397444340325" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_W15" edge="1" parent="1" style="edgeStyle=none;html=1;exitX=0.9765;exitY=0.3486;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=open;endFill=0;strokeColor=#000000;rounded=0;" target="W15">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="668.6002667605167" y="373.94324885916956" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_W14" edge="1" parent="1" style="edgeStyle=none;html=1;exitX=0.9993;exitY=0.4736;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=open;endFill=0;strokeColor=#000000;rounded=0;" target="W14">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="669.9649418824642" y="381.55008345730016" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_W12" edge="1" parent="1" style="edgeStyle=none;html=1;exitX=0.9892;exitY=0.6036;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=open;endFill=0;strokeColor=#000000;rounded=0;" target="W12">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="669.3410930766122" y="389.2530198359992" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_W11" edge="1" parent="1" style="edgeStyle=none;html=1;exitX=0.9514;exitY=0.7151;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=open;endFill=0;strokeColor=#000000;rounded=0;" target="W11">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="667.0230604410585" y="396.0289755697959" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_W10" edge="1" parent="1" style="edgeStyle=none;html=1;exitX=0.9017;exitY=0.7977;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=open;endFill=0;strokeColor=#000000;rounded=0;" target="W10">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="664.1152569760823" y="400.845290162301" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="5oY5Zwwtlsh2bPzr7kc3-1" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Офіціант" vertex="1">
+          <mxGeometry height="60" width="30" x="624" y="350" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

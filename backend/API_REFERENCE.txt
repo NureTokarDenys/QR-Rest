@@ -1,0 +1,670 @@
+================================================================================
+  QR RESTAURANT API — ENDPOINT REFERENCE
+  Project: Borshchechok QR Ordering System (SRS v4.2)
+  Base URL: http://localhost:3000/api   (or deployed root)
+  Generated: 2026-05-05
+================================================================================
+
+AUTH SCHEMES
+────────────
+  JWT Bearer   — Authorization: Bearer <accessToken>
+  Session      — Cookie: session_token=<token>  OR  X-Session-Token: <token>
+  Public       — No credentials required
+
+RESPONSE ENVELOPE (all endpoints)
+────────────────────────────────
+  Success:  { data: <payload>, meta: { request_id } }
+            List:  { data: [...], pagination: { page, limit, total, pages }, meta }
+  Error:    { error: { code, message }, meta: {} }
+
+ROLES
+─────
+  guest    — QR-scanned session (session token)
+  waiter   — JWT, role=waiter
+  cook     — JWT, role=cook
+  admin    — JWT, role=admin
+
+
+════════════════════════════════════════════════════════════════════════════════
+ 1. HEALTH
+════════════════════════════════════════════════════════════════════════════════
+
+GET /health
+  Auth:   Public
+  Out:    { status: "ok", uptime: <seconds>, timestamp: <ISO> }
+
+
+════════════════════════════════════════════════════════════════════════════════
+ 2. AUTHENTICATION  —  /auth
+════════════════════════════════════════════════════════════════════════════════
+
+POST /auth/register
+  Auth:   Public
+  In:     { name, email, password }
+  Out:    { user: { _id, name, email, role }, accessToken, refreshToken }
+  Notes:  role defaults to "guest"; sets httpOnly refresh cookie
+
+POST /auth/login
+  Auth:   Public
+  In:     { email, password }
+  Out:    { user: { _id, name, email, role }, accessToken, refreshToken }
+  Notes:  Sets httpOnly refresh cookie
+
+POST /auth/logout
+  Auth:   JWT Bearer (any role)
+  In:     — (reads refreshToken from cookie or body)
+  Out:    { message: "Logged out" }
+  Notes:  Clears refresh cookie, invalidates token server-side
+
+POST /auth/refresh
+  Auth:   Public (refresh token in cookie or body.refreshToken)
+  In:     { refreshToken } (optional if cookie present)
+  Out:    { accessToken, refreshToken }
+
+GET /auth/google
+  Auth:   Public
+  Out:    302 redirect to Google OAuth consent screen
+
+GET /auth/google/callback
+  Auth:   Public (handled by Passport.js)
+  Out:    302 redirect with accessToken & refreshToken in query params
+  Notes:  Creates or links User document; sets refresh cookie
+
+POST /auth/link/google
+  Auth:   JWT Bearer
+  In:     { googleToken } — Google ID token from client
+  Out:    { message: "Google account linked" }
+
+DELETE /auth/unlink/google
+  Auth:   JWT Bearer
+  In:     —
+  Out:    { message: "Google account unlinked" }
+  Notes:  Fails if user has no password set (would lock them out)
+
+POST /auth/set-password
+  Auth:   JWT Bearer
+  In:     { password }
+  Out:    { message: "Password set successfully" }
+  Notes:  For Google-authenticated users who want to enable email/password login
+
+
+════════════════════════════════════════════════════════════════════════════════
+ 3. QR CODE  —  /qr
+════════════════════════════════════════════════════════════════════════════════
+
+GET /qr/:shortCode
+  Auth:   Public
+  Out:    { session: { token, tableId, restaurantId, expiresAt }, table: { _id, number } }
+  Notes:  Resolves shortCode → table → creates new Session document.
+          Returns session_token cookie (httpOnly) + session data.
+          Client uses this token for all guest actions.
+
+
+════════════════════════════════════════════════════════════════════════════════
+ 4. MENU  —  /menu
+════════════════════════════════════════════════════════════════════════════════
+  All menu endpoints are public. Session token or restaurantId must be
+  supplied so the correct restaurant's menu is returned.
+  If a valid session_token cookie/header is present it is used automatically.
+  Otherwise pass ?restaurantId=<id>.
+
+GET /menu
+  Auth:   Public
+  Query:  restaurantId (required if no session), categoryId (filter)
+  Out:    { data: [ MenuItem... ] }
+  Notes:  Excludes isDeleted=true items; includes isAvailable flag
+
+GET /menu/categories
+  Auth:   Public
+  Query:  restaurantId (required if no session)
+  Out:    { data: [ Category... ] }  sorted by sortOrder
+
+GET /menu/categories/:id/items
+  Auth:   Public
+  Query:  restaurantId (required if no session)
+  Out:    { data: [ MenuItem... ] }  items in that category
+
+GET /menu/items/:id
+  Auth:   Public
+  Out:    { data: MenuItem }  includes ingredients, addons, componentGroups
+
+GET /menu/search
+  Auth:   Public
+  Query:  q (search string), restaurantId (required if no session)
+  Out:    { data: [ MenuItem... ] }  full-text search by name/description
+
+
+════════════════════════════════════════════════════════════════════════════════
+ 5. ORDERS  —  /orders
+════════════════════════════════════════════════════════════════════════════════
+  Guest actions require session token. JWT-authenticated users may also use
+  these routes for their own orders.
+
+POST /orders
+  Auth:   Session OR JWT Bearer
+  In:     {
+            tableId,
+            sessionToken,
+            servingGroups: [{ name, sortOrder, items: [{ menuItemId, quantity,
+              excludedIngredients: [ingId],
+              componentOptionId,
+              addOns: [{ addOnId, quantity }]
+            }] }]
+          }
+  Out:    { data: { order: Order, servingGroups: [...], items: [...] } }
+  Notes:  Creates Order (status=waiting), ServingGroup docs, OrderItem docs.
+          Emits WebSocket: kitchen:<restaurantId> ORDER_CREATED
+                           waiter:<restaurantId>  ORDER_CREATED
+
+GET /orders/:orderId
+  Auth:   Session OR JWT Bearer
+  Out:    { data: { order, servingGroups, items } }
+  Notes:  Session users can only access orders belonging to their session
+
+PATCH /orders/:orderId/items
+  Auth:   Session OR JWT Bearer
+  In:     { add: [...items], remove: [itemId], update: [{ itemId, quantity, ... }] }
+  Out:    { data: { order, items } }
+  Notes:  Only allowed while order.status === 'waiting';
+          recalculates total; emits ORDER_UPDATED to kitchen + waiter channels
+
+POST /orders/:orderId/waiter-call
+  Auth:   Session
+  In:     —
+  Out:    { data: WaiterCall }
+  Notes:  Creates WaiterCall document (status=pending).
+          Sets table.status = 'waiter'.
+          Emits: waiter:<restaurantId> WAITER_CALLED
+
+POST /orders/:orderId/void
+  Auth:   Session OR JWT Bearer (waiter/admin)
+  In:     { reason } (optional for session; required for staff)
+  Out:    { data: { orderId, status: 'void' } }
+  Notes:  Only voidable when status ∈ {waiting, cooking}.
+          Logs VOID audit event.
+          Emits: session:<token> ORDER_VOID
+
+PATCH /orders/:orderId/serving-groups/:groupId/status
+  Auth:   JWT Bearer (waiter or admin)
+  In:     { status }  one of: waiting | cooking | ready | served
+  Out:    { data: { groupId, status } }
+  Notes:  Status can only move forward.
+          Triggers recalcOrderStatus which recalculates order-level status.
+          Emits DISH_STATUS_UPDATED to session + table + waiter channels
+
+
+════════════════════════════════════════════════════════════════════════════════
+ 6. PAYMENTS  —  /payments
+════════════════════════════════════════════════════════════════════════════════
+
+POST /payments/:orderId/initiate
+  Auth:   Session OR JWT Bearer
+  In:     { returnUrl } — client redirect URL after LiqPay flow
+  Out:    { data: { data: <base64>, signature: <sha1>, checkoutUrl } }
+  Notes:  Creates Payment record (status=pending).
+          data+signature are passed to LiqPay checkout.
+
+GET /payments/:orderId
+  Auth:   Session OR JWT Bearer
+  Out:    { data: Payment }  includes status, amount, method
+
+POST /payments/:orderId/cash
+  Auth:   JWT Bearer (waiter or admin)
+  In:     —
+  Out:    { data: Payment }
+  Notes:  Records cash payment, marks order completed.
+          Logs CASH_PAYMENT audit event.
+          Emits: session:<token> PAYMENT_CONFIRMED
+
+POST /payments/:orderId/master-pay
+  Auth:   JWT Bearer (waiter or admin)
+  In:     —
+  Out:    { data: Payment }
+  Notes:  Records master_pay (card-on-terminal) payment.
+          Logs MASTER_PAY audit event.
+          Emits: session:<token> PAYMENT_CONFIRMED
+
+POST /paymentWebhook/liqpay
+  Auth:   Public (verified by LiqPay HMAC signature)
+  In:     { data, signature }  — LiqPay POST callback
+  Out:    200 OK  (LiqPay ignores body)
+  Notes:  Verifies signature; on status=success marks Payment completed,
+          sets order.status=completed.
+          Emits: session:<token> PAYMENT_CONFIRMED
+                 restaurant:<id> PAYMENT_CONFIRMED
+
+
+════════════════════════════════════════════════════════════════════════════════
+ 7. USER PROFILE  —  /user
+════════════════════════════════════════════════════════════════════════════════
+
+GET /user/profile
+  Auth:   JWT Bearer
+  Out:    { data: { _id, name, email, role, restaurantId, createdAt } }
+
+PUT /user/profile
+  Auth:   JWT Bearer
+  In:     { name?, email?, currentPassword?, newPassword? }
+  Out:    { data: User }
+  Notes:  currentPassword required when changing email or password
+
+DELETE /user/account
+  Auth:   JWT Bearer
+  In:     { password }
+  Out:    { message: "Account deleted" }
+  Notes:  Hard-deletes user document; invalidates all tokens
+
+GET /user/orders
+  Auth:   JWT Bearer
+  Query:  page, limit
+  Out:    { data: [ Order... ], pagination }
+  Notes:  Returns orders where order.guestId === user._id
+
+
+════════════════════════════════════════════════════════════════════════════════
+ 8. REVIEWS  —  /reviews
+════════════════════════════════════════════════════════════════════════════════
+
+POST /reviews/restaurant
+  Auth:   JWT Bearer (guest role) OR Session
+  In:     { orderId, rating (1-5), comment? }
+  Out:    { data: RestaurantReview }
+  Notes:  One review per order; order must be completed
+
+POST /reviews/dish
+  Auth:   JWT Bearer (guest role) OR Session
+  In:     { orderId, menuItemId, rating (1-5), comment? }
+  Out:    { data: DishReview }
+  Notes:  menuItemId must belong to that order; one review per item per order
+
+
+════════════════════════════════════════════════════════════════════════════════
+ 9. RESTAURANT REGISTRATION  —  /restaurants
+════════════════════════════════════════════════════════════════════════════════
+
+POST /restaurants/register
+  Auth:   Public
+  In:     { restaurantName, adminName, adminEmail, adminPassword }
+  Out:    { data: { restaurant: Restaurant, admin: User, accessToken, refreshToken } }
+  Notes:  Creates Restaurant + admin User in one transaction.
+          Returns JWT so admin can immediately start configuring.
+
+
+════════════════════════════════════════════════════════════════════════════════
+ 10. WAITER PANEL  —  /waiter
+════════════════════════════════════════════════════════════════════════════════
+  Auth required: JWT Bearer, role = waiter OR admin
+
+GET /waiter/orders
+  Query:  page, limit, tableId?, status?
+  Out:    { data: [ Order+items... ], pagination }
+  Notes:  Excludes completed and void orders by default.
+          Each order includes embedded items array.
+
+GET /waiter/calls
+  Query:  page, limit, confirmed=false (filter pending only)
+  Out:    { data: [ WaiterCall... ], pagination }
+
+PATCH /waiter/calls/:callId/confirm
+  In:     —
+  Out:    { data: WaiterCall }  (status=confirmed, confirmedAt, confirmedBy set)
+  Notes:  If table.status==='waiter', resets it to 'occupied'.
+          Emits: waiter:<restaurantId> TABLE_STATUS_UPDATED
+                 table:<tableId>       WAITER_CALL_CONFIRMED
+                 session:<token>       WAITER_CALL_CONFIRMED
+
+POST /waiter/tables/:tableId/close
+  In:     { reason }
+  Out:    { data: { tableId, status: 'free', voidedOrders: <count> } }
+  Notes:  Voids all active orders on the table (logs VOID for each).
+          Sets table.status = 'free', invalidates all active sessions.
+          Emits: session:<token> ORDER_VOID  (per voided order)
+                 waiter:<restaurantId> TABLE_STATUS_UPDATED
+
+
+════════════════════════════════════════════════════════════════════════════════
+ 11. KITCHEN PANEL  —  /kitchen
+════════════════════════════════════════════════════════════════════════════════
+  Auth required: JWT Bearer, role = cook OR admin
+
+GET /kitchen/orders
+  Query:  page, limit, view=order|table
+  Out:    view=order: { data: [ Order+table+items+servingGroups... ], pagination }
+          view=table: { data: [ { table, orders:[...] } ], pagination }
+  Notes:  Only returns orders with status ∈ {waiting, cooking, ready}.
+          Items include populated menuItemId.name.
+
+PATCH /kitchen/orders/:orderId/items/:itemId/status
+  In:     { status }  one of: cooking | ready | served
+  Out:    { data: { orderItemId, dishStatus } }
+  Notes:  Status is monotonically increasing (cannot go back).
+          Calls recalcOrderStatus → may auto-advance order.status.
+          Emits: session:<token>      DISH_STATUS_UPDATED
+                 table:<tableId>      DISH_STATUS_UPDATED
+                 waiter:<restaurantId> DISH_STATUS_UPDATED
+
+GET /kitchen/stoplist
+  Out:    { data: [ MenuItem... ] }  all items where isAvailable=false
+
+POST /kitchen/stoplist/:itemId
+  Out:    { data: { menuItemId, isAvailable: false } }
+  Notes:  Sets item.isAvailable=false.
+          Emits: restaurant:<id> MENU_UPDATED { type: 'STOPLIST_ADD' }
+
+DELETE /kitchen/stoplist/:itemId
+  Out:    { data: { menuItemId, isAvailable: true } }
+  Notes:  Sets item.isAvailable=true.
+          Emits: restaurant:<id> MENU_UPDATED { type: 'STOPLIST_REMOVE' }
+
+
+════════════════════════════════════════════════════════════════════════════════
+ 12. ADMIN — RESTAURANT  —  /admin/restaurant
+════════════════════════════════════════════════════════════════════════════════
+  Auth required: JWT Bearer, role = admin
+
+GET /admin/restaurant
+  Out:    { data: Restaurant }
+
+PUT /admin/restaurant
+  In:     { name?, address? }
+  Out:    { data: Restaurant }
+
+
+════════════════════════════════════════════════════════════════════════════════
+ 13. ADMIN — TABLES  —  /admin/tables
+════════════════════════════════════════════════════════════════════════════════
+  Auth required: JWT Bearer, role = admin
+
+GET /admin/tables
+  Query:  page, limit
+  Out:    { data: [ Table... ], pagination }
+
+POST /admin/tables
+  In:     { number, capacity? }
+  Out:    { data: Table }  (shortCode and qrImageUrl auto-generated)
+
+GET /admin/tables/:id
+  Out:    { data: Table }
+
+PUT /admin/tables/:id
+  In:     { number?, capacity?, status? }
+  Out:    { data: Table }
+
+DELETE /admin/tables/:id
+  Out:    { data: { message: "Table deleted" } }
+
+GET /admin/tables/:id/qr
+  Out:    image/png  — QR code PNG for the table's URL
+  Notes:  Download header: attachment; filename="table-<number>-qr.png"
+
+
+════════════════════════════════════════════════════════════════════════════════
+ 14. ADMIN — MENU  —  /admin/menu
+════════════════════════════════════════════════════════════════════════════════
+  Auth required: JWT Bearer, role = admin
+
+── CATEGORIES ──
+
+GET /admin/menu/categories
+  Query:  page, limit
+  Out:    { data: [ Category... ], pagination }
+
+POST /admin/menu/categories
+  In:     { name, sortOrder? }
+  Out:    { data: Category }
+
+GET /admin/menu/categories/:id
+  Out:    { data: Category }
+
+PUT /admin/menu/categories/:id
+  In:     { name?, sortOrder?, isActive? }
+  Out:    { data: Category }
+
+DELETE /admin/menu/categories/:id
+  Out:    { data: { message: "Category deleted" } }
+  Notes:  Soft-delete (isDeleted=true); also soft-deletes all items in category
+
+── MENU ITEMS ──
+
+GET /admin/menu/items
+  Query:  page, limit, categoryId?, isAvailable?, isDeleted?
+  Out:    { data: [ MenuItem... ], pagination }
+
+POST /admin/menu/items
+  In:     { name, description?, price, categoryId, sortOrder?, weight?,
+            cookingTime?, isAvailable? }
+  Out:    { data: MenuItem }
+
+GET /admin/menu/items/:id
+  Out:    { data: MenuItem }  includes ingredients, addons, componentGroups
+
+PUT /admin/menu/items/:id
+  In:     { name?, description?, price?, categoryId?, sortOrder?,
+            weight?, cookingTime?, isAvailable? }
+  Out:    { data: MenuItem }
+
+DELETE /admin/menu/items/:id
+  Out:    { data: { message: "Item deleted" } }
+  Notes:  Soft-delete (isDeleted=true)
+
+POST /admin/menu/items/:id/image
+  In:     multipart/form-data  field: image (JPEG/PNG)
+  Out:    { data: { imageUrl } }
+  Notes:  Uploads to AWS S3 (memoryStorage); updates MenuItem.imageUrl
+
+GET /admin/menu/items/:id/pdf
+  Out:    application/pdf — single-page dish spec sheet
+  Notes:  Includes name, description, price, ingredients, allergens
+
+── INGREDIENTS ──
+
+GET /admin/menu/items/:itemId/ingredients
+  Out:    { data: [ Ingredient... ] }
+
+POST /admin/menu/items/:itemId/ingredients
+  In:     { name, isAllergen? }
+  Out:    { data: Ingredient }
+
+DELETE /admin/menu/items/:itemId/ingredients/:ingId
+  Out:    { data: { message: "Ingredient removed" } }
+
+── ADD-ONS ──
+
+GET /admin/menu/items/:itemId/addons
+  Out:    { data: [ AddOn... ] }
+
+POST /admin/menu/items/:itemId/addons
+  In:     { name, price, isAvailable? }
+  Out:    { data: AddOn }
+
+PUT /admin/menu/items/:itemId/addons/:addonId
+  In:     { name?, price?, isAvailable? }
+  Out:    { data: AddOn }
+
+DELETE /admin/menu/items/:itemId/addons/:addonId
+  Out:    { data: { message: "Add-on removed" } }
+
+── COMPONENT GROUPS ──
+  (A component group = one "pick one" choice per dish, e.g. side dish or doneness)
+
+GET /admin/menu/items/:itemId/component-groups
+  Out:    { data: [ ComponentGroup+options... ] }
+
+POST /admin/menu/items/:itemId/component-groups
+  In:     { name, options: [{ name, priceModifier? }], isRequired? }
+  Out:    { data: ComponentGroup }
+
+PUT /admin/menu/items/:itemId/component-groups/:groupId
+  In:     { name?, options?, isRequired? }
+  Out:    { data: ComponentGroup }
+
+DELETE /admin/menu/items/:itemId/component-groups/:groupId
+  Out:    { data: { message: "Component group removed" } }
+
+
+════════════════════════════════════════════════════════════════════════════════
+ 15. ADMIN — STAFF  —  /admin/staff
+════════════════════════════════════════════════════════════════════════════════
+  Auth required: JWT Bearer, role = admin
+
+GET /admin/staff
+  Query:  page, limit, role? (cook|waiter|admin), isActive?
+  Out:    { data: [ User... ], pagination }  (passwordHash excluded)
+
+POST /admin/staff
+  In:     { name, email, role (cook|waiter|admin) }
+  Out:    { data: { _id, name, email, role, tempPassword } }
+  Notes:  Auto-generates random tempPassword (16 hex chars).
+          Staff member must change it on first login.
+
+GET /admin/staff/:userId
+  Out:    { data: User }  (passwordHash excluded)
+
+PUT /admin/staff/:userId/role
+  In:     { role (cook|waiter|admin) }
+  Out:    { data: { _id, role } }
+
+POST /admin/staff/:userId/deactivate
+  In:     —
+  Out:    { data: { _id, isActive: false } }
+  Notes:  Deactivated accounts cannot log in
+
+POST /admin/staff/:userId/activate
+  In:     —
+  Out:    { data: { _id, isActive: true } }
+
+POST /admin/staff/:userId/reset-password
+  In:     —
+  Out:    { data: { newPassword } }
+  Notes:  Generates new random 16-hex-char password; returns it once
+
+
+════════════════════════════════════════════════════════════════════════════════
+ 16. ADMIN — REVIEWS  —  /admin/reviews
+════════════════════════════════════════════════════════════════════════════════
+  Auth required: JWT Bearer, role = admin
+
+GET /admin/reviews
+  Query:  page, limit, rating?, from?, to?,
+          menuItemId? (if present → returns DishReviews; otherwise RestaurantReviews)
+  Out:    { data: [ Review... ], pagination }
+  Notes:  Reviews include populated userId.name
+
+
+════════════════════════════════════════════════════════════════════════════════
+ 17. ADMIN — ANALYTICS  —  /admin/analytics
+════════════════════════════════════════════════════════════════════════════════
+  Auth required: JWT Bearer, role = admin
+  Query params for all: from? (ISO date), to? (ISO date)
+  Default range: last 30 days
+
+GET /admin/analytics/revenue
+  Out:    { data: { total: <sum UAH>, count: <payment count> } }
+  Notes:  Aggregates completed payments only
+
+GET /admin/analytics/orders
+  Out:    { data: [ { _id: <status>, count: <n> }, ... ] }
+  Notes:  Count of orders grouped by status
+
+GET /admin/analytics/popular-dishes
+  Out:    { data: [ { menuItemId, name, totalQty }, ... ] }  top 10 by quantity
+  Notes:  Based on completed orders only
+
+GET /admin/analytics/cooking-time
+  Out:    { data: { message: "Cooking time analytics requires dish-level timestamps (future enhancement)" } }
+  Notes:  Stub endpoint — not yet implemented
+
+GET /admin/analytics/export
+  Out:    text/csv download  filename: orders.csv
+  Columns: orderId, tableId, status, createdAt, updatedAt
+  Notes:  All orders in date range (all statuses)
+
+
+════════════════════════════════════════════════════════════════════════════════
+ 18. ADMIN — AUDIT LOG  —  /admin/audit-log
+════════════════════════════════════════════════════════════════════════════════
+  Auth required: JWT Bearer, role = admin
+  Immutable — PUT/PATCH/DELETE/POST return 405 METHOD_NOT_ALLOWED
+
+GET /admin/audit-log
+  Query:  page, limit, from?, to?, eventType?, orderId?, userId?
+  Out:    { data: [ AuditLog... ], pagination }
+  Notes:  Sorted newest-first.
+          eventType values: CASH_PAYMENT | VOID | WALK_OUT | MASTER_PAY
+
+
+════════════════════════════════════════════════════════════════════════════════
+ WEBSOCKET EVENTS
+════════════════════════════════════════════════════════════════════════════════
+  Connect: ws://<host>/ws
+  Subscribe by sending: { type: "subscribe", channel: "<channel>" }
+
+  Channels & events emitted on them:
+
+  kitchen:<restaurantId>
+    ORDER_CREATED        { orderId, tableId, tableNumber, servingGroups, items }
+    ORDER_UPDATED        { orderId, items }
+    DISH_STATUS_UPDATED  { orderId, orderItemId, dishStatus, groupId }
+
+  waiter:<restaurantId>
+    ORDER_CREATED        { orderId, tableId, tableNumber }
+    ORDER_UPDATED        { orderId }
+    WAITER_CALLED        { callId, tableId, tableNumber, orderId }
+    TABLE_STATUS_UPDATED { tableId, tableNumber, status }
+    DISH_STATUS_UPDATED  { orderId, orderItemId, dishStatus, groupId }
+
+  table:<tableId>
+    WAITER_CALL_CONFIRMED { callId, tableId, confirmedAt }
+    DISH_STATUS_UPDATED   { orderId, orderItemId, dishStatus, groupId }
+
+  session:<sessionToken>
+    ORDER_VOID            { orderId, reason, voidedAt }
+    PAYMENT_CONFIRMED     { orderId, paymentId, amount, method }
+    WAITER_CALL_CONFIRMED { callId, tableId, confirmedAt }
+    DISH_STATUS_UPDATED   { orderId, orderItemId, dishStatus, groupId }
+
+  restaurant:<restaurantId>
+    MENU_UPDATED          { type: 'STOPLIST_ADD'|'STOPLIST_REMOVE', menuItemId, isAvailable }
+    PAYMENT_CONFIRMED     { orderId, paymentId, amount }
+
+
+════════════════════════════════════════════════════════════════════════════════
+ ORDER STATUS FLOW
+════════════════════════════════════════════════════════════════════════════════
+  waiting → cooking → ready → completed
+                           ↘ void  (from waiting or cooking)
+
+  recalcOrderStatus() auto-advances order based on dish statuses:
+    all items cooking  → order = cooking
+    all items ready    → order = ready
+    all items served   → order = completed
+
+
+════════════════════════════════════════════════════════════════════════════════
+ ERROR CODES
+════════════════════════════════════════════════════════════════════════════════
+  400  BAD_REQUEST          — missing/invalid fields
+  401  UNAUTHORIZED         — missing or invalid token
+  403  FORBIDDEN            — insufficient role
+  404  NOT_FOUND            — resource doesn't exist
+  405  METHOD_NOT_ALLOWED   — immutable resource (audit log)
+  409  CONFLICT             — duplicate (email already registered, etc.)
+  422  UNPROCESSABLE        — business rule violation (e.g. status regression)
+  500  INTERNAL_ERROR       — unhandled server error
+
+
+════════════════════════════════════════════════════════════════════════════════
+ QUICK REFERENCE: TEST CREDENTIALS (seeded)
+════════════════════════════════════════════════════════════════════════════════
+  admin@borshchechok.ua    / 12345678   (role: admin)
+  cook1@borshchechok.ua    / 12345678   (role: cook)
+  waiter1@borshchechok.ua  / 12345678   (role: waiter)
+  waiter2@borshchechok.ua  / 12345678   (role: waiter)
+  guest0@mail.com          / 12345678   (role: guest, 2 orders assigned)
+  guest1@mail.com          / 12345678   (role: guest, 2 orders assigned)
+  ... (35 guests total, all password 12345678, see SEED_DATA_REFERENCE.txt)
+
+  QR session flow:
+    GET /qr/<shortCode>  →  receive session_token cookie
+    Use cookie automatically, or pass X-Session-Token header for API clients
+================================================================================

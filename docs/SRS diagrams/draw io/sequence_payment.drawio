@@ -1,0 +1,186 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="fig38" name="3.8 Payment fallback">
+    <mxGraphModel dx="707" dy="389" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="900" pageHeight="920" background="#ffffff" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="pGuest" parent="1" style="shape=umlActor;html=1;outlineConnect=0;fillColor=#ffffff;strokeColor=#000000;verticalLabelPosition=bottom;verticalAlign=top;" value="Гість" vertex="1">
+          <mxGeometry height="60" width="30" x="45" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="pOrder" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#666666;" value="Order Service" vertex="1">
+          <mxGeometry height="40" width="160" x="260" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="pLiq" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#666666;" value="LiqPay" vertex="1">
+          <mxGeometry height="40" width="80" x="600" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="pWS" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#666666;" value="WS" vertex="1">
+          <mxGeometry height="40" width="60" x="740" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="pGuestB" parent="1" style="shape=umlActor;html=1;outlineConnect=0;fillColor=#ffffff;strokeColor=#000000;verticalLabelPosition=bottom;verticalAlign=top;" value="Гість" vertex="1">
+          <mxGeometry height="60" width="30" x="45" y="850" as="geometry" />
+        </mxCell>
+        <mxCell id="pOrderB" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#666666;" value="Order Service" vertex="1">
+          <mxGeometry height="40" width="160" x="260" y="860" as="geometry" />
+        </mxCell>
+        <mxCell id="pLiqB" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#666666;" value="LiqPay" vertex="1">
+          <mxGeometry height="40" width="80" x="600" y="860" as="geometry" />
+        </mxCell>
+        <mxCell id="pWSB" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#666666;" value="WS" vertex="1">
+          <mxGeometry height="40" width="60" x="740" y="860" as="geometry" />
+        </mxCell>
+        <mxCell id="llG" edge="1" parent="1" style="endArrow=none;html=1;dashed=1;strokeColor=#999999;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="60" y="80" as="sourcePoint" />
+            <mxPoint x="60" y="850" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="llO" edge="1" parent="1" style="endArrow=none;html=1;dashed=1;strokeColor=#999999;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="340" y="70" as="sourcePoint" />
+            <mxPoint x="340" y="860" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="llL" edge="1" parent="1" style="endArrow=none;html=1;dashed=1;strokeColor=#999999;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="640" y="70" as="sourcePoint" />
+            <mxPoint x="640" y="860" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="llW" edge="1" parent="1" style="endArrow=none;html=1;dashed=1;strokeColor=#999999;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="770" y="70" as="sourcePoint" />
+            <mxPoint x="770" y="860" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m1" edge="1" parent="1" style="html=1;endArrow=block;startArrow=none;" value="POST /:restaurantId/payments/initiate {orderId}">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="60" y="110" as="sourcePoint" />
+            <mxPoint x="340" y="110" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m3" edge="1" parent="1" style="html=1;endArrow=block;startArrow=none;" value="LiqPay Checkout API (запит на оплату)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="340" y="190" as="sourcePoint" />
+            <mxPoint x="640" y="190" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="altF" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fillColor=none;strokeColor=#000000;width=70;height=22;" value="alt  [Gateway Timeout (&gt; 30 сек)]" vertex="1">
+          <mxGeometry height="621" width="780" x="30" y="210" as="geometry" />
+        </mxCell>
+        <mxCell id="m4" edge="1" parent="1" style="html=1;endArrow=open;dashed=1;startArrow=none;" value="Timeout">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="640" y="250" as="sourcePoint" />
+            <mxPoint x="340" y="250" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m5" edge="1" parent="1" style="html=1;endArrow=open;dashed=1;startArrow=none;" value="HTTP 504 «Платіжна система недоступна»">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="340" y="285" as="sourcePoint" />
+            <mxPoint x="60" y="285" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="n1" parent="1" style="shape=note;whiteSpace=wrap;html=1;fillColor=#FFFFCC;strokeColor=#666600;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;size=12;" value="Order.status залишається open.&#xa;Гість може спробувати ще раз&#xa;або натиснути «Оплатити готівкою»." vertex="1">
+          <mxGeometry height="60" width="280" x="45" y="305" as="geometry" />
+        </mxCell>
+        <mxCell id="d1" edge="1" parent="1" style="endArrow=none;html=1;dashed=1;strokeColor=#000000;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="30" y="385" as="sourcePoint" />
+            <mxPoint x="810" y="385" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="d1l" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontStyle=1;" value="[Gateway Error (5xx)]" vertex="1">
+          <mxGeometry height="20" width="180" x="40" y="372" as="geometry" />
+        </mxCell>
+        <mxCell id="m6" edge="1" parent="1" style="html=1;endArrow=open;dashed=1;startArrow=none;" value="HTTP 500">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="640" y="415" as="sourcePoint" />
+            <mxPoint x="340" y="415" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m7" edge="1" parent="1" style="html=1;endArrow=open;dashed=1;startArrow=none;" value="HTTP 502 «Помилка платежу»">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="340" y="450" as="sourcePoint" />
+            <mxPoint x="60" y="450" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="d2" edge="1" parent="1" style="endArrow=none;html=1;dashed=1;strokeColor=#000000;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="30" y="478" as="sourcePoint" />
+            <mxPoint x="810" y="478" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="d2l" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontStyle=1;" value="[Платіж відхилено]" vertex="1">
+          <mxGeometry height="20" width="180" x="40" y="465" as="geometry" />
+        </mxCell>
+        <mxCell id="m8" edge="1" parent="1" style="html=1;endArrow=open;dashed=1;startArrow=none;" value="Webhook {status: failure, reason: &quot;…&quot;}">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="640" y="508" as="sourcePoint" />
+            <mxPoint x="340" y="508" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m9" edge="1" parent="1" style="html=1;endArrow=block;startArrow=none;" value="PAYMENT_FAILED">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="340" y="543" as="sourcePoint" />
+            <mxPoint x="770" y="543" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m10" edge="1" parent="1" style="html=1;endArrow=open;dashed=1;startArrow=none;" value="Повідомлення про відмову">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="340" y="578" as="sourcePoint" />
+            <mxPoint x="60" y="578" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="n2" parent="1" style="shape=note;whiteSpace=wrap;html=1;fillColor=#FFFFCC;strokeColor=#666600;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;size=12;" value="Order.status залишається open.&#xa;Гість може спробувати ще раз." vertex="1">
+          <mxGeometry height="46" width="260" x="45" y="598" as="geometry" />
+        </mxCell>
+        <mxCell id="d3" edge="1" parent="1" style="endArrow=none;html=1;dashed=1;strokeColor=#000000;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="30" y="660" as="sourcePoint" />
+            <mxPoint x="810" y="660" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="d3l" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontStyle=1;" value="[Webhook не надійшов (&gt; 2 хв)]" vertex="1">
+          <mxGeometry height="20" width="220" x="40" y="647" as="geometry" />
+        </mxCell>
+        <mxCell id="m11" edge="1" parent="1" style="html=1;endArrow=block;startArrow=none;rounded=0;" value="Запускає fallback-перевірку">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="400" y="685" />
+              <mxPoint x="400" y="710" />
+            </Array>
+            <mxPoint x="340" y="685" as="sourcePoint" />
+            <mxPoint x="340" y="710" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m12" edge="1" parent="1" style="html=1;endArrow=block;startArrow=none;" value="GET /payment/status/{ref}  (через 1 хв)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="340" y="735" as="sourcePoint" />
+            <mxPoint x="640" y="735" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m13" edge="1" parent="1" style="html=1;endArrow=open;dashed=1;startArrow=none;" value="confirmed">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="640" y="765" as="sourcePoint" />
+            <mxPoint x="340" y="765" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m14" edge="1" parent="1" style="html=1;endArrow=block;startArrow=none;rounded=0;" value="Order.status → completed_epay;  Столик → free">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="400" y="788" />
+              <mxPoint x="400" y="800" />
+            </Array>
+            <mxPoint x="340" y="788" as="sourcePoint" />
+            <mxPoint x="340" y="800" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m15" edge="1" parent="1" style="html=1;endArrow=block;startArrow=none;" value="PAYMENT_COMPLETED">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="340" y="815" as="sourcePoint" />
+            <mxPoint x="770" y="815" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

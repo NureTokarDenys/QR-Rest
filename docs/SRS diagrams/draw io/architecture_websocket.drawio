@@ -1,0 +1,243 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="fig36" name="3.6 WS rooms &amp; event flows">
+    <mxGraphModel dx="1885" dy="1036" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="1160" background="#ffffff" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="nMsg" parent="1" style="shape=note;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;size=14;" value="Client → Server повідомлення:&#xa;• PING&#x9;(кожні 25 с)&#xa;• SUBSCRIBE&#x9;{ room }&#xa;• REPLAY_REQUEST { last_event_id }" vertex="1">
+          <mxGeometry height="90" width="285" x="60" y="235" as="geometry" />
+        </mxCell>
+        <mxCell id="guestT2" parent="1" style="shape=umlActor;html=1;outlineConnect=0;fillColor=#ffffff;strokeColor=#000000;verticalLabelPosition=bottom;verticalAlign=top;" value="Гість стола T2" vertex="1">
+          <mxGeometry height="60" width="30" x="106" y="340" as="geometry" />
+        </mxCell>
+        <mxCell id="wsCont" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;verticalAlign=top;align=left;fontStyle=1;spacingLeft=6;spacingTop=4;" value="WebSocket server" vertex="1">
+          <mxGeometry height="415" width="350" x="40" y="455" as="geometry" />
+        </mxCell>
+        <mxCell id="wsServer" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ECECFF;strokeColor=#9673A6;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;" value="&lt;b&gt;«server» wsServer.js&lt;/b&gt;&lt;hr&gt;• WebSocketServer({ path:&#39;/ws&#39; })&lt;br&gt;• auth: ?token=&lt;jwt&gt; або ?session_token=&lt;…&gt;&lt;br&gt;• auto-join за роллю&lt;br&gt;• heartbeat PING/PONG (25 с)" vertex="1">
+          <mxGeometry height="120" width="305" x="60" y="490" as="geometry" />
+        </mxCell>
+        <mxCell id="wsService" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ECECFF;strokeColor=#9673A6;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;" value="&lt;b&gt;wsService.js&lt;/b&gt;&lt;hr&gt;• emit(room, event, payload)&lt;br&gt;• event_id (uuidv4) на подію&lt;br&gt;• replayEvents(room, since)" vertex="1">
+          <mxGeometry height="85" width="245" x="80" y="630" as="geometry" />
+        </mxCell>
+        <mxCell id="queue" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;" value="In-memory event queue&#xa;TTL = 10 хв на кімнату" vertex="1">
+          <mxGeometry height="55" width="205" x="100" y="760" as="geometry" />
+        </mxCell>
+        <mxCell id="ePush" edge="1" parent="1" source="wsService" style="endArrow=open;endFill=0;html=1;rounded=0;" target="queue" value="push { event_id, ts, payload }">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="roomsCont" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;verticalAlign=top;align=left;fontStyle=1;spacingLeft=6;spacingTop=4;" value="Кімнати (rooms)" vertex="1">
+          <mxGeometry height="660" width="255" x="615" y="205" as="geometry" />
+        </mxCell>
+        <mxCell id="R1" parent="1" style="ellipse;html=1;fillColor=#ffffff;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="26" width="26" x="725" y="262" as="geometry" />
+        </mxCell>
+        <mxCell id="R1t" parent="1" style="text;html=1;align=center;fontStyle=2;" value="«room»" vertex="1">
+          <mxGeometry height="18" width="90" x="693" y="238" as="geometry" />
+        </mxCell>
+        <mxCell id="R1n" parent="1" style="text;html=1;align=center;" value="session:{tokenG2}" vertex="1">
+          <mxGeometry height="18" width="220" x="628" y="292" as="geometry" />
+        </mxCell>
+        <mxCell id="R2" parent="1" style="ellipse;html=1;fillColor=#ffffff;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="26" width="26" x="725" y="337" as="geometry" />
+        </mxCell>
+        <mxCell id="R2t" parent="1" style="text;html=1;align=center;fontStyle=2;" value="«room»" vertex="1">
+          <mxGeometry height="18" width="90" x="693" y="313" as="geometry" />
+        </mxCell>
+        <mxCell id="R2n" parent="1" style="text;html=1;align=center;" value="table:T1" vertex="1">
+          <mxGeometry height="18" width="220" x="628" y="367" as="geometry" />
+        </mxCell>
+        <mxCell id="R3" parent="1" style="ellipse;html=1;fillColor=#ffffff;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="26" width="26" x="725" y="417" as="geometry" />
+        </mxCell>
+        <mxCell id="R3t" parent="1" style="text;html=1;align=center;fontStyle=2;" value="«room»" vertex="1">
+          <mxGeometry height="18" width="90" x="693" y="393" as="geometry" />
+        </mxCell>
+        <mxCell id="R3n" parent="1" style="text;html=1;align=center;" value="table:T2" vertex="1">
+          <mxGeometry height="18" width="220" x="628" y="447" as="geometry" />
+        </mxCell>
+        <mxCell id="R4" parent="1" style="ellipse;html=1;fillColor=#ffffff;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="26" width="26" x="725" y="512" as="geometry" />
+        </mxCell>
+        <mxCell id="R4t" parent="1" style="text;html=1;align=center;fontStyle=2;" value="«room»" vertex="1">
+          <mxGeometry height="18" width="90" x="693" y="488" as="geometry" />
+        </mxCell>
+        <mxCell id="R4n" parent="1" style="text;html=1;align=center;" value="waiter:{restaurantId}" vertex="1">
+          <mxGeometry height="18" width="220" x="628" y="542" as="geometry" />
+        </mxCell>
+        <mxCell id="R5" parent="1" style="ellipse;html=1;fillColor=#ffffff;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="26" width="26" x="725" y="592" as="geometry" />
+        </mxCell>
+        <mxCell id="R5t" parent="1" style="text;html=1;align=center;fontStyle=2;" value="«room»" vertex="1">
+          <mxGeometry height="18" width="90" x="693" y="568" as="geometry" />
+        </mxCell>
+        <mxCell id="R5n" parent="1" style="text;html=1;align=center;" value="session:{tokenG1}" vertex="1">
+          <mxGeometry height="18" width="220" x="628" y="622" as="geometry" />
+        </mxCell>
+        <mxCell id="R6" parent="1" style="ellipse;html=1;fillColor=#ffffff;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="26" width="26" x="725" y="682" as="geometry" />
+        </mxCell>
+        <mxCell id="R6t" parent="1" style="text;html=1;align=center;fontStyle=2;" value="«room»" vertex="1">
+          <mxGeometry height="18" width="90" x="693" y="658" as="geometry" />
+        </mxCell>
+        <mxCell id="R6n" parent="1" style="text;html=1;align=center;" value="kitchen:{restaurantId}" vertex="1">
+          <mxGeometry height="18" width="220" x="628" y="712" as="geometry" />
+        </mxCell>
+        <mxCell id="R7" parent="1" style="ellipse;html=1;fillColor=#ffffff;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="26" width="26" x="725" y="772" as="geometry" />
+        </mxCell>
+        <mxCell id="R7t" parent="1" style="text;html=1;align=center;fontStyle=2;" value="«room»" vertex="1">
+          <mxGeometry height="18" width="90" x="693" y="748" as="geometry" />
+        </mxCell>
+        <mxCell id="R7n" parent="1" style="text;html=1;align=center;" value="restaurant:{restaurantId}" vertex="1">
+          <mxGeometry height="18" width="220" x="628" y="802" as="geometry" />
+        </mxCell>
+        <mxCell id="aWaiter" parent="1" style="shape=umlActor;html=1;outlineConnect=0;fillColor=#ffffff;strokeColor=#000000;verticalLabelPosition=bottom;verticalAlign=top;" value="Офіціант&#xa;(role=waiter)" vertex="1">
+          <mxGeometry height="60" width="30" x="1280" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="aGuest1" parent="1" style="shape=umlActor;html=1;outlineConnect=0;fillColor=#ffffff;strokeColor=#000000;verticalLabelPosition=bottom;verticalAlign=top;" value="Гість стола T1&#xa;(session token у cookie)" vertex="1">
+          <mxGeometry height="60" width="30" x="1280" y="360" as="geometry" />
+        </mxCell>
+        <mxCell id="aCook" parent="1" style="shape=umlActor;html=1;outlineConnect=0;fillColor=#ffffff;strokeColor=#000000;verticalLabelPosition=bottom;verticalAlign=top;" value="Кухар&#xa;(role=cook)" vertex="1">
+          <mxGeometry height="60" width="30" x="1280" y="730" as="geometry" />
+        </mxCell>
+        <mxCell id="aAdmin" parent="1" style="shape=umlActor;html=1;outlineConnect=0;fillColor=#ffffff;strokeColor=#000000;verticalLabelPosition=bottom;verticalAlign=top;" value="Адміністратор&#xa;(role=admin)" vertex="1">
+          <mxGeometry height="60" width="30" x="1280" y="935" as="geometry" />
+        </mxCell>
+        <mxCell id="evW" parent="1" style="text;html=1;align=center;fontStyle=1;" value="ORDER_NEW&#xa;ORDER_ITEMS_ADDED&#xa;ORDER_CANCELLED&#xa;DISH_STATUS_UPDATED" vertex="1">
+          <mxGeometry height="70" width="240" x="980" y="95" as="geometry" />
+        </mxCell>
+        <mxCell id="evG1" parent="1" style="text;html=1;align=center;fontStyle=1;" value="DISH_STATUS_UPDATED&#xa;ORDER_CANCELLED" vertex="1">
+          <mxGeometry height="40" width="240" x="975" y="313" as="geometry" />
+        </mxCell>
+        <mxCell id="evG2" parent="1" style="text;html=1;align=center;fontStyle=1;" value="NOTIFICATION_NEW&#xa;DISH_STATUS_UPDATED&#xa;ORDER_CANCELLED&#xa;PONG (latency)" vertex="1">
+          <mxGeometry height="70" width="240" x="993" y="436" as="geometry" />
+        </mxCell>
+        <mxCell id="evK" parent="1" style="text;html=1;align=center;fontStyle=1;" value="ORDER_NEW&#xa;ORDER_ITEMS_ADDED&#xa;ORDER_CANCELLED&#xa;GROUP_STATUS_UPDATED" vertex="1">
+          <mxGeometry height="70" width="240" x="984" y="682" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="wsServer" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;endFill=0;exitX=1;exitY=0.1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="R1" value="connect ?session_token=…">
+          <mxGeometry relative="1" x="0.23" y="10" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="424" y="502" />
+              <mxPoint x="424" y="275" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="wsServer" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;endFill=0;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="R2" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="458" y="520" />
+              <mxPoint x="458" y="350" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="wsServer" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;endFill=0;exitX=1;exitY=0.4;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="R3" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="511" y="538" />
+              <mxPoint x="511" y="430" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="wsServer" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;endFill=0;exitX=1;exitY=0.6;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="R4" value="if role ∈ {waiter, waiter_cook, admin}">
+          <mxGeometry relative="1" x="-0.2645" y="11" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="wsServer" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;endFill=0;exitX=1;exitY=0.75;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="R5" value="auto-join">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="wsServer" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;endFill=0;exitX=1;exitY=0.9;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="R6" value="if role ∈ {cook, waiter_cook}">
+          <mxGeometry relative="1" x="0.2166" y="10" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="504" y="598" />
+              <mxPoint x="504" y="695" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="wsServer" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;endFill=0;exitX=1;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="R7" value="if role staff">
+          <mxGeometry relative="1" x="0.114" y="2" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="445" y="610" />
+              <mxPoint x="445" y="785" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="b1" edge="1" parent="1" source="R4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;dashed=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="aWaiter" value="(broadcast спільних подій столу)">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="979" y="525" />
+              <mxPoint x="979" y="60" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="b2" edge="1" parent="1" source="R2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;dashed=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.4;entryDx=0;entryDy=0;" target="aGuest1" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1101" y="350" />
+              <mxPoint x="1101" y="384" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="b3" edge="1" parent="1" source="R5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;dashed=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.6;entryDx=0;entryDy=0;" target="aGuest1" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1102" y="605" />
+              <mxPoint x="1102" y="396" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="b4" edge="1" parent="1" source="R6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;dashed=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="aCook" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="b5" edge="1" parent="1" source="R7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;dashed=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" value="restaurant-wide events">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1016" y="785" />
+              <mxPoint x="1016" y="956" />
+              <mxPoint x="1280" y="956" />
+            </Array>
+            <mxPoint x="1280" y="956" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="cT2" edge="1" parent="1" source="guestT2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;endFill=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.2;entryY=0;entryDx=0;entryDy=0;" target="wsServer" value="connect / SUBSCRIBE">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="cMsg" edge="1" parent="1" source="nMsg" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;dashed=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.15;entryDx=0;entryDy=0;" target="wsServer" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="20" y="280" />
+              <mxPoint x="20" y="508" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="cAdmin" edge="1" parent="1" source="aAdmin" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;dashed=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.948;entryY=0.99;entryDx=0;entryDy=0;entryPerimeter=0;" target="wsServer" value="connect ?token=&lt;JWT&gt;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="348" y="965" />
+              <mxPoint x="348" y="640" />
+              <mxPoint x="349" y="640" />
+              <mxPoint x="349" y="609" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="nReplay" parent="1" style="shape=note;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#000000;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;size=14;" value="При REPLAY_REQUEST { last_event_id }&#xa;сервер відтворює всі події кімнати&#xa;з event_id &gt; last_event_id.&#xa;Якщо черга очищена (&gt; 10 хв) —&#xa;клієнт повторно завантажує дані&#xa;через REST." vertex="1">
+          <mxGeometry height="120" width="300" x="611" y="989" as="geometry" />
+        </mxCell>
+        <mxCell id="eReplay" edge="1" parent="1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;dashed=1;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="209" y="815" />
+              <mxPoint x="209" y="1015" />
+            </Array>
+            <mxPoint x="209" y="814" as="sourcePoint" />
+            <mxPoint x="611" y="1015" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,118 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="fig37" name="3.7 Guest full cycle">
+    <mxGraphModel dx="1400" dy="1600" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1740" pageHeight="1740" background="#ffffff" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <!-- participants top -->
+        <mxCell id="pGuest" parent="1" vertex="1" style="shape=umlActor;html=1;outlineConnect=0;fillColor=#ffffff;strokeColor=#000000;verticalLabelPosition=bottom;verticalAlign=top;" value="Гість">
+          <mxGeometry x="45" y="20" width="30" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="pQR" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#666666;" value="QR Server">
+          <mxGeometry x="205" y="30" width="130" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="pMenu" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#666666;" value="Menu SPA">
+          <mxGeometry x="455" y="30" width="130" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="pOrder" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#666666;" value="Order Service">
+          <mxGeometry x="755" y="30" width="130" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="pWS" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#666666;" value="WebSocket">
+          <mxGeometry x="1015" y="30" width="130" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="pKDS" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#666666;" value="KDS">
+          <mxGeometry x="1245" y="30" width="70" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="pWaiter" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#666666;" value="Waiter Panel">
+          <mxGeometry x="1390" y="30" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="pLiq" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#666666;" value="LiqPay">
+          <mxGeometry x="1585" y="30" width="70" height="40" as="geometry" />
+        </mxCell>
+        <!-- participants bottom -->
+        <mxCell id="pGuestB" parent="1" vertex="1" style="shape=umlActor;html=1;outlineConnect=0;fillColor=#ffffff;strokeColor=#000000;verticalLabelPosition=bottom;verticalAlign=top;" value="Гість">
+          <mxGeometry x="45" y="1690" width="30" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="pQRB" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#666666;" value="QR Server">
+          <mxGeometry x="205" y="1690" width="130" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="pMenuB" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#666666;" value="Menu SPA">
+          <mxGeometry x="455" y="1690" width="130" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="pOrderB" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#666666;" value="Order Service">
+          <mxGeometry x="755" y="1690" width="130" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="pWSB" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#666666;" value="WebSocket">
+          <mxGeometry x="1015" y="1690" width="130" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="pKDSB" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#666666;" value="KDS">
+          <mxGeometry x="1245" y="1690" width="70" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="pWaiterB" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#666666;" value="Waiter Panel">
+          <mxGeometry x="1390" y="1690" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="pLiqB" parent="1" vertex="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#666666;" value="LiqPay">
+          <mxGeometry x="1585" y="1690" width="70" height="40" as="geometry" />
+        </mxCell>
+        <!-- lifelines -->
+        <mxCell id="llG" parent="1" edge="1" style="endArrow=none;html=1;dashed=1;strokeColor=#999999;"><mxGeometry relative="1" as="geometry"><mxPoint x="60" y="80" as="sourcePoint" /><mxPoint x="60" y="1690" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="llQ" parent="1" edge="1" style="endArrow=none;html=1;dashed=1;strokeColor=#999999;"><mxGeometry relative="1" as="geometry"><mxPoint x="270" y="70" as="sourcePoint" /><mxPoint x="270" y="1690" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="llM" parent="1" edge="1" style="endArrow=none;html=1;dashed=1;strokeColor=#999999;"><mxGeometry relative="1" as="geometry"><mxPoint x="520" y="70" as="sourcePoint" /><mxPoint x="520" y="1690" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="llO" parent="1" edge="1" style="endArrow=none;html=1;dashed=1;strokeColor=#999999;"><mxGeometry relative="1" as="geometry"><mxPoint x="820" y="70" as="sourcePoint" /><mxPoint x="820" y="1690" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="llW" parent="1" edge="1" style="endArrow=none;html=1;dashed=1;strokeColor=#999999;"><mxGeometry relative="1" as="geometry"><mxPoint x="1080" y="70" as="sourcePoint" /><mxPoint x="1080" y="1690" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="llK" parent="1" edge="1" style="endArrow=none;html=1;dashed=1;strokeColor=#999999;"><mxGeometry relative="1" as="geometry"><mxPoint x="1280" y="70" as="sourcePoint" /><mxPoint x="1280" y="1690" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="llWa" parent="1" edge="1" style="endArrow=none;html=1;dashed=1;strokeColor=#999999;"><mxGeometry relative="1" as="geometry"><mxPoint x="1460" y="70" as="sourcePoint" /><mxPoint x="1460" y="1690" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="llL" parent="1" edge="1" style="endArrow=none;html=1;dashed=1;strokeColor=#999999;"><mxGeometry relative="1" as="geometry"><mxPoint x="1620" y="70" as="sourcePoint" /><mxPoint x="1620" y="1690" as="targetPoint" /></mxGeometry></mxCell>
+        <!-- messages -->
+        <mxCell id="m1" parent="1" edge="1" style="html=1;endArrow=block;startArrow=none;" value="GET /qr/{shortCode}"><mxGeometry relative="1" as="geometry"><mxPoint x="60" y="110" as="sourcePoint" /><mxPoint x="270" y="110" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m2" parent="1" edge="1" style="html=1;endArrow=block;startArrow=none;rounded=0;" value="Перевірка cookies (Session Recovery);&#10;перевірка активного замовлення на столику"><mxGeometry relative="1" as="geometry"><mxPoint x="270" y="140" as="sourcePoint" /><mxPoint x="270" y="162" as="targetPoint" /><Array as="points"><mxPoint x="345" y="140" /><mxPoint x="345" y="162" /></Array></mxGeometry></mxCell>
+        <!-- alt session -->
+        <mxCell id="altF" parent="1" vertex="1" style="shape=umlFrame;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fillColor=none;strokeColor=#000000;width=80;height=22;" value="alt  [Нова сесія, столик вільний]"><mxGeometry x="30" y="182" width="560" height="240" as="geometry" /></mxCell>
+        <mxCell id="m3" parent="1" edge="1" style="html=1;endArrow=block;startArrow=none;rounded=0;" value="Генерація sessionToken (UUID v4)"><mxGeometry relative="1" as="geometry"><mxPoint x="270" y="212" as="sourcePoint" /><mxPoint x="270" y="232" as="targetPoint" /><Array as="points"><mxPoint x="345" y="212" /><mxPoint x="345" y="232" /></Array></mxGeometry></mxCell>
+        <mxCell id="m4" parent="1" edge="1" style="html=1;endArrow=open;dashed=1;startArrow=none;" value="HTTP 302 /menu?table={id}&amp;session={token}"><mxGeometry relative="1" as="geometry"><mxPoint x="270" y="255" as="sourcePoint" /><mxPoint x="60" y="255" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="sd1" parent="1" edge="1" style="endArrow=none;html=1;dashed=1;strokeColor=#000000;"><mxGeometry relative="1" as="geometry"><mxPoint x="30" y="283" as="sourcePoint" /><mxPoint x="590" y="283" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="sd1l" parent="1" vertex="1" style="text;html=1;align=left;verticalAlign=middle;fontStyle=1;" value="[Активна сесія відновлена]"><mxGeometry x="40" y="270" width="220" height="20" as="geometry" /></mxCell>
+        <mxCell id="m5" parent="1" edge="1" style="html=1;endArrow=open;dashed=1;startArrow=none;" value="HTTP 302 (існуюча сесія, той самий кошик)"><mxGeometry relative="1" as="geometry"><mxPoint x="270" y="310" as="sourcePoint" /><mxPoint x="60" y="310" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="sd2" parent="1" edge="1" style="endArrow=none;html=1;dashed=1;strokeColor=#000000;"><mxGeometry relative="1" as="geometry"><mxPoint x="30" y="338" as="sourcePoint" /><mxPoint x="590" y="338" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="sd2l" parent="1" vertex="1" style="text;html=1;align=left;verticalAlign=middle;fontStyle=1;" value="[Столик зайнятий (tableHasActiveOrder: true)]"><mxGeometry x="40" y="325" width="320" height="20" as="geometry" /></mxCell>
+        <mxCell id="m6" parent="1" edge="1" style="html=1;endArrow=open;dashed=1;startArrow=none;" value="Меню в режимі «тільки перегляд» (без кошика та кнопки підтвердження)"><mxGeometry relative="1" as="geometry"><mxPoint x="270" y="375" as="sourcePoint" /><mxPoint x="60" y="375" as="targetPoint" /></mxGeometry></mxCell>
+        <!-- after alt -->
+        <mxCell id="m7" parent="1" edge="1" style="html=1;endArrow=block;startArrow=none;" value="Відкриває меню"><mxGeometry relative="1" as="geometry"><mxPoint x="60" y="445" as="sourcePoint" /><mxPoint x="520" y="445" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m8" parent="1" edge="1" style="html=1;endArrow=block;startArrow=none;" value="GET /:restaurantId/menu?tableId={id}"><mxGeometry relative="1" as="geometry"><mxPoint x="520" y="480" as="sourcePoint" /><mxPoint x="820" y="480" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m9" parent="1" edge="1" style="html=1;endArrow=open;dashed=1;startArrow=none;" value="Страви, категорії, стоп-лист"><mxGeometry relative="1" as="geometry"><mxPoint x="820" y="515" as="sourcePoint" /><mxPoint x="520" y="515" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m10" parent="1" edge="1" style="html=1;endArrow=block;startArrow=none;" value="Додає страви, налаштовує модифікатори / add-ons"><mxGeometry relative="1" as="geometry"><mxPoint x="60" y="550" as="sourcePoint" /><mxPoint x="520" y="550" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m11" parent="1" edge="1" style="html=1;endArrow=block;startArrow=none;" value="Натискає «Підтвердити замовлення»"><mxGeometry relative="1" as="geometry"><mxPoint x="60" y="585" as="sourcePoint" /><mxPoint x="520" y="585" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m12" parent="1" edge="1" style="html=1;endArrow=block;startArrow=none;" value="POST /:restaurantId/orders {tableId, sessionToken, items, servingGroups}"><mxGeometry relative="1" as="geometry"><mxPoint x="520" y="620" as="sourcePoint" /><mxPoint x="820" y="620" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m13" parent="1" edge="1" style="html=1;endArrow=block;startArrow=none;rounded=0;" value="Валідація стоп-листу;&#10;перевірка: немає активного замовлення на столику"><mxGeometry relative="1" as="geometry"><mxPoint x="820" y="650" as="sourcePoint" /><mxPoint x="820" y="672" as="targetPoint" /><Array as="points"><mxPoint x="895" y="650" /><mxPoint x="895" y="672" /></Array></mxGeometry></mxCell>
+        <mxCell id="m14" parent="1" edge="1" style="html=1;endArrow=block;startArrow=none;rounded=0;" value="Збереження Order (status: open)"><mxGeometry relative="1" as="geometry"><mxPoint x="820" y="695" as="sourcePoint" /><mxPoint x="820" y="715" as="targetPoint" /><Array as="points"><mxPoint x="895" y="695" /><mxPoint x="895" y="715" /></Array></mxGeometry></mxCell>
+        <mxCell id="m15" parent="1" edge="1" style="html=1;endArrow=block;startArrow=none;" value="ORDER_NEW"><mxGeometry relative="1" as="geometry"><mxPoint x="820" y="738" as="sourcePoint" /><mxPoint x="1080" y="738" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m16" parent="1" edge="1" style="html=1;endArrow=block;startArrow=none;" value="Нова картка замовлення"><mxGeometry relative="1" as="geometry"><mxPoint x="1080" y="770" as="sourcePoint" /><mxPoint x="1280" y="770" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m17" parent="1" edge="1" style="html=1;endArrow=block;startArrow=none;" value="Нове замовлення на столику"><mxGeometry relative="1" as="geometry"><mxPoint x="1080" y="802" as="sourcePoint" /><mxPoint x="1460" y="802" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m18" parent="1" edge="1" style="html=1;endArrow=open;dashed=1;startArrow=none;" value="HTTP 201 {orderId}"><mxGeometry relative="1" as="geometry"><mxPoint x="820" y="835" as="sourcePoint" /><mxPoint x="520" y="835" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m19" parent="1" edge="1" style="html=1;endArrow=open;dashed=1;startArrow=none;" value="«Замовлення прийнято»"><mxGeometry relative="1" as="geometry"><mxPoint x="520" y="868" as="sourcePoint" /><mxPoint x="60" y="868" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m20" parent="1" edge="1" style="html=1;endArrow=block;startArrow=none;" value="PATCH /:restaurantId/orders/{id}/groups/{gId} {status: &quot;cooking&quot;}"><mxGeometry relative="1" as="geometry"><mxPoint x="1280" y="905" as="sourcePoint" /><mxPoint x="820" y="905" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m21" parent="1" edge="1" style="html=1;endArrow=block;startArrow=none;" value="GROUP_STATUS_UPDATED"><mxGeometry relative="1" as="geometry"><mxPoint x="820" y="945" as="sourcePoint" /><mxPoint x="1080" y="945" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m22" parent="1" edge="1" style="html=1;endArrow=open;dashed=1;startArrow=none;" value="Група «Готується»"><mxGeometry relative="1" as="geometry"><mxPoint x="1080" y="978" as="sourcePoint" /><mxPoint x="520" y="978" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m23" parent="1" edge="1" style="html=1;endArrow=open;dashed=1;startArrow=none;" value="Оновлення UI"><mxGeometry relative="1" as="geometry"><mxPoint x="520" y="1011" as="sourcePoint" /><mxPoint x="60" y="1011" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m24" parent="1" edge="1" style="html=1;endArrow=block;startArrow=none;" value="PATCH /:restaurantId/orders/{id}/groups/{gId} {status: &quot;ready&quot;}"><mxGeometry relative="1" as="geometry"><mxPoint x="1280" y="1048" as="sourcePoint" /><mxPoint x="820" y="1048" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m25" parent="1" edge="1" style="html=1;endArrow=block;startArrow=none;" value="GROUP_STATUS_UPDATED"><mxGeometry relative="1" as="geometry"><mxPoint x="820" y="1088" as="sourcePoint" /><mxPoint x="1080" y="1088" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m26" parent="1" edge="1" style="html=1;endArrow=open;dashed=1;startArrow=none;" value="Група «Готово»"><mxGeometry relative="1" as="geometry"><mxPoint x="1080" y="1121" as="sourcePoint" /><mxPoint x="520" y="1121" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m27" parent="1" edge="1" style="html=1;endArrow=open;dashed=1;startArrow=none;" value="«Ваша група страв готова!»"><mxGeometry relative="1" as="geometry"><mxPoint x="520" y="1154" as="sourcePoint" /><mxPoint x="60" y="1154" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m28" parent="1" edge="1" style="html=1;endArrow=block;startArrow=none;" value="PATCH /:restaurantId/orders/{id}/items/{itemId} {dishStatus: &quot;served&quot;}"><mxGeometry relative="1" as="geometry"><mxPoint x="1460" y="1191" as="sourcePoint" /><mxPoint x="820" y="1191" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m29" parent="1" edge="1" style="html=1;endArrow=block;startArrow=none;" value="DISH_STATUS_UPDATED"><mxGeometry relative="1" as="geometry"><mxPoint x="820" y="1231" as="sourcePoint" /><mxPoint x="1080" y="1231" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m30" parent="1" edge="1" style="html=1;endArrow=open;dashed=1;startArrow=none;" value="Страву подано"><mxGeometry relative="1" as="geometry"><mxPoint x="1080" y="1264" as="sourcePoint" /><mxPoint x="520" y="1264" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m31" parent="1" edge="1" style="html=1;endArrow=block;startArrow=none;" value="Натискає «Оплатити онлайн»"><mxGeometry relative="1" as="geometry"><mxPoint x="60" y="1300" as="sourcePoint" /><mxPoint x="520" y="1300" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m32" parent="1" edge="1" style="html=1;endArrow=block;startArrow=none;" value="POST /:restaurantId/payments/initiate {orderId}"><mxGeometry relative="1" as="geometry"><mxPoint x="520" y="1335" as="sourcePoint" /><mxPoint x="820" y="1335" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m33" parent="1" edge="1" style="html=1;endArrow=block;startArrow=none;rounded=0;" value="Валідація: всі страви → served"><mxGeometry relative="1" as="geometry"><mxPoint x="820" y="1367" as="sourcePoint" /><mxPoint x="820" y="1387" as="targetPoint" /><Array as="points"><mxPoint x="895" y="1367" /><mxPoint x="895" y="1387" /></Array></mxGeometry></mxCell>
+        <mxCell id="m34" parent="1" edge="1" style="html=1;endArrow=block;startArrow=none;" value="LiqPay Checkout API"><mxGeometry relative="1" as="geometry"><mxPoint x="820" y="1410" as="sourcePoint" /><mxPoint x="1620" y="1410" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m35" parent="1" edge="1" style="html=1;endArrow=open;dashed=1;startArrow=none;" value="Форма оплати LiqPay"><mxGeometry relative="1" as="geometry"><mxPoint x="1620" y="1443" as="sourcePoint" /><mxPoint x="60" y="1443" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m36" parent="1" edge="1" style="html=1;endArrow=block;startArrow=none;" value="Вводить дані картки"><mxGeometry relative="1" as="geometry"><mxPoint x="60" y="1476" as="sourcePoint" /><mxPoint x="1620" y="1476" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m37" parent="1" edge="1" style="html=1;endArrow=block;startArrow=none;" value="POST /payments/webhook/liqpay {status: success}"><mxGeometry relative="1" as="geometry"><mxPoint x="1620" y="1509" as="sourcePoint" /><mxPoint x="820" y="1509" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m38" parent="1" edge="1" style="html=1;endArrow=block;startArrow=none;rounded=0;" value="Order.status → completed_epay;&#10;Столик → free"><mxGeometry relative="1" as="geometry"><mxPoint x="820" y="1541" as="sourcePoint" /><mxPoint x="820" y="1563" as="targetPoint" /><Array as="points"><mxPoint x="895" y="1541" /><mxPoint x="895" y="1563" /></Array></mxGeometry></mxCell>
+        <mxCell id="m39" parent="1" edge="1" style="html=1;endArrow=block;startArrow=none;" value="PAYMENT_COMPLETED"><mxGeometry relative="1" as="geometry"><mxPoint x="820" y="1586" as="sourcePoint" /><mxPoint x="1080" y="1586" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m40" parent="1" edge="1" style="html=1;endArrow=open;dashed=1;startArrow=none;" value="Підтвердження оплати"><mxGeometry relative="1" as="geometry"><mxPoint x="1080" y="1619" as="sourcePoint" /><mxPoint x="520" y="1619" as="targetPoint" /></mxGeometry></mxCell>
+        <mxCell id="m41" parent="1" edge="1" style="html=1;endArrow=open;dashed=1;startArrow=none;" value="«Дякуємо! Оплату підтверджено»"><mxGeometry relative="1" as="geometry"><mxPoint x="520" y="1652" as="sourcePoint" /><mxPoint x="60" y="1652" as="targetPoint" /></mxGeometry></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

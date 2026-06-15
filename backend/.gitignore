@@ -1,9 +1,5 @@
 node_modules
-.vscode
-.git
-.claude
 .env
 logs
 coverage
 backups
-dist

@@ -1,0 +1,220 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="eSyRyyhQfu-Gdw-FIadz" name="Страница-1">
+    <mxGraphModel dx="1178" dy="648" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="client" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" value="&lt;b&gt;Клієнт&lt;/b&gt;&lt;br&gt;Browser / PWA (React SPA)" vertex="1">
+          <mxGeometry height="50" width="210" x="510" y="65" as="geometry" />
+        </mxCell>
+        <mxCell id="e_client_mw" edge="1" parent="1" source="client" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;" target="mw_group" value="HTTP Request">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="express_server" parent="1" style="swimlane;startSize=35;fillColor=#f5f5f5;strokeColor=#555555;fontStyle=1;fontSize=13;fontColor=#333333;" value="Express HTTP Server — Node.js / Express 4" vertex="1">
+          <mxGeometry height="495" width="1150" x="80" y="155" as="geometry" />
+        </mxCell>
+        <mxCell id="mw_group" parent="express_server" style="swimlane;startSize=25;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;fontStyle=1;" value="Middleware Pipeline" vertex="1">
+          <mxGeometry height="90" width="1040" x="20" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="mw_helmet" parent="mw_group" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="helmet" vertex="1">
+          <mxGeometry height="40" width="85" x="10" y="32" as="geometry" />
+        </mxCell>
+        <mxCell id="mw_rate" parent="mw_group" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="rate-limit" vertex="1">
+          <mxGeometry height="40" width="90" x="105" y="32" as="geometry" />
+        </mxCell>
+        <mxCell id="mw_sanitize" parent="mw_group" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="mongo-sanitize" vertex="1">
+          <mxGeometry height="40" width="105" x="205" y="32" as="geometry" />
+        </mxCell>
+        <mxCell id="mw_cors" parent="mw_group" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="CORS" vertex="1">
+          <mxGeometry height="40" width="65" x="320" y="32" as="geometry" />
+        </mxCell>
+        <mxCell id="mw_reqid" parent="mw_group" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="requestId" vertex="1">
+          <mxGeometry height="40" width="85" x="395" y="32" as="geometry" />
+        </mxCell>
+        <mxCell id="mw_logger" parent="mw_group" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="httpLogger (winston)" vertex="1">
+          <mxGeometry height="40" width="135" x="490" y="32" as="geometry" />
+        </mxCell>
+        <mxCell id="mw_auth" parent="mw_group" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="auth (JWT)" vertex="1">
+          <mxGeometry height="40" width="85" x="635" y="32" as="geometry" />
+        </mxCell>
+        <mxCell id="mw_rbac" parent="mw_group" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="rbac" vertex="1">
+          <mxGeometry height="40" width="65" x="730" y="32" as="geometry" />
+        </mxCell>
+        <mxCell id="mw_plan" parent="mw_group" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="requirePlan" vertex="1">
+          <mxGeometry height="40" width="90" x="805" y="32" as="geometry" />
+        </mxCell>
+        <mxCell id="mw_restparam" parent="mw_group" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;" value="restaurantParam" vertex="1">
+          <mxGeometry height="40" width="120" x="905" y="32" as="geometry" />
+        </mxCell>
+        <mxCell id="me1" edge="1" parent="mw_group" source="mw_helmet" style="edgeStyle=orthogonalEdgeStyle;" target="mw_rate">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="me2" edge="1" parent="mw_group" source="mw_rate" style="edgeStyle=orthogonalEdgeStyle;" target="mw_sanitize">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="me3" edge="1" parent="mw_group" source="mw_sanitize" style="edgeStyle=orthogonalEdgeStyle;" target="mw_cors">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="me4" edge="1" parent="mw_group" source="mw_cors" style="edgeStyle=orthogonalEdgeStyle;" target="mw_reqid">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="me5" edge="1" parent="mw_group" source="mw_reqid" style="edgeStyle=orthogonalEdgeStyle;" target="mw_logger">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="me6" edge="1" parent="mw_group" source="mw_logger" style="edgeStyle=orthogonalEdgeStyle;" target="mw_auth">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="me7" edge="1" parent="mw_group" source="mw_auth" style="edgeStyle=orthogonalEdgeStyle;" target="mw_rbac">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="me8" edge="1" parent="mw_group" source="mw_rbac" style="edgeStyle=orthogonalEdgeStyle;" target="mw_plan">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="me9" edge="1" parent="mw_group" source="mw_plan" style="edgeStyle=orthogonalEdgeStyle;" target="mw_restparam">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="router_group" parent="express_server" style="swimlane;startSize=25;fillColor=#f9f9f9;strokeColor=#666666;fontSize=11;fontStyle=1;" value="Маршрутизатор (Router Layer)" vertex="1">
+          <mxGeometry height="165" width="1120" x="20" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="global_routes" parent="router_group" style="swimlane;startSize=22;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="Глобальні маршрути /api" vertex="1">
+          <mxGeometry height="115" width="460" x="10" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="r_health" parent="global_routes" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" value="/health" vertex="1">
+          <mxGeometry height="60" width="65" x="10" y="35" as="geometry" />
+        </mxCell>
+        <mxCell id="r_auth" parent="global_routes" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" value="/auth" vertex="1">
+          <mxGeometry height="60" width="65" x="85" y="35" as="geometry" />
+        </mxCell>
+        <mxCell id="r_onboarding" parent="global_routes" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" value="/onboarding" vertex="1">
+          <mxGeometry height="60" width="80" x="160" y="35" as="geometry" />
+        </mxCell>
+        <mxCell id="r_user" parent="global_routes" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" value="/user" vertex="1">
+          <mxGeometry height="60" width="60" x="250" y="35" as="geometry" />
+        </mxCell>
+        <mxCell id="r_restaurants" parent="global_routes" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" value="/restaurants" vertex="1">
+          <mxGeometry height="60" width="80" x="320" y="35" as="geometry" />
+        </mxCell>
+        <mxCell id="r_qr" parent="global_routes" style="rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;" value="/qr" vertex="1">
+          <mxGeometry height="60" width="40" x="410" y="35" as="geometry" />
+        </mxCell>
+        <mxCell id="scoped_routes" parent="router_group" style="swimlane;startSize=22;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;fontStyle=1;" value="/api/:restaurantId — Маршрути ресторану (restaurantParam + requireSameRestaurant)" vertex="1">
+          <mxGeometry height="115" width="630" x="480" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="r_public" parent="scoped_routes" style="rounded=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=9;" value="/info /menu /orders /reviews &#xa;/payments /subscriptions" vertex="1">
+          <mxGeometry height="65" width="145" x="10" y="32" as="geometry" />
+        </mxCell>
+        <mxCell id="r_admin" parent="scoped_routes" style="rounded=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=9;" value="/admin/*&#xa;analytics, staff,&#xa;tables, translate&#xa;(rbac: admin)" vertex="1">
+          <mxGeometry height="65" width="110" x="165" y="32" as="geometry" />
+        </mxCell>
+        <mxCell id="r_waiter" parent="scoped_routes" style="rounded=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=9;" value="/waiter/*&#xa;orders, calls,&#xa;tables&#xa;(rbac: waiter)" vertex="1">
+          <mxGeometry height="65" width="110" x="285" y="32" as="geometry" />
+        </mxCell>
+        <mxCell id="r_kitchen" parent="scoped_routes" style="rounded=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=9;" value="/kitchen/*&#xa;orders, stoplist,&#xa;extras&#xa;(rbac: cook)" vertex="1">
+          <mxGeometry height="65" width="110" x="405" y="32" as="geometry" />
+        </mxCell>
+        <mxCell id="r_webhooks" parent="scoped_routes" style="rounded=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=9;" value="/paymentWebhook&#xa;/subscriptionWebhook" vertex="1">
+          <mxGeometry height="65" width="95" x="525" y="32" as="geometry" />
+        </mxCell>
+        <mxCell id="services_group" parent="express_server" style="swimlane;startSize=25;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;fontStyle=1;" value="Сервісний шар (Services)" vertex="1">
+          <mxGeometry height="90" width="1040" x="20" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="svc_order" parent="services_group" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" value="orderService" vertex="1">
+          <mxGeometry height="42" width="105" x="10" y="32" as="geometry" />
+        </mxCell>
+        <mxCell id="svc_ws" parent="services_group" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" value="wsService" vertex="1">
+          <mxGeometry height="42" width="85" x="125" y="32" as="geometry" />
+        </mxCell>
+        <mxCell id="svc_email" parent="services_group" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" value="emailService (Resend)" vertex="1">
+          <mxGeometry height="42" width="110" x="220" y="32" as="geometry" />
+        </mxCell>
+        <mxCell id="svc_liqpay" parent="services_group" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" value="liqpayService" vertex="1">
+          <mxGeometry height="42" width="100" x="340" y="32" as="geometry" />
+        </mxCell>
+        <mxCell id="svc_notif" parent="services_group" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" value="notificationService" vertex="1">
+          <mxGeometry height="42" width="120" x="450" y="32" as="geometry" />
+        </mxCell>
+        <mxCell id="svc_trans" parent="services_group" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" value="translationService" vertex="1">
+          <mxGeometry height="42" width="115" x="580" y="32" as="geometry" />
+        </mxCell>
+        <mxCell id="svc_session" parent="services_group" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" value="sessionService" vertex="1">
+          <mxGeometry height="42" width="100" x="705" y="32" as="geometry" />
+        </mxCell>
+        <mxCell id="svc_audit" parent="services_group" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" value="auditService" vertex="1">
+          <mxGeometry height="42" width="95" x="815" y="32" as="geometry" />
+        </mxCell>
+        <mxCell id="svc_encrypt" parent="services_group" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" value="encryptionService" vertex="1">
+          <mxGeometry height="42" width="110" x="920" y="32" as="geometry" />
+        </mxCell>
+        <mxCell id="err_handler" parent="express_server" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" value="&lt;b&gt;errorHandler&lt;/b&gt; (глобальний)" vertex="1">
+          <mxGeometry height="38" width="210" x="830" y="450" as="geometry" />
+        </mxCell>
+        <mxCell id="e_mw_router" edge="1" parent="express_server" source="mw_group" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="router_group">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_router_svc" edge="1" parent="express_server" source="router_group" style="edgeStyle=orthogonalEdgeStyle;html=1;" target="services_group">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="mongodb" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;" value="&lt;b&gt;MongoDB&lt;/b&gt; — Mongoose ODM (23 моделі)&#xa;Restaurant · Order · OrderItem · MenuItem · Category · Table · User · Review · Notification · ServingGroup · …" vertex="1">
+          <mxGeometry height="65" width="560" x="80" y="695" as="geometry" />
+        </mxCell>
+        <mxCell id="e_svc_db" edge="1" parent="1" source="services_group" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;" target="mongodb" value="Mongoose queries">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="620" y="670" />
+              <mxPoint x="360" y="670" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ext_group" parent="1" style="swimlane;startSize=25;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;fontStyle=1;" value="Зовнішні сервіси" vertex="1">
+          <mxGeometry height="90" width="490" x="680" y="690" as="geometry" />
+        </mxCell>
+        <mxCell id="ext_s3" parent="ext_group" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" value="AWS S3 (зображення)" vertex="1">
+          <mxGeometry height="45" width="90" x="10" y="33" as="geometry" />
+        </mxCell>
+        <mxCell id="ext_liqpay" parent="ext_group" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" value="LiqPay API (платежі)" vertex="1">
+          <mxGeometry height="45" width="90" x="110" y="33" as="geometry" />
+        </mxCell>
+        <mxCell id="ext_resend" parent="ext_group" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" value="Resend (email)" vertex="1">
+          <mxGeometry height="45" width="80" x="210" y="33" as="geometry" />
+        </mxCell>
+        <mxCell id="ext_google" parent="ext_group" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" value="Google OAuth 2.0 (passport)" vertex="1">
+          <mxGeometry height="45" width="100" x="300" y="33" as="geometry" />
+        </mxCell>
+        <mxCell id="ext_translate" parent="ext_group" style="rounded=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" value="Google Translate API" vertex="1">
+          <mxGeometry height="45" width="70" x="410" y="33" as="geometry" />
+        </mxCell>
+        <mxCell id="e_svc_ext" edge="1" parent="1" source="services_group" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;" target="ext_group" value="API-виклики">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="620" y="660" />
+              <mxPoint x="925" y="660" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ws_server" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" value="&lt;b&gt;WebSocket Server (ws)&lt;/b&gt;&#xa;Кімнати: session:token · table:id · restaurant:id · kitchen:id · waiter:id&#xa;Replay (10 хв черга подій) · PING/PONG keepalive (25 с) · макс. 5 перепідключень" vertex="1">
+          <mxGeometry height="65" width="560" x="80" y="810" as="geometry" />
+        </mxCell>
+        <mxCell id="e_wssvc_wsserver" edge="1" parent="1" source="svc_ws" style="edgeStyle=orthogonalEdgeStyle;dashed=1;html=1;fontSize=10;" target="ws_server" value="broadcast / subscribe">
+          <mxGeometry relative="1" x="-0.1526" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="268" y="670" />
+              <mxPoint x="60" y="670" />
+              <mxPoint x="60" y="820" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_ws_client" edge="1" parent="1" source="ws_server" style="edgeStyle=orthogonalEdgeStyle;dashed=1;html=1;fontSize=9;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="client" value="WebSocket Events">
+          <mxGeometry relative="1" x="-0.8534" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="40" y="842" />
+              <mxPoint x="40" y="90" />
+              <mxPoint x="510" y="90" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,109 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="fig39" name="3.9 WS reconnect &amp; replay">
+    <mxGraphModel dx="566" dy="311" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="950" pageHeight="650" background="#ffffff" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="pClient" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#666666;" value="Client (SPA / KDS)" vertex="1">
+          <mxGeometry height="40" width="180" x="40" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="pWS" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#666666;" value="WebSocket Server" vertex="1">
+          <mxGeometry height="40" width="180" x="340" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="pOrder" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#666666;" value="Order Service" vertex="1">
+          <mxGeometry height="40" width="180" x="640" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="pClientB" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#666666;" value="Client (SPA / KDS)" vertex="1">
+          <mxGeometry height="40" width="180" x="40" y="600" as="geometry" />
+        </mxCell>
+        <mxCell id="pWSB" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#666666;" value="WebSocket Server" vertex="1">
+          <mxGeometry height="40" width="180" x="340" y="600" as="geometry" />
+        </mxCell>
+        <mxCell id="pOrderB" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#E6E6E6;strokeColor=#666666;" value="Order Service" vertex="1">
+          <mxGeometry height="40" width="180" x="640" y="600" as="geometry" />
+        </mxCell>
+        <mxCell id="llC" edge="1" parent="1" style="endArrow=none;html=1;dashed=1;strokeColor=#999999;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="130" y="60" as="sourcePoint" />
+            <mxPoint x="130" y="600" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="llW" edge="1" parent="1" style="endArrow=none;html=1;dashed=1;strokeColor=#999999;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="430" y="60" as="sourcePoint" />
+            <mxPoint x="430" y="600" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="llO" edge="1" parent="1" style="endArrow=none;html=1;dashed=1;strokeColor=#999999;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="730" y="60" as="sourcePoint" />
+            <mxPoint x="730" y="600" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m1" edge="1" parent="1" style="html=1;endArrow=block;startArrow=none;" value="connect (sessionToken / JWT Bearer)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="130" y="100" as="sourcePoint" />
+            <mxPoint x="430" y="100" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m2" edge="1" parent="1" style="html=1;endArrow=open;dashed=1;startArrow=none;" value="connected">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="430" y="135" as="sourcePoint" />
+            <mxPoint x="130" y="135" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m3" edge="1" parent="1" style="html=1;endArrow=block;startArrow=none;" value="GROUP_STATUS_UPDATED (event_id: 42)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="430" y="170" as="sourcePoint" />
+            <mxPoint x="130" y="170" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m4" edge="1" parent="1" style="html=1;endArrow=cross;startArrow=none;strokeColor=#B85450;" value="✕ з&#39;єднання розірвано">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="130" y="208" as="sourcePoint" />
+            <mxPoint x="430" y="208" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="n1" parent="1" style="shape=note;whiteSpace=wrap;html=1;fillColor=#FFFFCC;strokeColor=#666600;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;size=14;" value="Відображає індикатор «Offline».&#xa;Сервер зберігає чергу подій (TTL: 10 хв)." vertex="1">
+          <mxGeometry height="55" width="270" x="20" y="232" as="geometry" />
+        </mxCell>
+        <mxCell id="loopF" parent="1" style="shape=umlFrame;whiteSpace=wrap;html=1;align=left;verticalAlign=top;fillColor=none;strokeColor=#000000;width=120;height=22;" value="loop  [Кожні 3 секунди (до 5 спроб)]" vertex="1">
+          <mxGeometry height="58" width="380" x="90" y="305" as="geometry" />
+        </mxCell>
+        <mxCell id="m5" edge="1" parent="1" style="html=1;endArrow=block;startArrow=none;" value="reconnect attempt">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="130" y="345" as="sourcePoint" />
+            <mxPoint x="430" y="345" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m6" edge="1" parent="1" style="html=1;endArrow=block;startArrow=none;" value="connect (token, last_event_id: 42)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="130" y="395" as="sourcePoint" />
+            <mxPoint x="430" y="395" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m7" edge="1" parent="1" style="html=1;endArrow=block;startArrow=none;" value="Отримати події після event_id: 42">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="430" y="432" as="sourcePoint" />
+            <mxPoint x="730" y="432" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m8" edge="1" parent="1" style="html=1;endArrow=open;dashed=1;startArrow=none;" value="[DISH_STATUS_UPDATED (43), ORDER_ITEMS_ADDED (44)]">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="730" y="468" as="sourcePoint" />
+            <mxPoint x="430" y="468" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m9" edge="1" parent="1" style="html=1;endArrow=open;dashed=1;startArrow=none;" value="Replay пропущених подій">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="430" y="505" as="sourcePoint" />
+            <mxPoint x="130" y="505" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="n2" parent="1" style="shape=note;whiteSpace=wrap;html=1;fillColor=#FFFFCC;strokeColor=#666600;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;size=14;" value="UI оновлено до актуального стану.&#xa;Індикатор «Offline» зникає." vertex="1">
+          <mxGeometry height="55" width="270" x="20" y="528" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

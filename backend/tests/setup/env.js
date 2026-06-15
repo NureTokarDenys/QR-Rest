@@ -1,0 +1,21 @@
+// Set environment variables before any module is loaded
+process.env.NODE_ENV = 'test';
+process.env.JWT_ACCESS_SECRET = 'test-access-secret-for-jest-only';
+process.env.JWT_REFRESH_SECRET = 'test-refresh-secret-for-jest-only';
+process.env.JWT_ACCESS_EXPIRES_IN = '1h';
+process.env.JWT_REFRESH_EXPIRES_IN = '7d';
+process.env.BASE_URL = 'http://localhost:3000';
+process.env.LIQPAY_PUBLIC_KEY = 'test_public_key';
+process.env.LIQPAY_PRIVATE_KEY = 'test_private_key';
+process.env.GOOGLE_CLIENT_ID = 'test_google_client_id';
+process.env.GOOGLE_CLIENT_SECRET = 'test_google_client_secret';
+process.env.GOOGLE_CALLBACK_URL = 'http://localhost:3000/api/auth/google/callback';
+process.env.AWS_ACCESS_KEY_ID = 'test_key';
+process.env.AWS_SECRET_ACCESS_KEY = 'test_secret';
+process.env.AWS_REGION = 'eu-central-1';
+process.env.AWS_S3_BUCKET = 'test-bucket';
+process.env.RESEND_API_KEY = 'test_resend_key';
+process.env.EMAIL_FROM = 'QR Restaurant <onboarding@example.com>';
+process.env.GOOGLE_TRANSLATE_API_KEY = 'test_google_translate_key';
+process.env.FRONTEND_URL = 'http://localhost:3000';
+process.env.ENCRYPTION_KEY = 'a'.repeat(64); // 64-char hex string for AES-256 in tests

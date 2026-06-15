@@ -1,0 +1,178 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="fig33" name="3.3 Потік HTTP-запиту">
+    <mxGraphModel dx="1230" dy="676" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1700" pageHeight="1200" background="#ffffff" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="hClient" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;" value="Client&#xa;(React SPA)" vertex="1">
+          <mxGeometry height="40" width="140" x="40" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="hApp" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;" value="Express app&#xa;(app.js)" vertex="1">
+          <mxGeometry height="40" width="140" x="200" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="hGlobal" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;" value="Глобальний&#xa;middleware-конвеєр" vertex="1">
+          <mxGeometry height="40" width="160" x="380" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="hRouter" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;" value="Router&#xa;(routes/index.js · scoped.js)" vertex="1">
+          <mxGeometry height="40" width="180" x="560" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="hGuard" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;" value="Захисний&#xa;middleware маршруту" vertex="1">
+          <mxGeometry height="40" width="160" x="770" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="hHandler" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;" value="Route handler&#xa;(контролер)" vertex="1">
+          <mxGeometry height="40" width="150" x="960" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="hService" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;" value="Service шар&#xa;(src/services/)" vertex="1">
+          <mxGeometry height="40" width="150" x="1140" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="hModel" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFF2CC;strokeColor=#D6B656;" value="Mongoose Model&#xa;(src/models/)" vertex="1">
+          <mxGeometry height="40" width="150" x="1320" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="hDB" parent="1" style="shape=cylinder3;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#666666;" value="&lt;div&gt;&lt;br&gt;&lt;/div&gt;&lt;div&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;MongoDB Atlas&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="55" width="120" x="1500" y="15" as="geometry" />
+        </mxCell>
+        <mxCell id="llClient" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="110" y="60" as="sourcePoint" />
+            <mxPoint x="110" y="1130" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="llApp" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="270" y="60" as="sourcePoint" />
+            <mxPoint x="270" y="1130" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="llGlobal" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="460" y="60" as="sourcePoint" />
+            <mxPoint x="460" y="1130" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="llRouter" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="650" y="60" as="sourcePoint" />
+            <mxPoint x="650" y="1130" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="llGuard" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="850" y="60" as="sourcePoint" />
+            <mxPoint x="850" y="1130" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="llHandler" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1035" y="60" as="sourcePoint" />
+            <mxPoint x="1035" y="1130" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="llService" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1215" y="60" as="sourcePoint" />
+            <mxPoint x="1215" y="1130" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="llModel" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1395" y="60" as="sourcePoint" />
+            <mxPoint x="1395" y="1130" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="llDB" edge="1" parent="1" style="endArrow=none;dashed=1;html=1;strokeColor=#999999;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1560" y="70" as="sourcePoint" />
+            <mxPoint x="1560" y="1130" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m1" edge="1" parent="1" style="html=1;endArrow=block;rounded=0;" value="HTTP request">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="110" y="100" as="sourcePoint" />
+            <mxPoint x="270" y="100" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m2" edge="1" parent="1" style="html=1;endArrow=block;rounded=0;" value="helmet → cors → express.json → cookieParser → mongoSanitize → passport.initialize → requestId → httpLogger → globalRateLimiter">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="270" y="150" as="sourcePoint" />
+            <mxPoint x="460" y="150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m3" edge="1" parent="1" style="html=1;endArrow=block;rounded=0;" value="match route (/auth · /qr · /:restaurantId/admin/* …)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="460" y="210" as="sourcePoint" />
+            <mxPoint x="650" y="210" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m4" edge="1" parent="1" style="html=1;endArrow=block;rounded=0;" value="selective middleware">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="650" y="255" as="sourcePoint" />
+            <mxPoint x="850" y="255" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="noteGuard" parent="1" style="shape=note;whiteSpace=wrap;html=1;fillColor=#FFF9B2;strokeColor=#666600;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;" value="&lt;b&gt;Захисні middleware (src/middleware/):&lt;/b&gt;&lt;br&gt;• requireAuth | optionalAuth | requireSession&lt;br&gt;• requireRole(role[]) | requireMinRole(min)&lt;br&gt;• requireSameRestaurant()&lt;br&gt;• restaurantParam (publicId → ObjectId)&lt;br&gt;• requirePlan(&#39;premium&#39;)  ← для Premium-only" vertex="1">
+          <mxGeometry height="105" width="340" x="715" y="285" as="geometry" />
+        </mxCell>
+        <mxCell id="m5" edge="1" parent="1" style="html=1;endArrow=block;rounded=0;" value="(req, res, next)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="850" y="445" as="sourcePoint" />
+            <mxPoint x="1035" y="445" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m6" edge="1" parent="1" style="html=1;endArrow=block;rounded=0;" value="виклик бізнес-методу (orderService · liqpayService · …)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1035" y="495" as="sourcePoint" />
+            <mxPoint x="1215" y="495" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="noteService" parent="1" style="shape=note;whiteSpace=wrap;html=1;fillColor=#FFF9B2;strokeColor=#666600;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;" value="&lt;b&gt;Сервіси (src/services/):&lt;/b&gt;&lt;br&gt;• orderService — створення / скасування Order&lt;br&gt;• sessionService — life cycle гостьової сесії&lt;br&gt;• liqpayService — підпис HMAC-SHA1, decode webhook&lt;br&gt;• notificationService — Notification + WS broadcast&lt;br&gt;• wsService — emit(room, event), event replay&lt;br&gt;• emailService — Resend SDK + React JSX templates&lt;br&gt;• translationService — Google Translate API&lt;br&gt;• encryptionService — шифрування ключів LiqPay&lt;br&gt;• auditService — журнал критичних дій" vertex="1">
+          <mxGeometry height="170" width="380" x="1045" y="520" as="geometry" />
+        </mxCell>
+        <mxCell id="m7" edge="1" parent="1" style="html=1;endArrow=block;rounded=0;" value="Order.findOne() / aggregate()">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1215" y="710" as="sourcePoint" />
+            <mxPoint x="1395" y="710" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m8" edge="1" parent="1" style="html=1;endArrow=block;rounded=0;" value="query (mongoose driver)">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1395" y="760" as="sourcePoint" />
+            <mxPoint x="1560" y="760" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m9" edge="1" parent="1" style="html=1;endArrow=open;dashed=1;rounded=0;" value="documents">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1560" y="805" as="sourcePoint" />
+            <mxPoint x="1395" y="805" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m10" edge="1" parent="1" style="html=1;endArrow=open;dashed=1;rounded=0;" value="entities">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1395" y="850" as="sourcePoint" />
+            <mxPoint x="1215" y="850" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m11" edge="1" parent="1" style="html=1;endArrow=open;dashed=1;rounded=0;" value="result DTO">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1215" y="895" as="sourcePoint" />
+            <mxPoint x="1035" y="895" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m12" edge="1" parent="1" style="html=1;endArrow=open;dashed=1;rounded=0;" value="res.json({ data, meta: { request_id } })">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1035" y="940" as="sourcePoint" />
+            <mxPoint x="460" y="940" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="m13" edge="1" parent="1" style="html=1;endArrow=open;dashed=1;rounded=0;" value="HTTP 200 / 4xx / 5xx">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="460" y="985" as="sourcePoint" />
+            <mxPoint x="110" y="985" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="noteErr" parent="1" style="shape=note;whiteSpace=wrap;html=1;fillColor=#FFF9B2;strokeColor=#666600;align=left;verticalAlign=top;spacingLeft=6;spacingTop=4;" value="&lt;b&gt;errorHandler (єдина точка):&lt;/b&gt;&lt;br&gt;формує { error: { code, message },&lt;br&gt;       meta: { request_id } }" vertex="1">
+          <mxGeometry height="90" width="320" x="300" y="1010" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

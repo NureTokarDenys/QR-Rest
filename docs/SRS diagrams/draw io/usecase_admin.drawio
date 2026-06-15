@@ -1,0 +1,109 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="admin-usecase-1" name="Адміністратор">
+    <mxGraphModel dx="1414" dy="777" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="860" background="#ffffff" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="actorAdmin" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="Адміністратор" vertex="1">
+          <mxGeometry height="60" width="30" x="620" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="e_A1" edge="1" parent="1" source="actorAdmin" style="edgeStyle=none;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;endArrow=open;endFill=0;strokeColor=#000000;rounded=0;" target="A1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_A2" edge="1" parent="1" source="actorAdmin" style="edgeStyle=none;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;endArrow=open;endFill=0;strokeColor=#000000;rounded=0;" target="A2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_A3" edge="1" parent="1" source="actorAdmin" style="edgeStyle=none;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;endArrow=open;endFill=0;strokeColor=#000000;rounded=0;" target="A3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_A4" edge="1" parent="1" source="actorAdmin" style="edgeStyle=none;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;endArrow=open;endFill=0;strokeColor=#000000;rounded=0;" target="A4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_A5" edge="1" parent="1" source="actorAdmin" style="edgeStyle=none;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;endArrow=open;endFill=0;strokeColor=#000000;rounded=0;" target="A5">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_A6" edge="1" parent="1" source="actorAdmin" style="edgeStyle=none;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;endArrow=open;endFill=0;strokeColor=#000000;rounded=0;" target="A6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_A7" edge="1" parent="1" source="actorAdmin" style="edgeStyle=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=open;endFill=0;strokeColor=#000000;rounded=0;" target="A7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_A8" edge="1" parent="1" source="actorAdmin" style="edgeStyle=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=open;endFill=0;strokeColor=#000000;rounded=0;" target="A8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_A9" edge="1" parent="1" source="actorAdmin" style="edgeStyle=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=open;endFill=0;strokeColor=#000000;rounded=0;" target="A9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_A10" edge="1" parent="1" source="actorAdmin" style="edgeStyle=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=open;endFill=0;strokeColor=#000000;rounded=0;" target="A10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_A11" edge="1" parent="1" source="actorAdmin" style="edgeStyle=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=open;endFill=0;strokeColor=#000000;rounded=0;" target="A11">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_A12" edge="1" parent="1" source="actorAdmin" style="edgeStyle=none;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=open;endFill=0;strokeColor=#000000;rounded=0;" target="A12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="rightRect" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="645" width="280" x="796" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="A7" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1;fontSize=11;" value="Переглядати аналітичний дашборд (Premium)" vertex="1">
+          <mxGeometry height="60" width="240" x="816" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="A8" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1;fontSize=11;" value="Експортувати аналітику у CSV (Premium)" vertex="1">
+          <mxGeometry height="60" width="240" x="816" y="135" as="geometry" />
+        </mxCell>
+        <mxCell id="A9" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1;fontSize=11;" value="Модерувати відгуки (Premium)" vertex="1">
+          <mxGeometry height="60" width="240" x="816" y="225" as="geometry" />
+        </mxCell>
+        <mxCell id="A10" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1;fontSize=11;" value="Запускати автоматичний переклад (Premium)" vertex="1">
+          <mxGeometry height="60" width="240" x="816" y="315" as="geometry" />
+        </mxCell>
+        <mxCell id="A11" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1;fontSize=11;" value="Генерувати PDF-меню (Premium)" vertex="1">
+          <mxGeometry height="60" width="240" x="816" y="405" as="geometry" />
+        </mxCell>
+        <mxCell id="A12" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1;fontSize=11;" value="Керувати підпискою Premium" vertex="1">
+          <mxGeometry height="60" width="240" x="816" y="495" as="geometry" />
+        </mxCell>
+        <mxCell id="leftRect" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#000000;strokeWidth=1;" value="" vertex="1">
+          <mxGeometry height="627" width="280" x="186" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="A1" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1;fontSize=11;" value="Керувати меню (категорії, страви, зображення)" vertex="1">
+          <mxGeometry height="60" width="240" x="206" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="A2" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1;fontSize=11;" value="Керувати інгредієнтами, додатками, групами компонентів" vertex="1">
+          <mxGeometry height="60" width="240" x="206" y="135" as="geometry" />
+        </mxCell>
+        <mxCell id="A3" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1;fontSize=11;" value="Керувати столиками та QR-кодами" vertex="1">
+          <mxGeometry height="60" width="240" x="206" y="225" as="geometry" />
+        </mxCell>
+        <mxCell id="A4" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1;fontSize=11;" value="Керувати персоналом (акаунти, ролі, паролі)" vertex="1">
+          <mxGeometry height="60" width="240" x="206" y="315" as="geometry" />
+        </mxCell>
+        <mxCell id="A5" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1;fontSize=11;" value="Налаштовувати параметри ресторану" vertex="1">
+          <mxGeometry height="60" width="240" x="206" y="405" as="geometry" />
+        </mxCell>
+        <mxCell id="A6" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1;fontSize=11;" value="Функціонал офіціанта" vertex="1">
+          <mxGeometry height="60" width="240" x="200" y="476" as="geometry" />
+        </mxCell>
+        <mxCell id="_7SHaLhwpIQuwgZYXqGs-1" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1;fontSize=11;" value="Налаштовувати ключі LiqPay" vertex="1">
+          <mxGeometry height="60" width="240" x="816" y="572" as="geometry" />
+        </mxCell>
+        <mxCell id="_7SHaLhwpIQuwgZYXqGs-2" edge="1" parent="1" style="edgeStyle=none;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;endArrow=open;endFill=0;strokeColor=#000000;rounded=0;" target="_7SHaLhwpIQuwgZYXqGs-1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="650" y="299" as="sourcePoint" />
+            <mxPoint x="887" y="714" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="_7SHaLhwpIQuwgZYXqGs-4" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1;fontSize=11;" value="Функціонал кухаря" vertex="1">
+          <mxGeometry height="60" width="240" x="206" y="557" as="geometry" />
+        </mxCell>
+        <mxCell id="_7SHaLhwpIQuwgZYXqGs-5" edge="1" parent="1" style="edgeStyle=none;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;endArrow=open;endFill=0;strokeColor=#000000;rounded=0;" target="_7SHaLhwpIQuwgZYXqGs-4">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="618" y="300" as="sourcePoint" />
+            <mxPoint x="604" y="767" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

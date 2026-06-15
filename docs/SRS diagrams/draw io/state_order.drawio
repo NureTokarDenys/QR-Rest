@@ -1,0 +1,86 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="fig35" name="3.5 Стан замовлення">
+    <mxGraphModel dx="857" dy="471" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="700" background="#ffffff" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="start" parent="1" style="ellipse;html=1;fillColor=#000000;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="30" width="30" x="380" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="open" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAF2FB;strokeColor=#4C7BB0;" value="open" vertex="1">
+          <mxGeometry height="50" width="120" x="342" y="136" as="geometry" />
+        </mxCell>
+        <mxCell id="open_paid" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAF2FB;strokeColor=#4C7BB0;" value="open_paid" vertex="1">
+          <mxGeometry height="50" width="120" x="170" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="cancelled" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAF2FB;strokeColor=#4C7BB0;" value="cancelled" vertex="1">
+          <mxGeometry height="50" width="120" x="510" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="completed_cash" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAF2FB;strokeColor=#4C7BB0;" value="completed_cash" vertex="1">
+          <mxGeometry height="50" width="150" x="20" y="438" as="geometry" />
+        </mxCell>
+        <mxCell id="completed_epay" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EAF2FB;strokeColor=#4C7BB0;" value="completed_epay" vertex="1">
+          <mxGeometry height="50" width="150" x="320" y="420" as="geometry" />
+        </mxCell>
+        <mxCell id="end" parent="1" style="ellipse;html=1;shape=endState;fillColor=#000000;strokeColor=#000000;" value="" vertex="1">
+          <mxGeometry height="30" width="30" x="380" y="610" as="geometry" />
+        </mxCell>
+        <mxCell id="s1" edge="1" parent="1" source="start" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;endFill=0;" target="open" value="Гість підтверджує замовлення&#xa;POST /orders → 201">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="s2" edge="1" parent="1" source="open" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;endFill=0;" target="open_paid" value="Гість оплачує замовлення на початку,&#xa;після чого його зміна неможлива">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="s3" edge="1" parent="1" source="open" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;endFill=0;" target="cancelled" value="Офіціант / адмін скасовує&#xa;або гість скасовує (всі страви у waiting)&#xa;або закриття столика (без оплати)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="s4" edge="1" parent="1" source="open_paid" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;endFill=0;" target="completed_cash" value="Офіціант закриває столик&#xa;(paymentMethod = cash)">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="s5" edge="1" parent="1" source="open_paid" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;endFill=0;" target="completed_epay" value="Офіціант закриває столик&#xa;(paymentMethod = epay)">
+          <mxGeometry relative="1" x="0.2986" y="-31" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="s6" edge="1" parent="1" source="completed_cash" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;endFill=0;" target="end" value="Table → free">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="95" y="534" />
+              <mxPoint x="395" y="534" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="s7" edge="1" parent="1" source="completed_epay" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;endFill=0;" target="end" value="Table → free">
+          <mxGeometry relative="1" x="-0.5827" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="s8" edge="1" parent="1" source="cancelled" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;endFill=0;" target="end" value="Table → free">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="570" y="625" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="MPWdlfoOED2tjhTfGnJJ-2" edge="1" parent="1" source="open" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;endFill=0;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.75;entryY=0;entryDx=0;entryDy=0;" target="completed_epay" value="Всі страви були подані, клієнт&amp;nbsp;&lt;div&gt;оплачує замовлення за допомогою liqpay&lt;/div&gt;">
+          <mxGeometry relative="1" x="-0.2719" as="geometry">
+            <mxPoint as="offset" />
+            <mxPoint x="460" y="289" as="sourcePoint" />
+            <mxPoint x="565" y="395" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="MPWdlfoOED2tjhTfGnJJ-4" edge="1" parent="1" source="open" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;endFill=0;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.25;entryY=0;entryDx=0;entryDy=0;" target="completed_cash" value="Всі страви були подані, клієнт&amp;nbsp;&lt;div&gt;оплачує замовлення готівкою&lt;/div&gt;">
+          <mxGeometry relative="1" x="0.0946" y="-2" as="geometry">
+            <mxPoint as="offset" />
+            <Array as="points">
+              <mxPoint x="372" y="236" />
+              <mxPoint x="57" y="236" />
+            </Array>
+            <mxPoint x="170" y="267" as="sourcePoint" />
+            <mxPoint x="171" y="501" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
