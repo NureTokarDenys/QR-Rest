@@ -1,0 +1,1028 @@
+================================================================================
+  QR REST — COMPREHENSIVE PROJECT SUMMARY
+  Updated: 2026-05-28
+================================================================================
+
+PROJECT OVERVIEW
+────────────────
+QR-based restaurant management system. Guests scan a QR code at the table,
+browse the menu, customise dishes, place orders and track order status in
+real time. Staff (waiters, cooks, admins) manage orders via a separate staff
+interface. Built as a SPA on a Node.js / Express backend with MongoDB.
+
+REPOSITORY LAYOUT (workspace root)
+──────────────────────────────────
+QR Rest/         React frontend (Vite SPA)
+QR Rest API/     Node.js / Express / MongoDB backend
+SRS/             Software-requirements specification
+SRS diagrams/    Use-case / sequence / ER diagrams
+docs/            Supplementary product / engineering docs
+project_summary.txt  ← this file
+
+TECH STACK
+──────────
+Frontend:  React 18, Vite 6, React Router v6, i18next + react-i18next
+HTTP:      Axios with auth/refresh/language interceptors
+Real-time: Single global WebSocket owned by AppContext; useWebSocket hook is
+           a thin shared-listener wrapper (no per-page sockets)
+Styling:   CSS Modules + global CSS variables (light/dark via data-theme)
+Icons:     react-icons — Material Design (Md…) naming
+PDF:       jsPDF v4 + html2canvas (PdfGenerator → direct file download)
+QR:        qrcode library
+Build:     Vite — `npm start` (dev), `npm run build` (prod), `npm run preview`
+
+Backend tech: Express 4, Mongoose 9, MongoDB 7, JWT (jsonwebtoken),
+              passport-google-oauth20, ws (WebSocket), bcrypt, multer,
+              AWS SDK v2 (S3 uploads), Resend (@react-email render → email),
+              pdfkit, qrcode, winston, helmet, express-rate-limit,
+              express-mongo-sanitize, sanitize-html, mongodb-memory-server
+              (test fixture).
+
+FRONTEND FOLDER STRUCTURE (QR Rest/src/)
+────────────────────────────────────────
+App.jsx, index.jsx, App.css, global.css
+api/           HTTP client + per-domain API modules (11 files)
+assets/        Static images (dish photos, logos)
+components/
+  client/      Client-facing components (20 dirs)
+  staff/       Staff-facing components (32 dirs)
+  *            Shared components (ConfirmDialog, DevToolbar, Dropdown,
+               FallbackMark, HttpErrorToast, InputField, Logo,
+               PremiumCelebrationModal, PrimaryButton, ProtectedRoute,
+               RequirePlan, SearchBar, SecondaryButton, UpgradeModal,
+               WsStatusBanner, WsStatusChip)
+constants/     mainConstants.js (PDF templates, font stacks, etc.)
+context/       9 React context providers (see STATE MANAGEMENT)
+data/          Local mock/seed data
+hooks/         useMenu, useNotificationSound, useOnlineStatus, usePlan, useSession, useWebSocket
+i18n/          index.js, langs.js, useLang.js + locales/
+  locales/
+    en/
+      client/  20 namespace JSON files
+      staff/   15 namespace JSON files
+    ua/        identical layout (UA is the SOURCE language)
+pages/
+  client/      Guest/user-facing pages (14)
+  staff/       Staff-facing pages (16)
+  onboarding/  Restaurant-owner registration flow (4)
+  Login, Forbidden, OAuthCallback (top-level)
+utils/         menuDiff.js, offlineOrderQueue.js
+
+BACKEND FOLDER STRUCTURE (QR Rest API/src/)
+───────────────────────────────────────────
+config/        aws, database, i18n, jwt, logger, passport
+middleware/    auth, errorHandler, httpLogger, rateLimiter, rbac, requestId,
+               requirePlan, restaurantParam, validate
+models/        23 Mongoose models (see DATA MODEL)
+routes/        auth, health, onboarding, user, restaurants, qr, scoped,
+               menu, orders, payments, paymentWebhook, subscriptions,
+               subscriptionWebhook, reviews, notifications
+  admin/       analytics, auditLog, menu, restaurant, reviews, staff,
+               tables, translate, translations
+  kitchen/     extras, orders, stoplist
+  waiter/      calls, orders, tables
+services/      auditService, emailService, encryptionService, linkNonceService,
+               liqpayService, notificationService, orderService, sessionService,
+               translationService, wsService,
+               i18nOrderEnricher  (injects name_en onto order items + nested
+                 ingredients / addons / component-group choices),
+               i18nFlatten        (flattens a doc's translations object into
+                 flat name_en / description_en / weight_en fields)
+scripts/       db-seed.js (v6), db-backup, db-restore, fix-admin-roles
+
+================================================================================
+USER ROLES & ACCESS
+================================================================================
+
+guest         — Anonymous user at a table (session via QR scan)
+                Routes: /menu, /category/:id, /dish/:id, /cart, /confirm,
+                        /order-status[/:orderId], /profile, /order-history,
+                        /restaurant-reviews
+
+waiter        — Table service staff
+                Routes: /staff/map, /staff/table/:id, /staff/orders,
+                        /staff/order/:id, /staff/settings
+
+cook          — Kitchen staff
+                Routes: /staff/cooking, /staff/orders, /staff/order/:id,
+                        /staff/menu (+ category/new, category/:id, dish/new,
+                        dish/:id, pdf), /staff/extras
+                        (+ /:type/new, /:type/:id), /staff/settings
+
+waiter_cook   — Combined role (union of waiter + cook routes,
+                plus /staff/map and /staff/menu)
+
+admin         — Full access to all staff routes plus:
+                /staff/analytics (RequirePlan — premium only)
+                /staff/restaurant-settings
+                /staff/staff
+                /staff/reviews (RequirePlan — premium only)
+
+root_admin    — First admin created during onboarding. Treated as `admin`
+                by ProtectedRoute (the route guard expands ['admin'] to
+                ['admin','root_admin']). Cannot be deactivated or have
+                role changed by other admins.
+
+ProtectedRoute (with the convenience wrapper <Guard>) enforces role checks
+and redirects unauthorised users to /forbidden?required=…&from=….
+ClientOnlyRoute redirects authenticated staff users back to /staff/map so
+client URLs never render staff inadvertently.
+
+================================================================================
+FREEMIUM MODEL
+================================================================================
+
+PLAN FIELD (backend)
+  Restaurant.plan: 'free' | 'premium'  (default: 'free')
+  Exposed in: public /restaurants listing, /qr/:shortCode response,
+              /:restaurantId/info response
+
+BACKEND GATING — requirePlan middleware
+  File: QR Rest API/src/middleware/requirePlan.js
+  Usage: router.post('/route', requirePlan('premium'), handler)
+  Error response on mismatch:
+    { error: { code: 'PLAN_REQUIRED', requiredPlan, currentPlan }, meta: {} }
+  Applied to (routes/):
+    All /admin/analytics routes                — premium only
+    All /admin/reviews routes                  — premium only
+    POST /admin/translations/auto-translate    — premium only
+    All /admin/translate routes                — premium only
+    POST /reviews/restaurant                   — premium only (guests)
+    POST /reviews/dish                         — premium only (guests)
+  LiqPay order payments (POST /:restId/payments/initiate) are gated by
+  whether the restaurant has saved its own LiqPay keys (PAYMENT_NOT_CONFIGURED
+  if not), independent of the requirePlan middleware.
+
+BACKEND LIMITS — PLAN_LIMIT_REACHED error
+  Code: 'PLAN_LIMIT_REACHED', fields: requiredPlan, limitType, limit
+  Applied to:
+    POST /admin/menu/categories       — free limit: 5 categories
+    POST /admin/menu/items            — free limit: 50 items
+    POST /admin/menu/items/:id/image  — free limit: 3 images per item
+    POST /admin/staff                 — free limit: 3 staff accounts
+
+FREE PLAN LIMITS SUMMARY
+  Categories:      5
+  Menu items:      50
+  Images per dish: 3
+  Staff accounts:  3   (admin counts toward the limit)
+  Payment:         cash only (online via LiqPay needs setup + premium)
+  Reviews:         disabled for guests and admin
+  Analytics:       disabled
+  PDF generator:   page accessible, modal-gated to premium
+  Auto-translate:  disabled
+
+PREMIUM PLAN
+  All limits removed. All features unlocked.
+  Single source of truth for pricing lives on the backend
+  (routes/subscriptions.js: PREMIUM_PRICE = 800 UAH / month). UpgradeModal
+  fetches the live price via GET /:restId/subscriptions/price.
+  POST /:restId/subscriptions/initiate creates a LiqPay subscribe payment.
+
+FRONTEND — PlanContext (src/context/PlanContext.jsx)
+  Thin wrapper around StaffDataContext.restaurant — no separate fetch:
+    const { restaurant } = useStaffData();
+    plan = restaurant?.plan || 'free'; planLoading = restaurant === null;
+  Exposed: { plan, isPremium, planLoading }
+  This means plan switches via WS (RESTAURANT_UPDATED) propagate instantly.
+  Hook: usePlanContext() — raw context access.
+
+FRONTEND — AppContext plan tracking (client-side)
+  AppContext.restaurantPlan — mirrors plan for guest/client flows
+  Sources:
+    • QR scan (initSession): reads restaurantPlan from /qr response
+    • Restaurant info restore: reads plan from /:restId/info
+    • selectRestaurant (picker): reads plan from restaurant listing
+  Persisted to: localStorage key 'restaurantPlan'
+
+FRONTEND — usePlan hook (src/hooks/usePlan.js)
+  Universal hook used by both staff and client pages.
+    const { plan, isPremium, isFree } = usePlan();
+  Resolution order: PlanContext → AppContext.restaurantPlan → 'free'
+
+FRONTEND — RequirePlan route guard (src/components/RequirePlan/index.jsx)
+  Wraps a route element; renders null while plan is loading, redirects free
+  users to /staff/map. Applied in App.jsx to /staff/analytics and
+  /staff/reviews so the pages never even mount on the free plan.
+
+FRONTEND — UpgradeModal component (src/components/UpgradeModal/)
+  Props: open, onClose, reason (optional i18n key), ns (default 'components')
+  Shows: premium badge, title, optional reason text, 7 feature bullets,
+         live price from GET /subscriptions/price, CTA → LiqPay checkout.
+  i18n keys in components namespace:
+    upgrade_badge, upgrade_title, upgrade_features_label,
+    upgrade_feature_unlimited_menu, upgrade_feature_unlimited_staff,
+    upgrade_feature_liqpay, upgrade_feature_analytics, upgrade_feature_reviews,
+    upgrade_feature_pdf, upgrade_feature_translate,
+    upgrade_cta, upgrade_close,
+    upgrade_limit_categories, upgrade_limit_items,
+    upgrade_limit_images, upgrade_limit_staff
+
+FRONTEND — Gated pages / features
+  Analytics (/staff/analytics)
+    → RequirePlan redirects on the route layer (no page render).
+  Reviews   (/staff/reviews)
+    → RequirePlan redirects on the route layer.
+  PDF Generator (/staff/menu/pdf)
+    → UpgradeModal opens immediately for free plan.
+  Auto-translate button (DishEdit, ExtrasEdit, RestaurantSettings)
+    → UpgradeModal opens on click for free plan.
+  Staff Management — add staff button
+    → UpgradeModal when staff.length >= 3 on free plan.
+  Menu Management — add dish/category buttons
+    → UpgradeModal when at limit; limit chips shown in header.
+  OrderStatus — LiqPay payment button
+    → hidden entirely for free-plan restaurants.
+  Sidebar nav (Analytics, Reviews)
+    → MdLock badge appended when on free plan; clicking the locked item
+      opens UpgradeModal instead of navigating.
+
+================================================================================
+MULTI-LANGUAGE SYSTEM
+================================================================================
+
+FRONTEND LANGUAGE CODES
+  'ua' → maps to ISO 'uk' when sent to backend (Accept-Language header)
+  'en' → stays 'en'
+  Backend also supports pl / de / fr / cs / sk (entries commented out in
+  langs.js until matching locale JSONs are added).
+  Helper: toApiLang('ua') → 'uk',  fromApiLang('uk') → 'ua'
+  SUPPORTED_LANGS[0] is the SOURCE language (Ukrainian = 'ua')
+
+I18N SETUP (src/i18n/index.js)
+  i18next with react-i18next. Language stored in localStorage 'lang'.
+  Namespaces loaded per page (e.g. 'menu', 'staffSettings', 'cooking',
+  'pdfGenerator', 'components', …).
+  Restaurant default language read from localStorage 'restaurantDefaultLang'.
+
+KEY HELPERS (src/i18n/langs.js)
+  fieldFor(base, lang)
+    Returns the correct field key for a given language.
+    fieldFor('name', 'ua') → 'name'       (source lang = no suffix)
+    fieldFor('name', 'en') → 'name_en'
+    Used everywhere multilingual form fields need to map to an object key.
+
+  emptyI18n(...bases)
+    Creates a blank multilingual object for form initialization.
+    emptyI18n('name', 'description') →
+      { name: '', name_en: '', description: '', description_en: '' }
+
+  SUPPORTED_LANGS — array of { code, label, flag, apiCode } objects
+  SOURCE_LANG — first entry, currently 'ua'
+
+DATABASE TRANSLATION STRUCTURE
+  Two storage patterns exist across the data model:
+
+  Pattern A — flat fields (read directly by the frontend):
+    { name: "Борщ з пампушками",   name_en: "Borsch with buns",
+      description: "Класичний...", description_en: "Classic..." }
+
+  Pattern B — translations object (driven by setTranslationEntry):
+    { translations: {
+        uk: { name: { value: "...", isManual: true } },
+        en: { name: { value: "...", isManual: false } }
+      }
+    }
+  Backend uses 'uk' as the ISO code for Ukrainian in the translations object.
+  Auto-translation is scheduled by translationService.scheduleAutoTranslate
+  on every admin mutation (premium plan only) and writes Pattern B.
+
+  IMPORTANT — which entities store which pattern (there is NO automatic
+  Pattern B → Pattern A sync; do not assume flat name_en always exists):
+    • Top-level docs — MenuItem, Category, Ingredient, AddOn, ComponentGroup,
+      ComponentOption — store ONLY `name` + `translations` (Pattern B). They do
+      NOT have a flat top-level `name_en`.
+    • MenuItem EMBEDDED sub-schemas (ingredients[], addons[],
+      componentGroups[], options[]) DO carry flat `name` + `name_en`.
+    • OrderItem snapshots freeze ONLY the source-language `name`
+      (menuItemName, excludedIngredients[].name, addons[].name,
+      componentGroupChoices[].groupName/optionName) — no `_en`.
+
+  Because of the above, endpoints that return order / menu / extras data must
+  EXPLICITLY surface `name_en`. Two backend helpers do this so the frontend
+  always receives flat name + name_en:
+    • i18nOrderEnricher.enrichOrderItems(items) — joins MenuItem (by id) and
+      rewrites each item to { menuItemId:{_id,name,name_en}, excludedIngredients
+      [{_id,name,name_en}], addons[...name_en], componentGroupChoices
+      [{ groupId:{_id,name,name_en}, optionId:{_id,name,name_en} }] }.
+      Used by GET /kitchen/orders, GET /orders/:id, create-order and
+      add-items responses.
+    • i18nFlatten.flattenTranslations(doc, fields) — copies
+      translations.<lang>.<field>.value into flat <field>_<lang> keys.
+      Used by GET /admin/menu/categories, /items, /items/:id and the
+      /admin/menu/extras summary.
+  /admin/tables already inlined this join for the table-map dish list.
+
+RENDERING MULTILINGUAL TEXT IN THE UI
+  Preferred: the useLocalField() hook (src/i18n/useLang.js) — returns a
+  localiser bound to the active i18next language:
+    const local = useLocalField();
+    local(dish, 'name')        // dish.name (ua) | dish.name_en (en) | source
+  It re-renders reactively on language change (built on useTranslation), so NO
+  data refetch is needed — the backend already ships both name and name_en in a
+  single response. Do NOT re-fetch order/menu data just because the language
+  changed.
+  Lower-level alternative when you only need the key:
+    const key  = fieldFor('name', i18n.language);   // 'name' | 'name_en'
+  All staff order/menu pages — Cooking, WaiterOrders, OrderDetail, TableDetail,
+  MenuManagement, ExtrasManagement, Analytics (+ KanbanCard, TableDishList,
+  MenuDishRow, TopDishRow, TopCategoryItem) — now use useLocalField().
+  Serving-group names are intentionally NOT localised (shown verbatim).
+
+ACCEPT-LANGUAGE HEADER
+  Axios request interceptor (api/client.js) auto-sets Accept-Language using
+  toApiLang(lang) so the backend returns translated content for endpoints
+  that support per-request localisation.
+
+================================================================================
+API MODULES (frontend — QR Rest/src/api/)
+================================================================================
+
+client.js     — Axios instance
+  Base URL: VITE_API_URL env or '/api'
+  withCredentials: true (so Set-Cookie e.g. google_link_nonce is retained)
+  Request interceptors:
+    • Authorization: Bearer <accessToken>     (when present)
+    • X-Session-Token: <sessionToken>         (guest QR sessions)
+    • Accept-Language: uk | en | …            (maps 'ua' → 'uk')
+  Response interceptors:
+    • 401 → token refresh (queues inflight requests, retries on success)
+    • dispatches 'api:error' CustomEvent → caught by HttpErrorToast
+    • suppresses known non-error codes (RESTAURANT_NOT_FOUND)
+    • skips refresh on /auth/login & /auth/register
+
+auth.js       — Authentication (16 functions)
+  login, register, logout, refreshToken, getMe, updateProfile,
+  changePassword, setPassword (first-time pw for Google-only accounts),
+  forgotPassword, resetPassword, requestEmailChange, confirmEmailChange,
+  deleteAccount, initiateGoogleOAuth, unlinkGoogle, initiateGoogleLink
+
+orders.js     — Order operations (25 functions)
+  createOrder, getOrder, getMyOrders,
+  cancelOrder, closeOrder, voidOrder (alias for cancelOrder),
+  addOrderItems, addGuestOrderItems,
+  cancelGuestOrder, cancelGuestServingGroup, cancelGuestOrderItem,
+  updateOrderItem, deleteOrderItem,
+  getTableOrders, waiterCall, waiterCallCash,
+  initiatePayment, checkCardAvailable, revertPayment,
+  getWaiterCalls, resolveWaiterCall,
+  getOrderNotifications, markNotificationsRead,
+  openTableRecovery, createWaiterOrder
+
+menu.js       — Public menu (3 functions)
+  getMenu(restId), getDishDetail(itemId, restId), searchMenu(q, restId)
+
+restaurants.js (2 functions)
+  getRestaurants(q, page, limit) → public listing (publicId, slug, address…)
+  getRestaurantInfo(publicId)    → { publicId, name, name_en,
+                                      defaultLanguage, enabledLanguages, plan }
+
+qr.js         (1 function)
+  scanQR(shortCode) → { sessionToken, tableId, tableNumber, restaurantId,
+                        restaurantName, tableHasActiveOrder, restaurant,
+                        defaultLanguage, enabledLanguages, restaurantPlan }
+
+admin.js      — Admin CRUD (53 functions). Highlights:
+  Restaurant:    getRestaurant, updateRestaurant, getLiqpayStatus,
+                 saveLiqpayKeys, uploadRestaurantLogo
+  Staff:         getStaff, createStaff, updateStaffRole,
+                 deactivateStaff, activateStaff, resetStaffPassword
+  Reviews:       getAdminReviews, deleteAdminReview              (premium)
+  Tables:        getTables, createTable, updateTable, deleteTable,
+                 reorderTables
+  Categories:    getCategories, createCategory, updateCategory,
+                 uploadCategoryImage, setCategoryImages
+  Extras (master catalog):
+                 getExtras,
+                 search/create/update/delete/setAvailability for
+                 Ingredients, Addons, ComponentGroups,
+                 removeExtraRelation(type, extraId, menuItemId)
+  Menu items:    getAdminMenuItem, getMenuItems (limit=9999),
+                 createMenuItem, updateMenuItem, deleteMenuItem,
+                 uploadMenuItemImage, setMenuItemImages
+  Translation:   translateText                                   (premium)
+  Analytics:     getRevenue, getOrderStats, getPopularDishes,
+                 getTopCategories, exportAnalyticsCsv             (premium)
+
+kitchen.js    — Cook / kitchen operations (5 functions)
+  getKitchenOrders(view='order'|'group'), getStopList,
+  setEmbeddedItemAvailability,
+  updateGroupStatus(orderId, gId, status),
+  updateItemStatus(orderId, iId, status)
+
+reviews.js    (5 functions)
+  getRestaurantReviews(restId, page, limit) → { data, pagination, summary }
+  getDishReviews(menuItemId, restId, page, limit)
+  submitRestaurantReview(payload, restId)                         (premium)
+  submitDishReview(payload, restId)                               (premium)
+  getMyReviewsForOrder(orderId, restId)
+
+onboarding.js (2 functions)
+  registerRestaurant(payload) → POST /onboarding/register
+  confirmOnboarding(token)    → GET  /onboarding/confirm/:token
+
+subscriptions.js (2 functions)
+  initiateSubscription(restId)  → POST /:restId/subscriptions/initiate
+  getSubscriptionPrice(restId)  → GET  /:restId/subscriptions/price
+                                  → { amount, currency, periodicity }
+
+================================================================================
+BACKEND ROUTES (QR Rest API/src/routes/)
+================================================================================
+
+GLOBAL ROUTES (no restaurant context)
+  /health, /auth, /onboarding, /user, /restaurants, /qr
+
+RESTAURANT-SCOPED  (mounted under /api/:restaurantId via scoped.js)
+  GET  /info                — public restaurant info incl. plan
+  /menu                     — public menu (categories + items, dish detail,
+                              search)
+  /orders                   — order CRUD (create / list / patch / delete,
+                              guest-add, guest-cancel, waiter-call,
+                              waiter-call-cash, manual close via POST
+                              /:orderId/close, etc.)
+  /notifications/:orderId   — guest order notifications
+  /payments                 — LiqPay order payments (initiate, webhook)
+  /subscriptions            — Premium subscription (price, initiate, webhook)
+  /reviews                  — Restaurant + dish reviews (premium-gated POST)
+
+  Admin (/admin/…):
+    tables, menu, analytics, staff, restaurant, reviews, auditLog,
+    translate, translations
+
+  Waiter (/waiter/…):  orders, calls, tables
+  Kitchen (/kitchen/…): orders, stoplist, extras
+
+restaurantParam middleware resolves the 8-char :restaurantId publicId →
+MongoDB ObjectId on req.restaurantId. requireSameRestaurant middleware
+guards admin/waiter/kitchen routes so a staff user can only touch their own
+restaurant.
+
+================================================================================
+WEBSOCKET SYSTEM
+================================================================================
+
+CONNECTION LIFECYCLE
+  ONE shared WebSocket lives in AppContext (no per-page sockets). The
+  useWebSocket hook is now a thin wrapper that registers / unregisters a
+  listener on the global connection.
+
+  URL priority: VITE_WS_URL → swap http→ws from VITE_API_URL → same-origin
+                /ws.  Auth via querystring: ?token=<jwt>&session_token=<…>
+
+  Reconnection: max 5 retries, 3-second delay,
+                status: idle → connecting → connected → reconnecting → failed
+  Keepalive:    PING every 25 s → PONG response
+  Replay:       On reconnect sends REPLAY_REQUEST with last_event_id.
+                Server keeps a 10-minute per-room event queue (wsService.js).
+
+SUBSCRIPTION ROOMS
+  session:<sessionToken>       — guest client (subscribed on QR scan)
+  table:<tableId>              — table-level events (table card lookups)
+  restaurant:<restaurantId>    — staff users get all restaurant events
+                                 here (joined automatically on auth)
+  kitchen:<restaurantId>       — cook / kitchen events (ORDER_NEW,
+                                 ORDER_UPDATED, ORDER_COMPLETED,
+                                 DISH_STATUS_UPDATED, GROUP_STATUS_UPDATED…)
+  waiter:<restaurantId>        — waiter-specific events (ORDER_UPDATED,
+                                 ORDER_COMPLETED, WAITER_CALL, WAITER_CALL_CASH,
+                                 WAITER_CALL_RESOLVED…)
+
+SERVER → CLIENT EVENTS
+  ORDER_NEW, ORDER_UPDATED, ORDER_VOID, ORDER_CANCELLED, ORDER_COMPLETED,
+  ORDER_ITEMS_ADDED, DISH_STATUS_UPDATED, GROUP_STATUS_UPDATED,
+  TABLE_CREATED, TABLE_UPDATED, TABLE_DELETED, TABLES_REORDERED,
+  TABLE_STATUS_UPDATED,
+  MENU_UPDATED, EXTRAS_UPDATED, STAFF_CREATED, STAFF_UPDATED,
+  RESTAURANT_UPDATED,
+  WAITER_CALL, WAITER_CALL_CASH, WAITER_CALL_RESOLVED,
+  PAYMENT_COMPLETED,
+  NOTIFICATION_NEW           (guest order notifications)
+  PONG                       (keepalive latency probe)
+
+NOTIFICATION_NEW PAYLOAD
+  { type, title_uk, title_en, body_uk, body_en, data: {} }
+  NotificationType: dish_status_updated | order_cancelled | items_added |
+                    payment_completed_cash | payment_completed_epay
+
+CLIENT-SIDE WS LISTENERS
+  AppContext: addWsListener(fn) / removeWsListener(fn) / wsSubscribe(room)
+  Pages register custom handlers for specific events; the AppContext routes
+  every inbound message to every registered listener.
+
+================================================================================
+STATE MANAGEMENT (QR Rest/src/context/ — 9 contexts)
+================================================================================
+
+AppContext.jsx   (~1200 lines — the main application state)
+  Cart:
+    cartItems[], cartServingGroups[], addToCart, updateCartItem,
+    removeFromCart, updateQuantity, moveToGroup, clearCart
+  Order lifecycle:
+    currentOrder       — active order object (real-time via WS)
+    editingOrder       — order being edited (add-more-dishes mode)
+    hasActiveOrder     — boolean derived from currentOrder
+    startEditingOrder(order), submitOrder(payload)
+  Order restoration on login (3-strategy fallback):
+    Strategy 0: localStorage 'activeOrder' cache (instant)
+    Strategy 1: GET /orders/:orderId (known order ID)
+    Strategy 2: GET /user/orders scan (unknown order)
+    normalizeApiOrder() converts the nested API shape
+      { order, servingGroups, items } to a flat internal shape.
+  Notifications (client-side):
+    notifications[], unreadCount, markAllRead()
+  Restaurant metadata:
+    restaurantId, restaurantName, restaurantLangs[], restaurantDefaultLang
+    restaurantPlan ('free' | 'premium') — synced from QR scan and /info
+    setRestaurantMeta({ name, nameLang, defaultLanguage, enabledLanguages })
+  Global WS:
+    wsStatus, wsLatency, wsSubscribe(room),
+    addWsListener(fn), removeWsListener(fn)
+  Session:
+    sessionToken, tableId, tableNumber
+    initSession(qrData)             — called after QR scan
+    selectRestaurant(id, name, meta)— meta.plan sets restaurantPlan
+  localStorage keys touched:
+    'sessionToken', 'tableId', 'tableNumber',
+    'restaurantId', 'restaurantName', 'restaurantName_en',
+    'orderId', 'activeOrder', 'cartState',
+    'restaurantLangs', 'restaurantDefaultLang',
+    'orderHistory', 'restaurantPlan', 'pendingOrderQueue'
+
+AuthContext.jsx  (~155 lines)
+  State: accessToken, user, isAuthenticated, isStaff
+  user object: { _id, name, email, role, googleId, hasPassword, restaurantId }
+  Methods: login, loginAsGuest, loginFromOAuth, updateProfile,
+           changePassword, refreshUser, deleteAccount, logout
+  On mount: re-fetches /auth/me when an access token exists.
+  localStorage: 'accessToken', 'refreshToken', 'user'
+
+StaffDataContext.jsx (~170 lines)
+  Single source for staff-side cached resources. Lazy-loaded via ensure*()
+  helpers and kept fresh via WS invalidation map.
+  Resources:
+    tables, categories, menuItems, staff, restaurant, extras, liqpay,
+    kitchenOrders (+ setKitchenOrders)
+  API: ensure*, refresh* per resource.
+  Restaurant document loads eagerly on auth (needed for PlanContext + sidebar
+  locked-nav decisions).
+  Refresh coalescing: an in-flight refresh for a resource is reused; if a WS
+  event lands while one is running, a `<key>:queued` flag schedules exactly one
+  follow-up fetch on completion so mid-flight events are never dropped.
+
+PlanContext.jsx  (~25 lines)
+  Pure derivation from StaffDataContext.restaurant.plan. Exposes
+  { plan, isPremium, planLoading }. Hook: usePlanContext().
+
+StaffNotificationsContext.jsx  (~110 lines)  — IMPLEMENTED
+  Subscribes to the global WS via useWebSocket (enabled for staff only).
+  Maintains an in-memory notifications array (oldest first), plays the
+  notification sound, exposes:
+    notifications, unreadCount, markRead, markAllRead, clearAll,
+    fireTestNotification (cycles ORDER_NEW → ORDER_ITEMS_ADDED → WAITER_CALL →
+    WAITER_CALL_CASH → PAYMENT_COMPLETED → ORDER_VOID → ORDER_CANCELLED for the
+    DevToolbar 🔔 button).
+  ROLE_EVENTS map decides which WS event types each role receives:
+    cook        : ORDER_NEW, ORDER_ITEMS_ADDED
+    waiter      : ORDER_NEW, WAITER_CALL, WAITER_CALL_CASH
+    waiter_cook : ORDER_NEW, ORDER_ITEMS_ADDED, WAITER_CALL, WAITER_CALL_CASH
+    admin       : everything above + ORDER_VOID, ORDER_CANCELLED,
+                  PAYMENT_COMPLETED
+  ORDER_ITEMS_ADDED notifies cooks/waiter_cooks/admins when a guest appends
+  dishes to an open order (title key: notif_order_items_added). The Cooking
+  board also handles ORDER_ITEMS_ADDED / ORDER_CANCELLED / ORDER_VOID /
+  ORDER_COMPLETED in its WS handler for instant in-place updates.
+
+MenuContext.jsx  (~315 lines)
+  Client-side menu cache.  localStorage keys 'menuCache_v1' (menu list) and
+  'menuDishCache_v1' (per-dish details). Both keyed by (restaurantId, lang).
+  Menu stale-time: 5 min; per-dish stale-time: 3 min.
+  Exposes: categories, loading, error, fetchDish(id), fetchFreshDish(id),
+           refresh()
+
+ThemeContext.jsx
+  State: theme ('light' | 'dark'); sets data-theme on <html>.
+  localStorage: 'theme'
+
+ClientToastContext.jsx
+  showToast(message), hideToast(). Single toast, 3 s auto-dismiss.
+
+StaffLayoutContext.jsx
+  panelOpen, togglePanel(), closePanel(). Controls the right-side
+  notifications panel in StaffShell.
+
+usePlan hook (src/hooks/usePlan.js)
+  Universal hook used by both staff and client pages.
+  Tries PlanContext first (staff), then AppContext.restaurantPlan, then 'free'.
+
+PROVIDER NESTING (App.jsx)
+  AuthProvider
+    AppProvider
+      StaffDataProvider
+        PlanProvider
+          MenuProvider
+            BrowserRouter
+              ThemeProvider
+                ClientToastProvider
+                  StaffNotificationsProvider
+                    HttpErrorToast + NotificationToast + DevToolbar + Routes
+
+================================================================================
+STYLING
+================================================================================
+
+APPROACH
+  CSS Modules for component / page-scoped styles (*.module.css).
+  Global CSS variables in global.css for theme-switchable values.
+
+THEME SYSTEM
+  <html data-theme="light"> or <html data-theme="dark">
+  Both [data-theme="light"] (== :root) and [data-theme="dark"] selectors
+  define the full var set in global.css.
+
+COMMON CSS VARIABLES (global.css)
+  --bg-color, --surface-color, --logo-color
+  --primary-text, --secondary-text, --primary-text-inverted,
+  --secondary-text-inverted, --menu-primary-text, --menu-secondary-text
+  --separator-color, --icon-color, --border, --chevron-color
+  --accent-color (#007aff), --primary-btn-active (#1d7afc), …
+  --danger-color, --danger-bg, --danger-text, --danger-soft-*
+  --warn-bg, --warn-border, --warn-text, --warn-text-soft, --warn-accent
+  --success-bg, --success-text, --info-bg, --info-text
+  --skel-base, --skel-peak (skeleton shimmer)
+  Status palettes for: order-status / kanban / badge / addon / excluded /
+  choice / waiter-notification / order-notification
+  --dropdown-bg, --dropdown-border, --dropdown-shadow, --trigger-*
+  --rating-text (#f5a623)
+
+PRINT MODE — global.css `@media print` keeps an old `body.pdf-printing`
+fallback (no longer triggered now that PdfGenerator downloads directly via
+jsPDF, but the rule is inert and harmless).
+
+STAFF SHELL LAYOUT
+  StaffShell wraps every staff page: sidebar + top header (bell, language,
+  theme, profile) + content + collapsible right panel.
+
+CLIENT LAYOUT
+  Each client page is self-contained: Header + content + Footer.
+
+================================================================================
+PAGES REFERENCE
+================================================================================
+
+CLIENT PAGES (/pages/client/) — 14
+  Menu/             Restaurant menu, categories, dish cards, search bar
+  Category/         Single category dish list
+  DishDetail/       Dish customisation: excluded ingredients, addons,
+                    component group choices, quantity, comment
+  Cart/             Shopping cart with serving groups. Auto-enters
+                    "add to order" mode when an active order exists.
+  ConfirmOrder/     Order review, payment-method selection
+  OrderStatus/      Real-time dish status (WS-driven). Notifications panel
+                    on the bell. LiqPay button hidden for free plan.
+  Profile/          Name, email, password, Google OAuth, language, theme,
+                    sound toggle, logout, delete account (guest only)
+  OrderHistory/     Past orders
+  RestaurantReviews/ Restaurant ratings, submit review (premium only)
+  RestaurantPicker/ Browse restaurants without QR; passes plan to AppContext
+  QrLanding/        QR entry — calls initSession, redirects to /menu
+  ForgotPassword/   Password-reset request
+  Register/         User signup
+  ConfirmEmailChange/ Email-change confirmation handler
+
+STAFF PAGES (/pages/staff/) — 16
+  TableMap/         Floor plan / table status grid. Tables come from the shared
+                    StaffDataContext cache, kept fresh via WS (no polling).
+  TableDetail/      Table's active order, inline dish edits (DishEditModal),
+                    item delete (ConfirmDialog), void, pay-cash / complete-order
+                    button (green when all served, amber otherwise; ConfirmDialog),
+                    waiter calls, QR block, recovery-window button. Admin/root_admin
+                    bypass the waiting-status restriction for edit and delete.
+                    Uses useLocalField() for multilingual display.
+  WaiterOrders/     All active orders queue, waiter-call alerts, void.
+                    Uses useWebSocket + useLocalField().
+  Cooking/          Kanban (waiting → cooking → ready) + table view.
+                    Uses useWebSocket + useLocalField(); instant in-place WS
+                    handling of items-added / cancel / void / complete.
+  OrderDetail/      Single order, item statuses, served confirmation, inline
+                    dish edits (DishEditModal), item delete (ConfirmDialog),
+                    pay-cash / complete-order button (ConfirmDialog). Admin /
+                    root_admin bypass waiting-status restrictions for edit/delete
+                    and can advance dish status on open_paid orders.
+                    Uses useLocalField() for dish / ingredient / addon names.
+  MenuManagement/   Category/dish browser, availability toggles.
+                    Uses useLocalField(). Free plan: limit chips + blocks.
+  CategoryEdit/     Create/edit category (LangTabs + fieldFor()).
+  DishEdit/         Create/edit dish with ingredients, addons, components.
+                    Auto-translate button gated behind premium.
+  ExtrasManagement/ Ingredients / addons / componentGroups with availability.
+                    Uses useLocalField(); search matches name + name_en.
+  ExtrasEdit/       Create/edit a single extra item.
+  PdfGenerator/     Multi-page PDF menu generator.
+                    Renders an off-screen measurement layer to compute true
+                    page breaks; jsPDF + html2canvas downloads `menu.pdf`
+                    directly (no print dialog). Free plan: UpgradeModal on
+                    page load.
+  Analytics/        Sales dashboard. Route-gated by RequirePlan. Top dishes &
+                    top categories localise via useLocalField (the analytics
+                    aggregation returns name + name_en directly).
+  StaffSettings/    Name edit, email change (ConfirmDialog → sheet),
+                    password reset, Google OAuth link, language, theme,
+                    sound notifications toggle.
+  RestaurantSettings/ Restaurant config (name, languages, logo, LiqPay keys).
+                    Header has Save + Cancel buttons (same CSS-variable styling
+                    as DishEdit / ExtrasEdit). Auto-translate button gated
+                    behind premium (UpgradeModal on free plan).
+  StaffManagement/  Create / deactivate staff, role assignment.
+                    Free plan: add button blocked at 3 staff.
+  ReviewsManagement/ Moderate guest reviews. Route-gated by RequirePlan.
+
+ONBOARDING PAGES (/pages/onboarding/) — 4
+  Landing/          Marketing landing page
+  Onboarding/       Restaurant-owner registration form
+  CheckEmail/       "Check email" confirmation screen
+  Confirm/          Token confirmation → creates restaurant + admin
+
+TOP-LEVEL PAGES (/pages/)
+  Login/, Forbidden/, OAuthCallback/
+
+================================================================================
+ORDER DATA MODEL (frontend representation)
+================================================================================
+
+Normalised order (after normalizeApiOrder()):
+  {
+    id, publicId,
+    tableId, tableNumber,
+    restaurantId, restaurantName, restaurantName_en,
+    restaurantPlan,                         // gates review UI
+    sessionToken, userId,
+    status: 'open' | 'open_paid' | 'cancelled' |
+            'completed_cash' | 'completed_epay',
+    paymentMethod: 'cash' | 'epay',
+    createdAt, updatedAt,
+    total,
+    servingGroups: [
+      { id, name, name_en, sortOrder, statusChangedAt }
+    ],
+    items: [
+      {
+        id, orderItemId,
+        name, name_en,                       // snapshot
+        price (unitPrice snapshot),
+        image,
+        quantity,
+        groupId,
+        status: 'waiting' | 'cooking' | 'ready' | 'served',
+        comment,
+        excludedIngredients: [{ sourceId, name, name_en }],
+        addons: [{ sourceId, addonId, name, name_en, quantity, unitPrice }],
+        componentGroupChoices:
+          [{ groupId, groupName, optionId, optionName }]
+      }
+    ]
+  }
+
+ServingGroup status transitions (kitchen):
+  waiting → cooking → ready          (cook via updateGroupStatus)
+  ready  → served                     (waiter via updateGroupStatus)
+
+DishStatus transitions: waiting → cooking → ready → served
+
+WaiterCall types:
+  'call'          — guest needs assistance
+  'cash_payment'  — guest wants to pay cash
+
+================================================================================
+COMPONENT OVERVIEW (selected highlights)
+================================================================================
+
+SHARED COMPONENTS
+  ProtectedRoute / ClientOnlyRoute   Role guards
+  RequirePlan                        Premium-only route guard
+  DevToolbar                         Dev-only floating action panel
+  ConfirmDialog                      Reusable portal modal (createPortal → document.body).
+                                   Props: open, title, message, confirmLabel,
+                                   cancelLabel, onConfirm, onCancel, danger (red btn).
+                                   Escape key closes. Body scroll locked while open.
+                                   Used for all cancellation / deletion confirmation
+                                   flows (order cancel, serving-group cancel, item
+                                   delete, manual order close).
+  InputField, PrimaryButton, SecondaryButton, Dropdown, SearchBar, Logo,
+  FallbackMark
+  HttpErrorToast                     Global api:error overlay
+  UpgradeModal                       Premium upsell
+  PremiumCelebrationModal            Post-upgrade confetti modal
+  WsStatusBanner / WsStatusChip      Live connection status indicators
+
+CLIENT COMPONENTS (20 dirs)
+  Header, Footer, MenuHeader, OrderBar,
+  DishCard, CategoryCard, CartItem, ConfirmOrderItem,
+  OrderStatusItem, OrderHistoryCard, OrderReviews, ReviewItem,
+  NotificationToast, Toast, PaymentSheet,
+  SettingsRow, SettingsSection, Skeleton,
+  Lightbox, OfflineBanner
+
+STAFF COMPONENTS (32 dirs)
+  StaffShell, StaffHeader, Sidebar, RightPanel, HeaderPopover
+  KanbanCard, KanbanColumn
+  ActiveOrderRow, TableMapItem, TableDishList, TableHistoryBlock,
+  TableQrBlock
+  MenuCategoryList, MenuDishRow, DishPreview, DishEditModal,
+  MenuPickerModal
+  AnalyticsMicro, MicroStat, TopCategoryItem, TopDishRow, ShiftStats
+  LangTabs, TextareaField, ReadonlyField, PhotoUpload, TranslateOverlay
+  NotificationItem, StaffNotificationToast
+  PdfMenuDish, PdfSettingItem, Skeleton
+
+================================================================================
+NOTIFICATIONS (CURRENT STATE)
+================================================================================
+
+CLIENT SIDE
+  AppContext.notifications[]      — loaded via getOrderNotifications(orderId)
+  AppContext.unreadCount          — derived
+  AppContext.markAllRead()        — PATCH /:rest/notifications/:order/read-all
+  WS event NOTIFICATION_NEW       — appended to notifications array
+  NotificationToast component     — floating banner on new WS notification
+  OrderStatus page                — notification list + bell badge
+
+STAFF SIDE  (IMPLEMENTED — formerly stub)
+  StaffNotificationsContext drives the bell badge and right panel.
+  Real WS subscription via useWebSocket; ROLE_EVENTS filters by role.
+  Plays the notification sound when a new entry arrives.
+  Right panel (StaffShell) renders NotificationItem rows from this context.
+  DevToolbar 🔔 button (`fireTestNotification`) injects mock events for
+  manual UX testing.
+
+SOUND NOTIFICATIONS
+  Toggle lives in StaffSettings (and Profile for client). State persisted
+  to localStorage under SOUND_KEY = 'soundNotifications'.
+  useNotificationSound hook plays /assets/notification_sound_1.mp3 only when
+  the toggle is on.
+
+================================================================================
+DEV TOOLBAR (src/components/DevToolbar/index.jsx)
+================================================================================
+
+Rendered in App.jsx only when import.meta.env.DEV is true.
+Positioned: centre-right of the screen (top: 50%, right: 12px).
+All seeded staff & guest passwords: '12345678'.
+
+Two-column grid — 5 rows of 2 buttons, then a 🔔 row and a Clear row:
+
+  Row 1 (guests):
+    G   → loginAsGuest() → /restaurants
+    G1  → login guest1@example.com → /menu
+
+  Row 2 (waiters):
+    WF  → login waiter1@borshchechok.ua → /staff/map     (free restaurant)
+    WP  → login waiter1@premium.ua      → /staff/map     (premium)
+
+  Row 3 (cooks):
+    CF  → login cook1@borshchechok.ua   → /staff/cooking (free)
+    CP  → login cook1@premium.ua        → /staff/cooking (premium)
+
+  Row 4 (admins):
+    AF  → login admin@borshchechok.ua   → /staff/map     (free)
+    AP  → login admin@premium.ua        → /staff/map     (premium)
+
+  Row 5 (utility):
+    LG  → cycle language (UA → EN → …)
+    TH  → toggle light / dark theme
+
+  🔔 (full-width amber) → fireTestNotification — cycles ORDER_NEW →
+       ORDER_ITEMS_ADDED → WAITER_CALL → WAITER_CALL_CASH → PAYMENT_COMPLETED →
+       ORDER_VOID → ORDER_CANCELLED.
+
+  C  (red, full-width) → clear localStorage + reload
+
+================================================================================
+DB SEED SCRIPT (QR Rest API/scripts/db-seed.js — v6)
+================================================================================
+
+  npm run db:seed
+
+SHARED DATA
+  35 guest users: guest1@example.com … guest35@example.com
+  Password for every seeded account: '12345678'
+
+FREE RESTAURANT  (publicId: BR5CH3OK)
+  Plan:     free
+  Slug:     borshchechok
+  Address:  вул. Сумська 12, Харків
+  Staff (3):
+    admin@borshchechok.ua    [root_admin]   (treated as admin in routes)
+    cook1@borshchechok.ua    [cook]
+    waiter1@borshchechok.ua  [waiter]
+  Reviews:  disabled
+
+PREMIUM RESTAURANT  (publicId: PR3MIUM1)
+  Plan:     premium
+  Slug:     borshchechok-premium
+  Address:  пр. Науки 22, Харків
+  Staff (5):
+    admin@premium.ua         [root_admin]
+    cook1@premium.ua         [cook]
+    waitercook@premium.ua    [waiter_cook]
+    waiter1@premium.ua       [waiter]
+    waiter2@premium.ua       [waiter]
+  Reviews:  enabled (dish + restaurant reviews seeded)
+
+PER-RESTAURANT DATA
+  5 tables (t1 free; t2..t5 occupied / active)
+  7 categories + 32 menu items (uk + en translations)
+  50 orders: 44 completed + 2 cancelled + 4 active
+    - 1-3 serving groups each with statusChangedAt
+    - realistic per-group dish statuses for multi-group active orders
+    - payments for completed orders
+  3 waiter calls: table 2 (cash_payment), table 4 (call), table 5 (call)
+
+Order IDs are deterministic but namespaced by restaurant prefix to avoid
+collisions between the two restaurants' orders.
+
+Active orders across restaurants are assigned to non-overlapping guest
+slices (R0 → guests[0–3], R1 → guests[4–7]) so no userId appears in two
+live orders simultaneously, satisfying the one-active-order-per-account
+constraint. Historical / completed orders cycle the full guest pool freely.
+
+================================================================================
+NOTABLE IMPLEMENTATION NOTES
+================================================================================
+
+PDF GENERATOR (/staff/menu/pdf)
+  • Settings rail (template presets, page format, orientation, margins,
+    language, font family / size, colours, content toggles, image options,
+    drag-orderable categories with per-dish checkboxes).
+  • Off-screen measurement layer renders every flat item at the real content
+    width; pagination is driven by offsetHeight + ResizeObserver, with an
+    integrated orphan-header fix.
+  • Bilingual layouts: stacked (UA then EN) or two columns.
+  • Download: jsPDF + html2canvas — captures every page article at 2× scale
+    and saves directly as `menu.pdf`.  No browser print dialog.
+  • Free plan: UpgradeModal opens immediately on page load.
+  • Server pagination cap is 9999 for the admin /menu/items list so the
+    full dish set is fetched in one request.
+
+ONE ACTIVE ORDER PER ACCOUNT
+  POST /:restId/orders checks for any non-terminal order belonging to the
+  same account across ALL restaurants — not just the current table/restaurant.
+  Authenticated users are keyed by userId; guests are keyed by sessionToken.
+  Terminal statuses (excluded from the check): cancelled, completed_cash,
+  completed_epay.
+  Error code: ACTIVE_ORDER_EXISTS (HTTP 409).
+  Response includes activeOrderId and activeOrderRestaurantId so the client
+  can redirect to the existing order.
+  ConfirmOrder/index.jsx catches both ACTIVE_ORDER_EXISTS and the legacy
+  TABLE_ORDER_LOCKED code and shows a lockedBanner with a "View order" link.
+
+ORDER RESTORATION
+  3-strategy fallback on login (cache → known order id → user orders scan).
+  The active order's restaurantPlan is preserved so the review UI gates
+  correctly even after a refresh.
+
+LIQPAY INTEGRATION
+  Per-restaurant LiqPay keys are stored encrypted (encryptionService) and
+  read by /payments/initiate. The platform-level LiqPay service is used for
+  subscription checkout (premium upgrade).
+
+GOOGLE OAUTH
+  Login: /api/auth/google → /auth/callback (handled by OAuthCallback page)
+  Link existing account: initiateGoogleLink stores a short-lived
+                          google_link_nonce cookie before redirecting.
+  Unlink: only allowed when the account also has a password.
+
+ROUTING REDIRECTS
+  RootRedirect chooses /menu vs /restaurants based on sessionToken /
+  restaurantId presence; waits for AppContext order-restoration to finish.
+
+================================================================================
+IMPORTANT PATTERNS / CONVENTIONS
+================================================================================
+
+• Module CSS class names are camelCase: styles.myClassName
+• i18n keys are snake_case: t('my_translation_key')
+• All restaurant-scoped API calls use restaurantId from AppContext /
+  getStoredRestaurantId().
+• Money values are floats (UAH).
+• publicId is the external 8-char restaurant identifier; MongoDB _id is
+  internal only.
+• Serving groups are always present (minimum 1 per order — 'main').
+• "Snapshot" fields (menuItemName, unitPrice, ingredient / addon /
+  componentGroup names) are frozen on the OrderItem at order-creation and
+  never mutate even if the menu is updated later. NOTE: snapshots freeze only
+  the SOURCE-language name — there is no name_en on the OrderItem document.
+• name_en for order items is NOT stored on the snapshot; it is injected at
+  response time by i18nOrderEnricher (live MenuItem join). So endpoints that
+  return order items must run them through enrichOrderItems — otherwise the
+  frontend only sees the Ukrainian name and language switching silently fails.
+• usePlan() is the universal hook for plan-gated logic (staff + client).
+• UpgradeModal is the universal component for all premium upsell flows.
+• RequirePlan is preferred over per-page modals when an entire page should
+  not be reachable on the free plan.
+• `root_admin` is treated as `admin` by ProtectedRoute (auto-included when
+  baseRoles contains 'admin').
+• All staff features rely on the single global WebSocket; do not open new
+  sockets — use useWebSocket({ onMessage, enabled }) instead.
+
+================================================================================
