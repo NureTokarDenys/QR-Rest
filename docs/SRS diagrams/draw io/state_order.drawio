@@ -1,6 +1,6 @@
 <mxfile host="app.diagrams.net">
   <diagram id="fig35" name="3.5 Стан замовлення">
-    <mxGraphModel dx="857" dy="471" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="700" background="#ffffff" math="0" shadow="0">
+    <mxGraphModel dx="808" dy="444" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="700" background="#ffffff" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -34,11 +34,11 @@
         <mxCell id="s3" edge="1" parent="1" source="open" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;endFill=0;" target="cancelled" value="Офіціант / адмін скасовує&#xa;або гість скасовує (всі страви у waiting)&#xa;або закриття столика (без оплати)">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="s4" edge="1" parent="1" source="open_paid" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;endFill=0;" target="completed_cash" value="Офіціант закриває столик&#xa;(paymentMethod = cash)">
+        <mxCell id="s4" edge="1" parent="1" source="open_paid" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;endFill=0;" target="completed_cash" value="Всі страви подані&lt;div&gt;(paymentMethod = cash)&lt;/div&gt;">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="s5" edge="1" parent="1" source="open_paid" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;endFill=0;" target="completed_epay" value="Офіціант закриває столик&#xa;(paymentMethod = epay)">
-          <mxGeometry relative="1" x="0.2986" y="-31" as="geometry">
+        <mxCell id="s5" edge="1" parent="1" source="open_paid" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=open;endFill=0;" target="completed_epay" value="Всі страви подані&lt;br&gt;(paymentMethod = epay)">
+          <mxGeometry relative="1" x="0.3007" y="-31" as="geometry">
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
