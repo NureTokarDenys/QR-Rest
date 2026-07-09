@@ -10,6 +10,7 @@ import styles from './dishDetail.module.css';
 import { useToast } from '../../../context/ClientToastContext';
 import { useTranslation } from 'react-i18next';
 import { useLocalField, useFallbackField, useLang } from '../../../i18n/useLang';
+import { bilingualFromEntity } from '../../../i18n/langs';
 import FallbackMark from '../../../components/FallbackMark';
 import Lightbox from '../../../components/client/Lightbox';
 
@@ -19,18 +20,20 @@ function normaliseDish(raw) {
   if (!raw) return null;
   const images = raw.images?.length ? raw.images : raw.imageUrl ? [raw.imageUrl] : [];
   const selectedImageIdx = Math.min(raw.selectedImageIdx ?? 0, Math.max(0, images.length - 1));
+  const { name, name_en } = bilingualFromEntity(raw, 'name');
+  const { description, description_en } = bilingualFromEntity(raw, 'description');
   // Map API shape to internal shape used by addToCart and rendering
   return {
     id: raw._id || raw.id,
-    name: raw.name,
-    name_en: raw.name_en || raw.name,
+    name,
+    name_en,
     price: raw.basePrice !== undefined ? raw.basePrice : raw.price,
     weight: raw.weight || null,
     images,
     selectedImageIdx,
     image: images[selectedImageIdx] || null,
-    description: raw.description,
-    description_en: raw.description_en || raw.description,
+    description,
+    description_en,
     rating: raw.rating,
     reviewCount: raw.reviewCount,
     reviews: raw.reviews || [],

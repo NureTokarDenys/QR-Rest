@@ -11,6 +11,7 @@ import SecondaryButton from '../../../components/SecondaryButton';
 import styles from './confirmOrder.module.css';
 import { useTranslation } from 'react-i18next';
 import { useLocalField } from '../../../i18n/useLang';
+import { useSyncCartItemNames } from '../../../hooks/useCartItemName';
 
 import {
   MdTableRestaurant, MdEdit, MdCheck,
@@ -102,6 +103,8 @@ export default function ConfirmOrder() {
   } = useApp();
   const { fetchFreshDish } = useMenuContext();
   const { showToast } = useToast();
+
+  useSyncCartItemNames();
 
   const { t } = useTranslation('orderConfirmation');
   const { t: tToast } = useTranslation('clientToast');

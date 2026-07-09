@@ -86,3 +86,36 @@ export function emptyI18n(...bases) {
   });
   return obj;
 }
+
+/**
+ * Extract stable source-language + English values from an API entity.
+ *
+ * Public menu endpoints localise `name` via applyTranslations, so the bare
+ * field reflects the active Accept-Language — not always the source language.
+ * Top-level docs (MenuItem, Category) store English in translations.en; the
+ * legacy `name` field in the DB is the source-language value.
+ */
+export function bilingualFromEntity(entity, field = 'name') {
+  if (!entity) {
+    const enKey = fieldFor(field, 'en');
+    return { [field]: '', [enKey]: '' };
+  }
+
+  const enKey = fieldFor(field, 'en');
+  const sourceApi = toApiLang(SOURCE_LANG);
+
+  const sourceVal =
+    entity.translations?.[sourceApi]?.[field]?.value
+    ?? entity[field]
+    ?? '';
+
+  const enVal =
+    entity.translations?.en?.[field]?.value
+    ?? entity[enKey]
+    ?? '';
+
+  return {
+    [field]: sourceVal,
+    [enKey]: enVal || sourceVal,
+  };
+}

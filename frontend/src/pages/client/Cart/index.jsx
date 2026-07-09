@@ -10,6 +10,8 @@ import Footer from '../../../components/client/Footer';
 import styles from './cart.module.css';
 import { useTranslation } from 'react-i18next';
 import { useLocalField } from '../../../i18n/useLang';
+import { useCartItemName, useSyncCartItemNames, resolveCartItemName } from '../../../hooks/useCartItemName';
+import { useMenuContext } from '../../../context/MenuContext';
 import { MdLock } from 'react-icons/md';
 
 import { MdShoppingCart, MdAdd, MdDelete, MdEdit, MdCheck, MdDragIndicator } from 'react-icons/md';
@@ -25,6 +27,9 @@ export default function Cart() {
     editingOrder,
     currentOrder, startEditingOrder,
   } = useApp();
+  const { categories } = useMenuContext();
+
+  useSyncCartItemNames();
 
   // Real backend order statuses are open / open_paid / cancelled /
   // completed_cash / completed_epay. Anything else is treated as terminal
@@ -100,12 +105,12 @@ export default function Cart() {
     setDragState({
       cartItemId: item.cartItemId,
       fromGroupId: item.groupId,
-      label: local(item, 'name') || item.name_en || '',
+      label: resolveCartItemName(item, categories, local),
       x: e.clientX,
       y: e.clientY,
     });
     setDropTarget(item.groupId);
-  }, [local]);
+  }, [categories, local]);
 
   const onDragMove = useCallback((e) => {
     setDragState(prev => {

@@ -4,6 +4,7 @@ import { useApp } from '../../../context/AppContext';
 import { getDishDetail } from '../../../api/menu';
 import styles from './cartItem.module.css';
 import { useLocalField } from '../../../i18n/useLang';
+import { useCartItemName } from '../../../hooks/useCartItemName';
 import { useTranslation } from 'react-i18next';
 import { MdDelete, MdExpandMore, MdExpandLess, MdContentCopy } from 'react-icons/md';
 
@@ -46,6 +47,7 @@ function mapDetail(raw) {
 export default function CartItem({ item }) {
   const { removeFromCart, updateCartItem, duplicateCartItem, updateItemComment } = useApp();
   const local = useLocalField();
+  const displayName = useCartItemName(item);
   const navigate = useNavigate();
   const { t } = useTranslation('cart');
 
@@ -166,12 +168,12 @@ export default function CartItem({ item }) {
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div className={styles.wrapper}>
-      <img src={item.image} alt={item.name} className={styles.image} />
+      <img src={item.image} alt={displayName} className={styles.image} />
 
       <div className={styles.info}>
         {/* Dish name → navigates to DishDetail with current selections pre-filled */}
         <button className={styles.nameBtn} onClick={openDishDetail}>
-          {local(item, 'name')}
+          {displayName}
         </button>
 
         {item.comment ? <span className={styles.comment}>💬 {item.comment}</span> : null}

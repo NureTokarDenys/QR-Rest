@@ -3,7 +3,7 @@ import { scanQR } from '../api/qr';
 import { createOrder, getOrder, addGuestOrderItems, getMyOrders, getOrderNotifications, markNotificationsRead } from '../api/orders';
 import { getRestaurantInfo } from '../api/restaurants';
 import { useAuth } from './AuthContext';
-import { SUPPORTED_LANGS, SOURCE_LANG, fromApiLang } from '../i18n/langs';
+import { SUPPORTED_LANGS, SOURCE_LANG, fromApiLang, bilingualFromEntity } from '../i18n/langs';
 import { useNotificationSound } from '../hooks/useNotificationSound';
 import { enqueueOrder, dequeueOrder, readQueue } from '../utils/offlineOrderQueue';
 
@@ -777,14 +777,15 @@ export function AppProvider({ children }) {
     }, 0);
 
     const unitPrice = dish.price + addonPrice + groupPrice;
+    const { name, name_en } = bilingualFromEntity(dish, 'name');
 
     setCart(prev => {
       const cartItemId = `${dish.id}-${Date.now()}-${Math.random()}`;
       return [...prev, {
         cartItemId,
         id:   dish.id,
-        name: dish.name,
-        name_en: dish.name_en,
+        name,
+        name_en,
         price: unitPrice,
         image: dish.image,
         quantity: 1,

@@ -9,6 +9,7 @@ import { CategorySkeleton } from '../../../components/client/Skeleton';
 import styles from './category.module.css';
 import { useTranslation } from 'react-i18next';
 import { useLocalField } from '../../../i18n/useLang';
+import { bilingualFromEntity } from '../../../i18n/langs';
 
 export default function Category() {
   const { t } = useTranslation('category');
@@ -25,10 +26,12 @@ export default function Category() {
     : null;
 
   const allDishes = apiCat
-    ? (apiCat.items || []).map(item => ({
+    ? (apiCat.items || []).map(item => {
+        const { name, name_en } = bilingualFromEntity(item, 'name');
+        return {
         id:         item._id || item.id,
-        name:       item.name,
-        name_en:    item.name_en || item.name,
+        name,
+        name_en,
         price:      item.basePrice ?? item.price,
         image: (() => {
           const imgs = item.images?.length ? item.images : item.imageUrl ? [item.imageUrl] : [];
@@ -36,7 +39,8 @@ export default function Category() {
         })(),
         rating:      item.rating,
         reviewCount: item.reviewCount,
-      }))
+      };
+      })
     : [];
 
   const filtered = query.trim()
