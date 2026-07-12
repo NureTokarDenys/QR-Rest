@@ -52,7 +52,7 @@ export default function DevToolbar() {
 }
 
 function DevToolbarInner() {
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(false);
   const { login, loginAsGuest } = useAuth();
   const { theme, setTheme } = useTheme();
   const { i18n } = useTranslation();
