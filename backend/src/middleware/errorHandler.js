@@ -40,7 +40,8 @@ module.exports = (err, req, res, next) => {
   }
 
   const status = err.status || 500;
-  const message = status < 500 ? err.message : 'Internal server error';
+  const exposeMessage = status < 500 || err.code === 'EMAIL_SEND_FAILED';
+  const message = exposeMessage ? err.message : 'Internal server error';
 
   res.status(status).json({
     error: { code: err.code || 'INTERNAL_ERROR', message },

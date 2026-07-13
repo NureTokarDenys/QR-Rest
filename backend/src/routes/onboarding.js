@@ -89,7 +89,7 @@ router.post('/register', async (req, res, next) => {
     const token     = generateToken();
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 h
 
-    await OnboardingRequest.create({
+    const request = await OnboardingRequest.create({
       email: email.toLowerCase().trim(),
       ownerName: ownerName.trim(),
       restaurantName: restaurantName.trim(),
@@ -100,12 +100,17 @@ router.post('/register', async (req, res, next) => {
     const BASE_FRONTEND = process.env.FRONTEND_URL || process.env.BASE_URL?.replace(':5000', ':3000') || 'http://localhost:3000';
     const confirmUrl = `${BASE_FRONTEND}/onboarding/confirm?token=${token}`;
 
-    await sendOnboardingConfirmation({
-      to: email,
-      ownerName: ownerName.trim(),
-      restaurantName: restaurantName.trim(),
-      confirmUrl,
-    });
+    try {
+      await sendOnboardingConfirmation({
+        to: email,
+        ownerName: ownerName.trim(),
+        restaurantName: restaurantName.trim(),
+        confirmUrl,
+      });
+    } catch (emailErr) {
+      await OnboardingRequest.deleteOne({ _id: request._id });
+      throw emailErr;
+    }
 
     respond(res, req, {
       message: 'Confirmation email sent. Please check your inbox and click the link within 24 hours.',

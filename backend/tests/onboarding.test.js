@@ -164,6 +164,21 @@ describe('POST /api/onboarding/register', () => {
     expect(res.status).toBe(409);
     expect(res.body.error.code).toBe('ONBOARDING_PENDING');
   });
+
+  it('returns 503 EMAIL_SEND_FAILED and rolls back the request when Resend fails', async () => {
+    mockSend.mockResolvedValueOnce({ data: null, error: { message: 'domain not verified', statusCode: 403 } });
+
+    const res = await request(app).post(REGISTER_URL).send({
+      ...VALID_BODY,
+      email: 'newowner@example.com',
+    });
+
+    expect(res.status).toBe(503);
+    expect(res.body.error.code).toBe('EMAIL_SEND_FAILED');
+
+    const doc = await OnboardingRequest.findOne({ email: 'newowner@example.com' });
+    expect(doc).toBeNull();
+  });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

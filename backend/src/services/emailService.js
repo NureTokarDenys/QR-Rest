@@ -21,6 +21,23 @@ function getResend() {
 
 const FROM = () => process.env.EMAIL_FROM || 'QR Restaurant <onboarding@qrrest.app>';
 
+class EmailSendError extends Error {
+  constructor(message, { resendStatus } = {}) {
+    super(message);
+    this.name = 'EmailSendError';
+    this.status = 503;
+    this.code = 'EMAIL_SEND_FAILED';
+    this.resendStatus = resendStatus;
+  }
+}
+
+function throwIfResendError(error, context) {
+  if (!error) return;
+  throw new EmailSendError(`Resend error (${context}): ${error.message}`, {
+    resendStatus: error.statusCode,
+  });
+}
+
 // ─── public API ──────────────────────────────────────────────────────────────
 
 async function sendOnboardingConfirmation({ to, ownerName, restaurantName, confirmUrl }) {
@@ -30,7 +47,7 @@ async function sendOnboardingConfirmation({ to, ownerName, restaurantName, confi
     subject: `Підтвердіть реєстрацію ресторану «${restaurantName}» — QR Restaurant`,
     react:   React.createElement(OnboardingConfirmation, { ownerName, restaurantName, confirmUrl }),
   });
-  if (error) throw new Error(`Resend error (confirmation): ${error.message}`);
+  throwIfResendError(error, 'confirmation');
 }
 
 async function sendOnboardingCredentials({ to, ownerName, restaurantName, restaurantId, password, loginUrl }) {
@@ -40,7 +57,7 @@ async function sendOnboardingCredentials({ to, ownerName, restaurantName, restau
     subject: `Ваш ресторан «${restaurantName}» готовий — дані для входу`,
     react:   React.createElement(OnboardingCredentials, { ownerName, restaurantName, restaurantId, email: to, password, loginUrl }),
   });
-  if (error) throw new Error(`Resend error (credentials): ${error.message}`);
+  throwIfResendError(error, 'credentials');
 }
 
 /**
@@ -54,7 +71,7 @@ async function sendPasswordReset({ to, name, resetUrl }) {
     subject: 'Скидання пароля — Waitless QR',
     react:   React.createElement(PasswordResetEmail, { name, resetUrl }),
   });
-  if (error) throw new Error(`Resend error (password-reset): ${error.message}`);
+  throwIfResendError(error, 'password-reset');
 }
 
 /**
@@ -68,7 +85,7 @@ async function sendStaffWelcome({ to, name, restaurantName, tempPassword, role, 
     subject: `Вас додано до ресторану «${restaurantName}» — Waitless QR`,
     react:   React.createElement(StaffWelcome, { name, restaurantName, email: to, tempPassword, role, loginUrl }),
   });
-  if (error) throw new Error(`Resend error (staff-welcome): ${error.message}`);
+  throwIfResendError(error, 'staff-welcome');
 }
 
 /**
@@ -82,7 +99,7 @@ async function sendEmailChangeConfirmation({ to, name, newEmail, confirmUrl }) {
     subject: 'Підтвердіть нову email-адресу — Waitless QR',
     react:   React.createElement(EmailChangeConfirmation, { name, newEmail, confirmUrl }),
   });
-  if (error) throw new Error(`Resend error (email-change): ${error.message}`);
+  throwIfResendError(error, 'email-change');
 }
 
 /**
@@ -96,7 +113,7 @@ async function sendAccountDeactivated({ to, name, email, restaurantName }) {
     subject: 'Ваш акаунт деактивовано — Waitless QR',
     react:   React.createElement(AccountDeactivated, { name, email, restaurantName }),
   });
-  if (error) throw new Error(`Resend error (account-deactivated): ${error.message}`);
+  throwIfResendError(error, 'account-deactivated');
 }
 
 /**
@@ -110,10 +127,11 @@ async function sendAccountActivated({ to, name, email, restaurantName, loginUrl 
     subject: 'Ваш акаунт активовано — Waitless QR',
     react:   React.createElement(AccountActivated, { name, email, restaurantName, loginUrl }),
   });
-  if (error) throw new Error(`Resend error (account-activated): ${error.message}`);
+  throwIfResendError(error, 'account-activated');
 }
 
 module.exports = {
+  EmailSendError,
   sendOnboardingConfirmation,
   sendOnboardingCredentials,
   sendPasswordReset,

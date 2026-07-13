@@ -75,6 +75,11 @@ export default function OnboardingPage() {
       } else if (code === 'EMAIL_TAKEN') {
         setFieldErrors(prev => ({ ...prev, email: 'Цей email вже зареєстровано.' }));
         refs.email.current?.focus();
+      } else if (code === 'EMAIL_SEND_FAILED') {
+        setBanner({
+          type: 'error',
+          message: 'Не вдалося надіслати лист підтвердження. Спробуйте пізніше або зверніться до підтримки.',
+        });
       } else if (err?.response?.status >= 400 && err?.response?.status < 500) {
         setBanner({ type: 'error', message: message || 'Перевірте введені дані та спробуйте ще раз.' });
       } else {
